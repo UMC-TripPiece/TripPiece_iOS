@@ -4,7 +4,7 @@ import UIKit
 
 struct Constants {
     struct NetworkManager {
-        static let baseURL = ""
+        static let baseURL = "http://43.203.61.175:8080"
     }
     
     struct Colors {
