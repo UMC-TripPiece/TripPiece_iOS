@@ -11,7 +11,7 @@ enum MapAPI {
     case getMapSearch(keyword: String)
     case getMapMarkers
     
-    case postMaps(param: postMapsRequest)
+    case postMaps(param: postMapRequest)
     
     //TODO: API update 필요
 }
@@ -26,7 +26,7 @@ extension MapAPI: TargetType {
 
     var path: String {
         switch self {
-        case .deleteMapColor(let mapId): return "maps/\(mapId)/color"
+        case .deleteMapColor(let mapId): return "maps/color/delete/\(mapId)"
             
         case .getUserMap(let userId): return "maps/\(userId)"
         case .getUserMapStats(let userId): return "maps/stats/\(userId)"
@@ -34,6 +34,7 @@ extension MapAPI: TargetType {
         case .getMapMarkers: return "maps/markers"
             
         case .postMaps(let param): return "maps"
+        //TODO: put case 추가 필요
         }
     }
 

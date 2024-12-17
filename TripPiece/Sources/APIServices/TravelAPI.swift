@@ -43,19 +43,19 @@ extension TravelAPI: TargetType {
         case .postCreateTravel: return "mytravels"
             
         case .postWherePiece(let param):
-            return "mytravels/\(param.travelId)/where"
+            return "mytravels/where/\(param.travelId)"
         case .postVideoPiece(let param):
-            return "mytravels/\(param.travelId)/video"
+            return "mytravels/video/\(param.travelId)"
         case .postSelfiePiece(let param):
-            return "mytravels/\(param.travelId)/selfie"
+            return "mytravels/selfie/\(param.travelId)"
         case .postPicturePiece(let param):
-            return "mytravels/\(param.travelId)/picture"
+            return "mytravels/picture/\(param.travelId)"
         case .postMemoPiece(let param):
-            return "mytravels/\(param.travelId)/memo"
+            return "mytravels/memo/\(param.travelId)"
         case .postEmojiPiece(let param):
-            return "mytravels/\(param.travelId)/emoji"
+            return "mytravels/emoji/\(param.travelId)"
             
-        case .postTravelEnd(let travelId): return "mytravels/\(travelId)/end"
+        case .postTravelEnd(let travelId): return "mytravels/end/\(travelId)"
         }
     }
     

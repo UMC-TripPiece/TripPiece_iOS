@@ -7,9 +7,11 @@ import FirebaseCore
 import Moya
 
 class SignUpVC: UIViewController {
-    
-    let LoginProvider = MoyaProvider<AuthAPI>(plugins: [ NetworkLoggerPlugin() ])
-    
+    private lazy var backButton: CustomBackButton = {
+        let button = CustomBackButton(title: "")
+        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
+        return button
+    }()
     private lazy var usernameField = CustomLabelTextFieldView2(labelText: "이름", textFieldPlaceholder: "| 이름을 입력해 주세요", validationText: "이름을 입력해주세요")
     private lazy var emailField = CustomLabelTextFieldView2(labelText: "이메일", textFieldPlaceholder: "| 사용할 이메일 주소를 입력해 주세요", validationText: "사용할 수 없는 이메일입니다")
     private lazy var passwordField: CustomLabelTextFieldView2 = {
@@ -76,7 +78,7 @@ class SignUpVC: UIViewController {
     
     // MARK: - Setup Methods
     private func setupView() {
-        [titleLabel, usernameField, emailField, passwordField, confirmPasswordField, termsCheckBox, privacyCheckBox, allAgreeCheckBox, termsValidationLabel, signUpButton].forEach {
+        [backButton, titleLabel, usernameField, emailField, passwordField, confirmPasswordField, termsCheckBox, privacyCheckBox, allAgreeCheckBox, termsValidationLabel, signUpButton].forEach {
             view.addSubview($0)
         }
         
@@ -84,8 +86,12 @@ class SignUpVC: UIViewController {
     }
     
     private func setupConstraints() {
+        backButton.snp.makeConstraints { make in
+            make.top.equalTo(view.safeAreaLayoutGuide).inset(superViewWidth * 0.03)
+            make.leading.equalToSuperview().inset(superViewWidth * 0.07)
+        }
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
+            make.centerY.equalTo(backButton)
             make.centerX.equalToSuperview()
         }
         
@@ -132,7 +138,6 @@ class SignUpVC: UIViewController {
             make.leading.equalToSuperview().inset(20)
             make.height.equalTo(20)
         }
-        
     }
     
     private func setupActions() {
@@ -155,6 +160,18 @@ class SignUpVC: UIViewController {
     }
     
     // MARK: - Actions
+    @objc func didTapBackButton() {
+        var currentVC: UIViewController? = self
+            while let presentingVC = currentVC?.presentingViewController {
+                if presentingVC is SelectLoginTypeVC {
+                    presentingVC.dismiss(animated: true, completion: nil)
+                    return
+                }
+                currentVC = presentingVC
+            }
+        print("SelectLoginTypeVC를 찾을 수 없습니다.")
+    }
+    
     @objc func signUpButtonTapped() {
         if isValid {
             print("회원가입 버튼 클릭")
@@ -168,6 +185,7 @@ class SignUpVC: UIViewController {
         let profileVC = ProfileVC()
         //userInfoManager에 입력된 기본 개인정보 저장
         SignUpManager.shared.setName(username: usernameField.text!, emailString: emailField.text!, pwString: passwordField.text!)
+        profileVC.isEmailLogin = true
         profileVC.modalPresentationStyle = .fullScreen
         present(profileVC, animated: true, completion: nil)
         }

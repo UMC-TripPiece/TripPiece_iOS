@@ -8,9 +8,7 @@ import SnapKit
 import Moya
 
 class LoginVC: UIViewController {
-    
-    let LoginProvider = MoyaProvider<AuthAPI>(plugins: [ NetworkLoggerPlugin() ])
-    
+
     private lazy var backButton: CustomBackButton = {
         let button = CustomBackButton(title: "")
         button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
@@ -123,8 +121,16 @@ class LoginVC: UIViewController {
     //MARK: Setup Actions
     lazy var isValid = false
     
-    @objc private func didTapBackButton() {
-        navigationController?.popViewController(animated: true)
+    @objc func didTapBackButton() {
+        var currentVC: UIViewController? = self
+            while let presentingVC = currentVC?.presentingViewController {
+                if presentingVC is SelectLoginTypeVC {
+                    presentingVC.dismiss(animated: true, completion: nil)
+                    return
+                }
+                currentVC = presentingVC
+            }
+        print("SelectLoginTypeVC를 찾을 수 없습니다.")
     }
     
     @objc func loginButtonTapped() {

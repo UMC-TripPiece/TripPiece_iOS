@@ -6,7 +6,8 @@ import Moya
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    let LoginProvider = MoyaProvider<AuthAPI>(plugins: [ NetworkLoggerPlugin() ])
+    var isEmailLogin = false
+    var isSocialLogin = false
     
     let profileLabel: UILabel = {
         let label = UILabel()
@@ -189,9 +190,31 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     @objc func signUpButtonTapped() {
-        print("회원가입 dto setup 클릭")
-        SignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!, birthString: birthdateTextField.text!, countryString: "South Korea")
-        sendSignupRequest()
+        print("isEmailLogin : \(isEmailLogin)")
+        print("isSocialLogin : \(isSocialLogin)")
+        if isEmailLogin {
+            SignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!, birthString: birthdateTextField.text!, countryString: "South Korea")
+            callSignUpAPI() { isSuccess in
+                if isSuccess {
+                    self.proceedIfSignupSuccessful()
+                    print("회원 가입 성공")
+                } else {
+                    print("회원 가입 실패")
+                }
+            }
+        }
+        if isSocialLogin {
+            SocialSignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!, birthString: birthdateTextField.text!, countryString: "South Korea")
+            callKakaoSignUpAPI() { isSuccess in
+                if isSuccess {
+                    self.proceedIfSignupSuccessful()
+                    print("회원 가입 성공")
+                } else {
+                    print("회원 가입 실패")
+                }
+            }
+        }
+        
     }
     
     func configureTapGestureForProfileImage() {
@@ -228,25 +251,28 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let selectedImage = info[.originalImage] as? UIImage {
             profileImageView.image = selectedImage
+            if isEmailLogin {
+                SignUpManager.shared.profileImg = selectedImage
+            }
+            if isSocialLogin {
+                SocialSignUpManager.shared.profileImg = selectedImage
+            }
             
-//            let convertedData = selectedImage.jpegData(compressionQuality: 0.1)
-            SignUpManager.shared.profileImg = selectedImage
         } else {
             print("⚠️ 이미지 선택 실패")
         }
         
-        // 이미지 피커 닫기
         dismiss(animated: true, completion: nil)
     }
     
-    func convertImageToFileData(_ image: UIImage, fileName: String = "profile.jpg") -> (data: Data, fileName: String, mimeType: String)? {
-        guard let imageData = image.jpegData(compressionQuality: 0.1) else { // JPEG로 변환
-            print("이미지를 JPEG 데이터로 변환 실패")
-            return nil
-        }
-        return (data: imageData, fileName: "profile.jpg", mimeType: "image/jpeg")
-    }
-    
+//    func convertImageToFileData(_ image: UIImage, fileName: String = "profile.jpg") -> (data: Data, fileName: String, mimeType: String)? {
+//        guard let imageData = image.jpegData(compressionQuality: 0.1) else { // JPEG로 변환
+//            print("이미지를 JPEG 데이터로 변환 실패")
+//            return nil
+//        }
+//        return (data: imageData, fileName: "profile.jpg", mimeType: "image/jpeg")
+//    }
+//    
     // 닉네임 또는 생년월일 변경 시 호출
     @objc func textFieldDidChange(_ textField: UITextField) {
         checkFormValidity()
@@ -261,8 +287,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             switch genderString {
             case "남성":
                 SignUpManager.shared.gender = "MALE"
+                SocialSignUpManager.shared.gender = "MALE"
             case "여성":
                 SignUpManager.shared.gender = "FEMALE"
+                SocialSignUpManager.shared.gender = "FEMALE"
             default:
                 print("Unknown gender selected")
             }

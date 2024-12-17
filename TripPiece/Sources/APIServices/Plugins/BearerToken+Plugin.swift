@@ -11,19 +11,19 @@ final class BearerTokenPlugin: PluginType {
 
     func checkAuthenticationStatus(completion: @escaping (String?) -> Void) {
         guard let accessToken = SelectLoginTypeVC.keychain.get("serverAccessToken"),
-              let accessTokenExpiryMillis = SelectLoginTypeVC.keychain.get("accessTokenExpiresIn"),
-              let expiryMillis = Int64(accessTokenExpiryMillis),
-              let accessTokenExpiryDate = Date(milliseconds: expiryMillis) else {
-//            print("AccessToken이 존재하지 않음.")
+              let accessTokenCreatedMillis = SelectLoginTypeVC.keychain.get("accessTokenCreatedAt"),
+              let createdMillis = Int64(accessTokenCreatedMillis) else {
+            print("AccessToken이 존재하지 않음.")
             refreshAccessToken(completion: completion)
             return
         }
-        
-        if Date() < accessTokenExpiryDate {
-//            print("AccessToken 유효. 갱신 불필요.")
+        let expiryMillis = createdMillis + (30 * 60 * 1000) // 30분 = 1,800,000 밀리초
+        let expiryDate = Date(milliseconds: expiryMillis)
+        if Date() < expiryDate {
+            print("AccessToken 유효. 갱신 불필요.")
             completion(accessToken)
         } else {
-//            print("AccessToken 만료. RefreshToken으로 갱신 시도.")
+            print("AccessToken 만료. RefreshToken으로 갱신 시도.")
             refreshAccessToken(completion: completion)
         }
     }
@@ -36,8 +36,7 @@ final class BearerTokenPlugin: PluginType {
             return
         }
         
-        let provider = MoyaProvider<AuthAPI>(plugins: [NetworkLoggerPlugin()])
-        provider.request(.postTokenReissue(refreshToken: refreshToken)) { result in
+        APIManager.AuthProvider.request(.postTokenReissue(refreshToken: refreshToken)) { result in
             switch result {
             case .success(let response):
                 do {

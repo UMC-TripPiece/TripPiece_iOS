@@ -23,6 +23,9 @@ let project = Project(
                             ]
                         ]
                     ],
+                    "NSAppTransportSecurity" : [
+                        "NSAllowsArbitraryLoads" : true
+                    ],
                     "KAKAO_NATIVE_APP_KEY" : "b30c067a8e1ee82121d9dad510240fbe",
                     "CFBundleURLTypes" : [
                         [

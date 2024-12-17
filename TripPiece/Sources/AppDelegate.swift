@@ -11,8 +11,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-           // 카카오 SDK 초기화
-           KakaoSDK.initSDK(appKey: "KAKAO_NATIVE_APPKEY")
+        // 카카오 SDK 초기화
+        if let kakaoAPIkey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
+            KakaoSDK.initSDK(appKey: "\(kakaoAPIkey)")
+        }
         GMSServices.provideAPIKey("AIzaSyD3GAn10uYDg7Tny_Aeg0wGeCy0idL48pM")
            return true
        }
@@ -23,4 +25,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {}
+    
 }

@@ -16,7 +16,7 @@ enum AuthAPI {
     
     // SNS 로그인
     case postKakaoSignUp(param: [MultipartFormData])
-    case postKakaoLogin(email: String)
+    case postKakaoLogin(param: KakaoLoginRequest)
     
     // 기타
     case updateProfile(param: [MultipartFormData])
@@ -77,8 +77,8 @@ extension AuthAPI: TargetType {
             return .requestPlain
         case .postKakaoSignUp(let param) :
             return .uploadMultipart(param)
-        case .postKakaoLogin(let email) :
-            return .requestParameters(parameters: ["email": email], encoding: JSONEncoding.default)
+        case .postKakaoLogin(let param) :
+            return .requestJSONEncodable(param)
         case .updateProfile(let param) :
             return .uploadMultipart(param)
         case .getUserProfile :
@@ -96,35 +96,4 @@ extension AuthAPI: TargetType {
             return ["Content-Type": "application/json"]
         }
     }
-    
-    func convertToMultipartData(info: [String: Any], profileImg: [UIImage]) -> [MultipartFormData] {
-            var multipartData = [MultipartFormData]()
-            
-            // Convert info dictionary to JSON and add as a single "info" field
-            do {
-                let jsonData = try JSONSerialization.data(withJSONObject: info, options: [])
-                if let jsonString = String(data: jsonData, encoding: .utf8),
-                   let jsonFieldData = jsonString.data(using: .utf8) {
-                    multipartData.append(MultipartFormData(provider: .data(jsonFieldData), name: "info"))
-                }
-            } catch {
-                print("⚠️ Failed to serialize info dictionary to JSON: \(error)")
-            }
-            
-            // Append profileImg images
-            for (index, image) in profileImg.enumerated() {
-                if let imageData = image.jpegData(compressionQuality: 0.8) {
-                    multipartData.append(
-                        MultipartFormData(
-                            provider: .data(imageData),
-                            name: "profileImg", // Adjust field name if needed
-                            fileName: "image\(index).jpg",
-                            mimeType: "image/jpeg"
-                        )
-                    )
-                }
-            }
-            
-            return multipartData
-        }
 }

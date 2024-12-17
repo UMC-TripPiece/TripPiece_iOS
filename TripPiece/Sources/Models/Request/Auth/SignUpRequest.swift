@@ -3,16 +3,24 @@
 import Foundation
 import UIKit
 
-//SignUpDto
-struct SignUpRequest {
-    let Info : Info
-    let profileImg : UIImage
+struct SignUpRequest<T: Codable> {
+    let info: T
+    let profileImg: UIImage
 }
 
 struct Info : Codable {
     let name : String
     let email : String
     let password : String
+    let nickname : String
+    let gender : String
+    let birth : String
+    let country : String
+}
+
+struct SocialInfo : Codable {
+    let providerId : Int64
+    let email : String
     let nickname : String
     let gender : String
     let birth : String
@@ -44,5 +52,29 @@ class SignUpManager {
         birth = birthString
         country = countryString
     }
+}
+
+class SocialSignUpManager {
+    static let shared = SocialSignUpManager()
     
+    var providerId : Int64 = 0
+    var email : String = ""
+    var nickname : String = ""
+    var gender : String = ""
+    var birth : String = ""
+    var country : String = ""
+    var profileImg : UIImage? = nil
+    
+    private init() {}
+    
+    func setName(providerIdInt : Int64, emailString : String) {
+        providerId = providerIdInt
+        email = emailString
+    }
+    
+    func setProfile(nicknameString: String, birthString : String, countryString: String) {
+        nickname = nicknameString
+        birth = birthString
+        country = countryString
+    }
 }
