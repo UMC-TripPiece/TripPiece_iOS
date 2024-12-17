@@ -4,10 +4,10 @@
 ```shell
 ├── main
 ├── Dev ────── Release
-     ├── YS        └── version 1.0.0
-     ├── NY
-     ├── SH
-     └── HS
+     ├── Auth       └── version 1.0.0
+     ├── Map
+     ├── Travel
+     └── User
 ```
 
 ## 폴더링
