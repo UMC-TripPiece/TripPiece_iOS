@@ -26,7 +26,7 @@ extension ProfileVC {
         if let infoData = MultipartForm.createJSONMultipartData(data: emailSignUp.info, fieldName: "info") {
             multipartData.append(infoData)
         }
-        if let imageData = MultipartForm.createImageMultipartData(image: emailSignUp.profileImg, fieldName: "profileImg") {
+        if let imageData = MultipartForm.createImageMultipartData(image: emailSignUp.profileImg!, fieldName: "profileImg") {
             multipartData.append(imageData)
         }
         
@@ -71,7 +71,7 @@ extension ProfileVC {
         if let infoData = MultipartForm.createJSONMultipartData(data: emailSignUp.info, fieldName: "info") {
             multipartData.append(infoData)
         }
-        if let imageData = MultipartForm.createImageMultipartData(image: emailSignUp.profileImg, fieldName: "profileImg") {
+        if let imageData = MultipartForm.createImageMultipartData(image: emailSignUp.profileImg!, fieldName: "profileImg") {
             multipartData.append(imageData)
         }
         

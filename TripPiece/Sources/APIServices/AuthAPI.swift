@@ -12,7 +12,7 @@ enum AuthAPI {
     case postSignUp(param: [MultipartFormData])
     case postLogin(param: LoginRequest)
     case postLogout
-    case userDelete //
+    case userDelete
     
     // SNS 로그인
     case postKakaoSignUp(param: [MultipartFormData])

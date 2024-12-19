@@ -3,34 +3,6 @@
 import UIKit
 import SnapKit
 
-//class PaddedTextField: UITextField {
-//    var padding: UIEdgeInsets
-//
-//    init(padding: UIEdgeInsets) {
-//        self.padding = padding
-//        super.init(frame: .zero)
-//    }
-//
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
-//
-//    // 텍스트 영역의 위치를 조정
-//    override func textRect(forBounds bounds: CGRect) -> CGRect {
-//        return bounds.inset(by: padding)
-//    }
-//
-//    // 편집 시 텍스트 영역의 위치를 조정
-//    override func editingRect(forBounds bounds: CGRect) -> CGRect {
-//        return bounds.inset(by: padding)
-//    }
-//
-//    // 플레이스홀더 텍스트 영역의 위치를 조정
-//    override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
-//        return bounds.inset(by: padding)
-//    }
-//}
-
 class PaddedTextField: UITextField {
     
     var padding: UIEdgeInsets
@@ -59,7 +31,7 @@ class PaddedTextField: UITextField {
     
     private func setupDefaultStyle() {
         self.borderStyle = .none
-        self.layer.borderColor = UIColor(hex: "#D8D8D8")?.cgColor
+        self.layer.borderColor = Constants.Colors.white?.cgColor
         self.layer.borderWidth = 1.0
         self.layer.cornerRadius = 5.0
         self.layer.shadowColor = UIColor.black.cgColor

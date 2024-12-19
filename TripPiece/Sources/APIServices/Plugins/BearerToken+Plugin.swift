@@ -17,7 +17,7 @@ final class BearerTokenPlugin: PluginType {
             refreshAccessToken(completion: completion)
             return
         }
-        let expiryMillis = createdMillis + (30 * 60 * 1000) // 30분 = 1,800,000 밀리초
+        let expiryMillis = createdMillis + (120 * 60 * 1000) // 30분 = 1,800,000 밀리초
         let expiryDate = Date(milliseconds: expiryMillis)
         if Date() < expiryDate {
             print("AccessToken 유효. 갱신 불필요.")
