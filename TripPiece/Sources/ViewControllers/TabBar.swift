@@ -13,6 +13,7 @@ func setTabBar() {
 //        let vc1 = UINavigationController(rootViewController: WorldViewController())
     let vc1 = UINavigationController(rootViewController: TestVC())
         vc1.tabBarItem = UITabBarItem(title: "월드", image: UIImage(named: "World"), tag: 1)
+<<<<<<< Updated upstream
 
 //        let vc2 = UINavigationController(rootViewController: TravelRecordViewController())
         let vc2 = UINavigationController(rootViewController: TestVC())
@@ -23,6 +24,14 @@ func setTabBar() {
 //        let vc4 = UINavigationController(rootViewController: MyPageViewController())
         let vc4 = UINavigationController(rootViewController: TestVC())
         vc4.tabBarItem = UITabBarItem(title: "마이페이지", image: UIImage(named: "My page"), tag: 4)
+=======
+        let vc2 = UINavigationController(rootViewController: MyLogVC())
+        vc2.tabBarItem = UITabBarItem(title: "나의 기록", image: UIImage(named: "MyLog"), tag: 2)
+        let vc3 = UINavigationController(rootViewController: TestVC())
+        vc3.tabBarItem = UITabBarItem(title: "탐색", image: UIImage(named: "Explore"), tag: 3)
+        let vc4 = UINavigationController(rootViewController: MyPageVC())
+        vc4.tabBarItem = UITabBarItem(title: "마이페이지", image: UIImage(named: "User"), tag: 4)
+>>>>>>> Stashed changes
         self.viewControllers = [vc1, vc2, vc3, vc4]
     }
 func appearance() {
