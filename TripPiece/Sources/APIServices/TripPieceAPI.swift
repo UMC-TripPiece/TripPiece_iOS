@@ -7,7 +7,7 @@ enum TripPieceAPI {
     case deleteTripPiece(tripPieceId: Int)
     
     case getTripPiece(tripPieceId: Int)
-    case getAllTripPiece(sort: String)
+    case getAllTripPiece
 
     case updateVideoPiece(param: UpdateVideoPieceRequest)
     case updatePicturePiece(param: UpdatePhotosPieceRequest)
@@ -27,7 +27,8 @@ extension TripPieceAPI: TargetType {
         switch self {
         case .deleteTripPiece(let tripPieceId): return "mytrippieces/delete/\(tripPieceId)"
         case .getTripPiece(let tripPieceId): return "mytrippieces/\(tripPieceId)"
-        case .getAllTripPiece(let sort): return "mytrippieces/all"
+        case .getAllTripPiece: return "mytrippieces/all"
+
         case .updateVideoPiece(let param): return "mytrippieces/video/update/\(param.tripPieceId)"
         case .updatePicturePiece(let param): return "mytrippieces/picture/update/\(param.tripPieceId)"
         case .updateMemoPiece(let param): return "mytrippieces/memo/update/\(param.tripPieceId)"
@@ -51,10 +52,8 @@ extension TripPieceAPI: TargetType {
         switch self {
         case .getTripPiece(let param) :
             return .requestJSONEncodable(param)
-        case .getAllTripPiece(let param) :
-            return .requestJSONEncodable(param)
-        case .getAllTripPiece(let param) :
-            return .requestJSONEncodable(param)
+        case .getAllTripPiece :
+            return .requestPlain
         case .updateVideoPiece(let param) :
             return .requestJSONEncodable(param)
         case .updatePicturePiece(let param) :

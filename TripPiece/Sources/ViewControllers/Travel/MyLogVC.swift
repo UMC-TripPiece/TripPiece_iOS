@@ -1,0 +1,359 @@
+// Copyright © 2024 TripPiece. All rights reserved
+
+import Foundation
+import UIKit
+import SnapKit
+import GoogleMaps
+
+//TODO: 여행조각 sorting 확인 필요 / 여행기 클릭 시 넘어가는 뷰 / 구글맵 연동
+
+class MyLogVC: UIViewController {
+    private lazy var navBar: GradientNavigationBar = {
+        return GradientNavigationBar(title: "여행자님의 기록")
+    }()
+    
+    private lazy var scrollView: UIScrollView = {
+        return UIScrollView()
+    }()
+    
+    private lazy var contentView: UIView = {
+        let view = UIView()
+        view.backgroundColor = Constants.Colors.bg2
+        return view
+    }()
+    
+    private lazy var mapView: GMSMapView = {
+        let camera = GMSCameraPosition.camera(withLatitude: 37.5665, longitude: 126.9780, zoom: 6.0)
+        let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
+        mapView.backgroundColor = .lightGray
+        return mapView
+    }()
+    
+    private lazy var progressTravelSectionTitle: UILabel = {
+        let label = UILabel()
+        label.text = "진행 중인 여행"
+        label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        label.isHidden = true
+        return label
+    }()
+    
+    private lazy var progressTravelCard: ProgressTravelLogCardCell = {
+        let card = ProgressTravelLogCardCell()
+        card.isHidden = true // 기본값 설정
+        return card
+    }()
+    
+    private lazy var tripSectionTitle: UILabel = {
+        let label = UILabel()
+        label.text = "생성된 여행기"
+        label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        return label
+    }()
+    
+    private lazy var travelLogScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
+    }()
+    
+    private lazy var travelLogStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.distribution = .equalSpacing
+        stackView.axis = .horizontal
+        stackView.spacing = 15
+        stackView.layoutMargins = UIEdgeInsets(top: 20, left: 0, bottom: 20, right: 0)
+        stackView.isLayoutMarginsRelativeArrangement = true
+        return stackView
+    }()
+    
+    private lazy var historyTitle: UILabel = {
+        let label = UILabel()
+        label.text = "여행자님의 지난 여행 조각"
+        label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
+        return label
+    }()
+    
+    private lazy var sortScrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsHorizontalScrollIndicator = false
+        return scrollView
+    }()
+    
+    private lazy var latestSortButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("완료", for: .normal)
+        button.setTitleColor(Constants.Colors.black3, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        //        button.addTarget(self, action: #selector(updateSelectedFilterButton), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var oldestSortButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("완료", for: .normal)
+        button.setTitleColor(Constants.Colors.black3, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
+        //        button.addTarget(self, action: #selector(updateSelectedFilterButton), for: .touchUpInside)
+        return button
+    }()
+    
+    private lazy var sortStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        stackView.distribution = .equalSpacing
+        stackView.spacing = 10
+        stackView.layoutMargins = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
+        stackView.isLayoutMarginsRelativeArrangement = true
+        return stackView
+    }()
+    
+    private lazy var tripPieceStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.alignment = .fill
+        stackView.distribution = .equalSpacing
+        stackView.spacing = 10
+        return stackView
+    }()
+    
+    let allButton = PieceSortButton(title: "전체", tag: 0, target: self, action: #selector(filterButtonTapped(_:)))
+    let photoButton = PieceSortButton(title: "📷 사진", tag: 1, target: self, action: #selector(filterButtonTapped(_:)))
+    let videoButton = PieceSortButton(title: "🎬 영상", tag: 2, target: self, action: #selector(filterButtonTapped(_:)))
+    let musicButton = PieceSortButton(title: "🎶 음악", tag: 3, target: self, action: #selector(filterButtonTapped(_:)))
+    let memoButton = PieceSortButton(title: "✍🏻 메모", tag: 4, target: self, action: #selector(filterButtonTapped(_:)))
+    
+    private lazy var addButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "plus")?.withTintColor(Constants.Colors.black5 ?? .blue, renderingMode: .alwaysOriginal),for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor(named: "Main")
+        button.layer.cornerRadius = 30
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.3
+        button.layer.shadowOffset = CGSize(width: 2, height: 2)
+        button.layer.shadowRadius = 5
+        button.addTarget(self, action: #selector(startTravel), for: .touchUpInside)
+        return button
+    }()
+    
+    var fetchedTravelsInfo: [TravelsInfo] = []
+    var allPiece: [TripPieceInfo] = []
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        MyLogManager.fetchTravelsInfo { result in
+            switch result {
+            case .success(let TravelsInfo):
+                self.fetchedTravelsInfo = TravelsInfo.result // 데이터를 저장
+                self.updateTravelLogStackView()
+                print("데이터 불러오기")
+            case .failure(let error):
+                print("Error occurred: \(error.localizedDescription)")
+            }
+        }
+        MyLogManager.fetchTripPieceInfo { result in
+            switch result {
+            case .success(let TripPieceInfo):
+                self.allPiece = TripPieceInfo.result
+                self.updateTripPieceStackView(items: self.allPiece)
+                print("데이터 불러오기")
+            case .failure(let error):
+                print("Error occurred: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        //        NotificationCenter.default.addObserver(self, selector: #selector(handleTravelLogStarted), name: .travelLogStarted, object: nil)
+        setupView()
+        setupConstraints()
+        updateSelectedFilterButton(selectedButton: allButton)
+    }
+    
+    func setupView() {
+        view.backgroundColor = Constants.Colors.bg2
+        [navBar, scrollView, addButton].forEach {
+            view.addSubview($0)
+        }
+        scrollView.addSubview(contentView)
+        travelLogScrollView.addSubview(travelLogStackView)
+        [allButton, photoButton, videoButton, musicButton, memoButton].forEach {
+            sortStackView.addArrangedSubview($0)
+        }
+        sortScrollView.addSubview(sortStackView)
+        [mapView, progressTravelSectionTitle, progressTravelCard, tripSectionTitle, travelLogScrollView, historyTitle, sortScrollView, tripPieceStackView].forEach {
+            contentView.addSubview($0)
+        }
+        
+    }
+    
+    func setupConstraints() {
+        navBar.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.height.equalTo(107)
+        }
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(navBar.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+        }
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+        }
+        mapView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.height.equalTo(200)
+        }
+        progressTravelSectionTitle.snp.makeConstraints { make in
+            make.top.equalTo(mapView.snp.bottom).offset(16)
+            make.leading.equalToSuperview().offset(16)
+        }
+        progressTravelCard.snp.makeConstraints { make in
+            make.top.equalTo(progressTravelSectionTitle.snp.bottom).offset(16)
+            make.leading.equalToSuperview().offset(16)
+            make.trailing.equalToSuperview().offset(-16)
+            make.height.equalTo(90)
+        }
+        tripSectionTitle.snp.makeConstraints { make in
+            make.top.equalTo(progressTravelCard.snp.bottom).offset(16)
+            make.leading.equalToSuperview().offset(16)
+        }
+        travelLogScrollView.snp.makeConstraints { make in
+            make.top.equalTo(tripSectionTitle.snp.bottom)
+            make.trailing.equalToSuperview()
+            make.leading.equalToSuperview().inset(16)
+            make.height.equalTo(240)
+        }
+        travelLogStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.height.equalTo(240)
+        }
+        historyTitle.snp.makeConstraints { make in
+            make.top.equalTo(travelLogScrollView.snp.bottom)
+            make.leading.equalToSuperview().offset(16)
+        }
+        sortScrollView.snp.makeConstraints { make in
+            make.top.equalTo(historyTitle.snp.bottom)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(50)
+        }
+        sortStackView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.trailing.equalToSuperview()
+            make.height.equalToSuperview()
+        }
+        tripPieceStackView.snp.makeConstraints { make in
+            make.top.equalTo(sortScrollView.snp.bottom).offset(8)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().offset(-40)  // 마지막 요소이므로 아래 여백 설정
+        }
+        addButton.snp.makeConstraints { make in
+            make.width.height.equalTo(63)
+            make.trailing.equalToSuperview().inset(24)
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(40)
+        }
+    }
+    
+    // MARK: func 세팅
+    @objc private func startTravel() {
+        let viewController = TestVC()
+        viewController.modalPresentationStyle = .fullScreen
+        self.present(viewController, animated: true, completion: nil)
+    }
+    
+    func updateTravelLogStackView() { //여행기 cell 추가
+        travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for TravelsInfo in fetchedTravelsInfo.reversed() {
+            let cell = TravelLogCardCell()
+            let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
+            let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
+            let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
+            cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+            travelLogStackView.addArrangedSubview(cell)
+            
+            if TravelsInfo.status == "ONGOING" {
+                progressTravelSectionTitle.isHidden = false
+                progressTravelCard.isHidden = false
+                let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
+                let subtitle = "Day \(daysElapsed)"
+                let title = "[\(TravelsInfo.cityName)] \(TravelsInfo.title)"
+                self.progressTravelCard.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: subtitle)
+                
+            }
+        }
+        updateLayoutForProgressTravelCardVisibility()
+    }
+    
+    func updateLayoutForProgressTravelCardVisibility() {
+        if progressTravelSectionTitle.isHidden && progressTravelCard.isHidden {
+            tripSectionTitle.snp.remakeConstraints { make in
+                make.top.equalTo(mapView.snp.bottom).offset(16)
+                make.leading.equalToSuperview().offset(16)
+            }
+        } else {
+            tripSectionTitle.snp.remakeConstraints { make in
+                make.top.equalTo(progressTravelCard.snp.bottom).offset(16)
+                make.leading.equalToSuperview().offset(16)
+            }
+        }
+
+        UIView.animate(withDuration: 0.2) {
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    func updateTripPieceStackView(items: [TripPieceInfo]) { //여행 조각 관련 함수
+        tripPieceStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        for item in items.reversed() {
+            let cell = PieceCell()
+            let formattedDate = formatDate(from: item.createdAt)!
+            let location = "\(item.cityName), \(item.countryName)"
+            cell.configure(type: item.category, mediaURL: item.mediaUrl ?? "", memo: item.memo ?? "", createdAt: formattedDate, location: location)
+            tripPieceStackView.addArrangedSubview(cell)
+        }
+    }
+    
+    func updateSelectedFilterButton(selectedButton: PieceSortButton) {
+        let buttons = [allButton, photoButton, videoButton, musicButton, memoButton]
+        for button in buttons {
+            button.updateSelection(isSelected: button == selectedButton)
+        }
+    }
+    
+    @objc func filterButtonTapped(_ sender: UIButton) {
+        let selectedType = TravelItemType(rawValue: sender.tag) ?? .all
+        let filteredPiece = filterPieces(by: selectedType)
+        updateTripPieceStackView(items: filteredPiece)
+        
+        if let button = sender as? PieceSortButton {
+            updateSelectedFilterButton(selectedButton: button)
+        }
+    }
+    
+    private func filterPieces(by type: TravelItemType) -> [TripPieceInfo] {
+        if type == .all {
+            return allPiece
+        } else {
+            return allPiece.filter { item in
+                switch type {
+                case .photo:
+                    return item.category == "PICTURE"
+                case .video:
+                    return item.category == "VIDEO"
+                case .memo:
+                    return item.category == "MEMO"
+                case .music:
+                    return item.category == "MUSIC"
+                default:
+                    return false
+                }
+            }
+        }
+    }
+    
+}

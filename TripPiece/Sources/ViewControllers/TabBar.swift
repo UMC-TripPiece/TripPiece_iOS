@@ -12,12 +12,12 @@ class TabBar: UITabBarController {
         //TODO:여기서 월드 부분 뭐시기 컨트롤러? 뭐 그런걸로 해야 스유랑 연결됨
         let vc1 = UINavigationController(rootViewController: TestVC())
         vc1.tabBarItem = UITabBarItem(title: "월드", image: UIImage(named: "World"), tag: 1)
-        let vc2 = UINavigationController(rootViewController: TestVC())
-        vc2.tabBarItem = UITabBarItem(title: "나의 기록", image: UIImage(named: "My log"), tag: 2)
+        let vc2 = UINavigationController(rootViewController: MyLogVC())
+        vc2.tabBarItem = UITabBarItem(title: "나의 기록", image: UIImage(named: "MyLog"), tag: 2)
         let vc3 = UINavigationController(rootViewController: TestVC())
-        vc3.tabBarItem = UITabBarItem(title: "탐색", image: UIImage(named: "Search"), tag: 3)
+        vc3.tabBarItem = UITabBarItem(title: "탐색", image: UIImage(named: "Explore"), tag: 3)
         let vc4 = UINavigationController(rootViewController: MyPageVC())
-        vc4.tabBarItem = UITabBarItem(title: "마이페이지", image: UIImage(named: "My page"), tag: 4)
+        vc4.tabBarItem = UITabBarItem(title: "마이페이지", image: UIImage(named: "User"), tag: 4)
         self.viewControllers = [vc1, vc2, vc3, vc4]
     }
     func appearance() {
