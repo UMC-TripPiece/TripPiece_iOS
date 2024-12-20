@@ -6,6 +6,7 @@ import AuthenticationServices
 import KakaoSDKUser
 import SnapKit
 import Moya
+import SwiftyToaster
 
 class LoginVC: UIViewController {
 
@@ -157,14 +158,19 @@ class LoginVC: UIViewController {
     func sendLoginRequest() {
         if isValid {
             if let loginRequest = setupLoginDTO(loginField.emailField.text!, loginField.passwordField.text!) {
-                callLoginAPI(loginRequest) { isSuccess in
-                    if isSuccess {
-                        self.proceedIfSignupSuccessful()
-                    } else {
-                        self.checkLoginInfo()
-                        print("로그인 실패")
+                callLoginAPI(loginRequest) { isSuccess, statusCode in
+                        if isSuccess {
+                            print("로그인 성공! 상태 코드: \(statusCode ?? 0)")
+                        } else {
+                            if let code = statusCode {
+                                print("로그인 실패! 상태 코드: \(code)")
+                                self.checkLoginInfo()
+                            } else {
+                                self.checkLoginInfo()
+                                print("로그인 실패! 상태 코드를 확인할 수 없습니다.")
+                            }
+                        }
                     }
-                }
             }
         }
     }

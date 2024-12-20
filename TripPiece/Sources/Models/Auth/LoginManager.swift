@@ -104,7 +104,7 @@ extension LoginVC {
         return LoginRequest(email: emailString, password: pwString)
     }
     
-    func callLoginAPI(_ userParameter: LoginRequest, completion: @escaping (Bool) -> Void) {
+    func callLoginAPI(_ userParameter: LoginRequest, completion: @escaping (Bool, Int?) -> Void) {
         APIManager.AuthProvider.request(.postLogin(param: userParameter)) { result in
             switch result {
             case .success(let response):
@@ -116,15 +116,18 @@ extension LoginVC {
                     SelectLoginTypeVC.keychain.set(data.result.refreshToken, forKey: "serverRefreshToken")
                     SelectLoginTypeVC.keychain.set(String(currentTimeInMilliseconds), forKey: "accessTokenCreatedAt")
                     print(data)
-                    completion(true)
+                    completion(true, response.statusCode) // 성공과 상태 코드 반환
                 } catch {
-                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
+                    print("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
+                    completion(false, response.statusCode) // 실패와 상태 코드 반환
                 }
-            case .failure(let error) :
+            case .failure(let error):
                 if let response = error.response {
                     Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
+                    completion(false, response.statusCode) // 실패와 상태 코드 반환
+                } else {
+                    completion(false, nil) // 네트워크 문제로 상태 코드 없음
                 }
-                completion(false)
             }
         }
     }

@@ -9,6 +9,7 @@ import SwiftyToaster
 class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
     static var isKakaoLogin : Bool = false
+    static var isAppleLogin : Bool = false
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     
     private let backgroundImageView: UIImageView = {
@@ -107,6 +108,18 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
         return button
     }()
     
+    private let quitButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("회원 탈퇴", for: .normal)
+        button.setTitleColor(Constants.Colors.black3, for: .normal)
+        button.backgroundColor = Constants.Colors.black3?.withAlphaComponent(0.1)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .semibold)
+        button.layer.cornerRadius = 10
+        button.addTarget(self, action: #selector(showDeleteAccountAlert), for: .touchUpInside)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
     private let stackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .horizontal
@@ -161,7 +174,7 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
     }
     
     func setupViews() {
-        [backgroundImageView, myPageLabel, profileImageView, profileEditIconView, nameLabel, stackView, mapStackView, logoutButton].forEach {
+        [backgroundImageView, myPageLabel, profileImageView, profileEditIconView, nameLabel, stackView, mapStackView, logoutButton, quitButton].forEach {
             view.addSubview($0)
         }
         [followersLabel, followingLabel, travelLogsLabel].forEach {
@@ -209,7 +222,13 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
         logoutButton.snp.makeConstraints { make in
             make.top.equalTo(mapStackView.snp.bottom).offset(32)
             make.centerX.equalToSuperview()
-            make.width.equalTo(150)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(44)
+        }
+        quitButton.snp.makeConstraints { make in
+            make.top.equalTo(logoutButton.snp.bottom).offset(8)
+            make.centerX.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(44)
         }
     }
@@ -253,6 +272,70 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
                 if let response = error.response {
                     Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
                 }
+            }
+        }
+    }
+    
+    @objc func showDeleteAccountAlert() {
+        let alert = UIAlertController(title: "계정 삭제", message: "계정을 정말 삭제하시겠습니까?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "삭제", style: .destructive, handler: { _ in
+            if MyPageVC.isAppleLogin {
+                //TODO: 애플 로그인 탈퇴 처리 구현 필요
+                print("애플 탈퇴")
+                if let authorizationCode = SelectLoginTypeVC.keychain.get("AppleAuthToken") {
+                    print("가입/로그인 시 authCode 이미 발급함")
+                    
+                } else {
+                    print("새로 authCode 발급")
+                }
+            } else {
+                print("일반, 카카오 탈퇴")
+                self.quitTapped { isSuccess in
+                    if isSuccess {
+                        Toaster.shared.makeToast("계정 삭제 완료")
+                    } else {
+                        Toaster.shared.makeToast("계정 삭제 실패 - 다시 시도해주세요")
+                        
+                    }
+                }
+            }
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func quitTapped(completion: @escaping (Bool) -> Void) {
+        APIManager.UserProvider.request(.userDelete) { result in
+            switch result {
+            case .success(let response):
+                
+                if MyPageVC.isKakaoLogin {
+                    self.kakaoAuthVM.unlinkKakaoAccount { success in
+                        if success {
+                            ["serverAccessToken", "accessTokenExpiresIn", "serverRefreshToken"].forEach { keyName in
+                                SelectLoginTypeVC.keychain.delete(keyName)
+                            }
+                            Toaster.shared.makeToast("계정 삭제 완료")
+                            self.showSplashScreen()
+                            completion(true)
+                        } else {
+                            Toaster.shared.makeToast("계정 삭제 실패 - 다시 시도해 주세요")
+                            completion(false)
+                        }
+                    }
+                } else {
+                    // 카카오 연동 해제 없이 일반 회원 탈퇴만 처리
+                    ["serverAccessToken", "accessTokenExpiresIn", "serverRefreshToken"].forEach { keyName in
+                        SelectLoginTypeVC.keychain.delete(keyName)
+                    }
+                    self.showSplashScreen()
+                    completion(true)
+                }
+            case .failure(let error):
+                if let response = error.response {
+                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
+                }
+                completion(false)
             }
         }
     }

@@ -14,11 +14,12 @@ let superViewWidth = UIScreen.main.bounds.width
 
 class SelectLoginTypeVC : UIViewController {
     
-    static let keychain = KeychainSwift() // For storing tokens like GoogleAccessToken, GoogleRefreshToken, FCMToken, serverAccessToken, serverRefreshToken, accessTokenCreatedAt
+    static let keychain = KeychainSwift() // For storing tokens like serverAccessToken, serverRefreshToken, accessTokenCreatedAt
     
+    //TODO: 배경 이미지 대신 바꾸기...
     lazy var backgroundImage: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "backgroundImage")
+        view.image = UIImage(named: "SelectLoginView")
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
