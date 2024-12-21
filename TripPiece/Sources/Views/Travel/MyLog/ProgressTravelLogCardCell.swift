@@ -55,11 +55,13 @@ class ProgressTravelLogCardCell: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupTapGesture()
     }
     
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         setupUI()
+        setupTapGesture()
     }
     
     // MARK: - UI Setup
@@ -111,4 +113,19 @@ class ProgressTravelLogCardCell: UIView {
         dateLabel.text = date
         dayCountLabel.text = subtitle
     }
+    // MARK: - Tap Gesture
+        private func setupTapGesture() {
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+            cardView.isUserInteractionEnabled = true
+            cardView.addGestureRecognizer(tapGesture)
+        }
+        
+        @objc private func handleTap() {
+            // OngoingLogVC로 전환
+            let viewController = OngoingLogVC()
+            viewController.modalPresentationStyle = .fullScreen
+            if let topController = UIApplication.shared.keyWindow?.rootViewController {
+                topController.present(viewController, animated: true, completion: nil)
+            }
+        }
 }
