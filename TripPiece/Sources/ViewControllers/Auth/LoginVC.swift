@@ -161,6 +161,7 @@ class LoginVC: UIViewController {
                 callLoginAPI(loginRequest) { isSuccess, statusCode in
                         if isSuccess {
                             print("로그인 성공! 상태 코드: \(statusCode ?? 0)")
+                            self.proceedIfSignupSuccessful()
                         } else {
                             if let code = statusCode {
                                 print("로그인 실패! 상태 코드: \(code)")
