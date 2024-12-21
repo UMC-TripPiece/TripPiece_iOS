@@ -23,9 +23,11 @@ class MyLogVC: UIViewController {
     }()
     
     private lazy var mapView: GMSMapView = {
-        let camera = GMSCameraPosition.camera(withLatitude: 37.5665, longitude: 126.9780, zoom: 6.0)
-        let mapView = GMSMapView.map(withFrame: .zero, camera: camera)
-        mapView.backgroundColor = .lightGray
+        let options = GMSMapViewOptions()
+        options.camera = GMSCameraPosition(latitude: 37.5665, longitude: 126.9780, zoom: 6.0)
+        options.frame = .zero
+        
+        let mapView = GMSMapView(options: options)
         return mapView
     }()
     
@@ -146,6 +148,7 @@ class MyLogVC: UIViewController {
             case .success(let TravelsInfo):
                 self.fetchedTravelsInfo = TravelsInfo.result // 데이터를 저장
                 self.updateTravelLogStackView()
+                self.updateGoogleMap()
                 print("데이터 불러오기")
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
@@ -286,6 +289,34 @@ class MyLogVC: UIViewController {
             }
         }
         updateLayoutForProgressTravelCardVisibility()
+    }
+    
+    private func updateGoogleMap() {
+        mapView.clear()
+        
+        for (index, travelsInfo) in fetchedTravelsInfo.enumerated() {
+            MyLogManager.fetchGeocoding(country: travelsInfo.countryName, city: travelsInfo.cityName) { [weak self] result in
+                switch result {
+                case .success(let geocodingResponse):
+                    print(geocodingResponse)
+                    if let result = geocodingResponse.results.first {
+                        self?.appendMarker(position: CLLocationCoordinate2D(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng), color: UIColor.red, imageURL: travelsInfo.thumbnail, zIndex: index)
+                    }
+                case .failure(let error):
+                    print("Not Found: \(travelsInfo.countryName), \(travelsInfo.cityName)")
+                    print("Status: \(travelsInfo.status)")
+                    print("Error occurred: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    private func appendMarker(position: CLLocationCoordinate2D, color: UIColor, imageURL: String, zIndex: Int) {
+        let marker = GMSMarker(position: position)
+//        marker.title = "Hello World"
+        marker.map = mapView
+        marker.zIndex = Int32(zIndex)
+        marker.iconView = MarkerView(frame: CGRect(x: 0, y: 0, width: 32, height: 32), color: color, imageURL: imageURL)
     }
     
     func updateLayoutForProgressTravelCardVisibility() {

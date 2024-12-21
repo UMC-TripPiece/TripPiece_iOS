@@ -9,4 +9,5 @@ class APIManager {
     static let TravelProvider = MoyaProvider<TravelAPI>(plugins: [BearerTokenPlugin(), NetworkLoggerPlugin()])
     static let TripPieceProvider = MoyaProvider<TripPieceAPI>(plugins: [BearerTokenPlugin(), NetworkLoggerPlugin()])
     static let UserProvider = MoyaProvider<AuthAPI>(plugins: [BearerTokenPlugin(), NetworkLoggerPlugin()])
+    static let GeoCodingProvider = MoyaProvider<GeocodingAPI>()
 }
