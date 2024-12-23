@@ -61,6 +61,7 @@ let project = Project(
                 .external(name: "InteractiveMap"),
                 .external(name: "GoogleMaps"),
                 .external(name: "SwiftyJSON"),
+                .external(name: "Macaw")
             ]
         ),
         .target(
