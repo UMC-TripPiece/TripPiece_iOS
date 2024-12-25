@@ -57,9 +57,9 @@ extension MapAPI: TargetType {
             return .requestPlain
         case .getUserMapStats :
             return .requestPlain
-        case .getMapSearch(let param) :
-            return .requestJSONEncodable(param)
-        case .getMapMarkers :
+        case .getMapSearch(let keyword) :
+            return .requestParameters(parameters: ["keyword": keyword], encoding: URLEncoding.queryString)
+        case .getMapMarkers:
             return .requestPlain
         case .postMaps(let param) :
             return .requestJSONEncodable(param)
