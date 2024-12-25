@@ -1,5 +1,5 @@
 {
-  "originHash" : "e7782fd10a84683cfa43b8ff129e1a7c39dc32fa9d425dd379d2a8cceb91b740",
+  "originHash" : "2a146c08d4a3dbe43c6170c2137995e2c81af5f3c1317a84f1a315a928d8a9bd",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -137,6 +137,15 @@
       }
     },
     {
+      "identity" : "macaw",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/exyte/Macaw.git",
+      "state" : {
+        "revision" : "29ec199cbc9c814f8ceffc1a33b8775b7349dcdd",
+        "version" : "0.9.10"
+      }
+    },
+    {
       "identity" : "moya",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Moya/Moya.git",
@@ -224,6 +233,15 @@
       "state" : {
         "revision" : "4ed905fdecf7426e3e7a7af03b09674980f9c1a7",
         "version" : "1.0.2"
+      }
+    },
+    {
+      "identity" : "swxmlhash",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/drmohundro/SWXMLHash",
+      "state" : {
+        "revision" : "6469881a3f30417c5bb02404ea4b69207f297592",
+        "version" : "6.0.0"
       }
     }
   ],
