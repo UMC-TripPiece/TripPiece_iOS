@@ -4,17 +4,6 @@ import UIKit
 
 extension WorldVC: UITableViewDelegate, UITableViewDataSource {
     
-    // 검색 결과 수에 따라 테이블 뷰 높이를 업데이트
-    public func updateSearchTableViewHeight() {
-        let rowHeight: CGFloat = 48.0 // 각 행의 높이
-        let maxVisibleRows = 4 // 표시할 최대 행 수
-        let visibleRows = min(searchResults.count, maxVisibleRows)
-        let newHeight = (CGFloat(visibleRows) * rowHeight) + 55
-        searchTableViewHeightConstraint.constant = newHeight
-        UIView.animate(withDuration: 0.3) { // 애니메이션으로 높이 변경
-            self.view.layoutIfNeeded()
-        }
-    }
     
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -52,26 +41,31 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
-    /*func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let cityData = searchResults[indexPath.row - 1]
             
-        customSearchBar.searchBar.text = cityData.cityName
-        searchTableView.isHidden = true
+        self.searchBar.searchBar.text = cityData.cityName
+        self.searchTableView.isHidden = true
             
-        let selectedCityViewController = SelectedCityViewController()
-        selectedCityViewController.cityData = cityData
+        //let selectedCityViewController = SelectedCityViewController()
+        //selectedCityViewController.cityData = cityData
             
     // TODO: Macaw로 변환하면서 수정 못한 것
     //        updateWorldViewUI(with: cityData["countryName"] ?? "한국")
             
             
         // 모달로 표시할 때 기존 뷰 컨트롤러를 배경에 반투명하게 보이도록 설정
-        selectedCityViewController.modalPresentationStyle = .overCurrentContext
+        /*selectedCityViewController.modalPresentationStyle = .overCurrentContext
         selectedCityViewController.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해
         // 모달로 뷰 컨트롤러를 표시
-        present(selectedCityViewController, animated: true, completion: nil)
+        present(selectedCityViewController, animated: true, completion: nil)*/
             
-    }*/
+    }
+    
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        view.endEditing(true)  // 스크롤을 시작할 때 키보드 내리기
+        searchTableView.isHidden = true
+    }
     
 }
 
