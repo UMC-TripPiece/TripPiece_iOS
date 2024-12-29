@@ -5,7 +5,7 @@ import UIKit
 import SnapKit
 import GoogleMaps
 
-//TODO: 여행조각 sorting 확인 필요 / 여행기 클릭 시 넘어가는 뷰 / 구글맵 연동
+//TODO: 여행조각 최신순 sorting 확인 필요
 
 class MyLogVC: UIViewController {
     private lazy var navBar: GradientNavigationBar = {
@@ -13,7 +13,9 @@ class MyLogVC: UIViewController {
     }()
     
     private lazy var scrollView: UIScrollView = {
-        return UIScrollView()
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
     }()
     
     private lazy var contentView: UIView = {
@@ -171,10 +173,14 @@ class MyLogVC: UIViewController {
         //        NotificationCenter.default.addObserver(self, selector: #selector(handleTravelLogStarted), name: .travelLogStarted, object: nil)
         setupView()
         setupConstraints()
+        setupGestures()
         updateSelectedFilterButton(selectedButton: allButton)
     }
     
     func setupView() {
+        
+        scrollView.delaysContentTouches = false
+        scrollView.canCancelContentTouches = true
         view.backgroundColor = Constants.Colors.bg2
         [navBar, scrollView, addButton].forEach {
             view.addSubview($0)
@@ -226,13 +232,13 @@ class MyLogVC: UIViewController {
         }
         travelLogScrollView.snp.makeConstraints { make in
             make.top.equalTo(tripSectionTitle.snp.bottom)
-            make.trailing.equalToSuperview()
-            make.leading.equalToSuperview().inset(16)
+            make.leading.trailing.equalToSuperview()
             make.height.equalTo(240)
         }
         travelLogStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.height.equalTo(240)
+            make.leading.equalToSuperview().inset(16)
+            make.trailing.top.bottom.equalToSuperview()
+            make.height.equalToSuperview()
         }
         historyTitle.snp.makeConstraints { make in
             make.top.equalTo(travelLogScrollView.snp.bottom)
@@ -260,9 +266,23 @@ class MyLogVC: UIViewController {
         }
     }
     
+    func setupGestures() {
+        let progressTravelGesture = UITapGestureRecognizer(target: self, action: #selector(getProgressTravel))
+        progressTravelCard.addGestureRecognizer(progressTravelGesture)
+        progressTravelCard.isUserInteractionEnabled = true
+    }
+    
     // MARK: func 세팅
     @objc private func startTravel() {
+        //TODO: 여행기 클릭 시 넘어가는 뷰
         let viewController = TestVC()
+        viewController.modalPresentationStyle = .fullScreen
+        self.present(viewController, animated: true, completion: nil)
+    }
+    
+    
+    @objc private func getProgressTravel() {
+        let viewController = OngoingLogVC()
         viewController.modalPresentationStyle = .fullScreen
         self.present(viewController, animated: true, completion: nil)
     }
@@ -313,7 +333,6 @@ class MyLogVC: UIViewController {
     
     private func appendMarker(position: CLLocationCoordinate2D, color: UIColor, imageURL: String, zIndex: Int) {
         let marker = GMSMarker(position: position)
-//        marker.title = "Hello World"
         marker.map = mapView
         marker.zIndex = Int32(zIndex)
         marker.iconView = MarkerView(frame: CGRect(x: 0, y: 0, width: 32, height: 32), color: color, imageURL: imageURL)
@@ -331,7 +350,7 @@ class MyLogVC: UIViewController {
                 make.leading.equalToSuperview().offset(16)
             }
         }
-
+        
         UIView.animate(withDuration: 0.2) {
             self.view.layoutIfNeeded()
         }
@@ -348,7 +367,7 @@ class MyLogVC: UIViewController {
             tripPieceStackView.addArrangedSubview(cell)
         }
     }
-    
+    //TODO: 최신순 sorting 추가
     func updateSelectedFilterButton(selectedButton: PieceSortButton) {
         let buttons = [allButton, photoButton, videoButton, musicButton, memoButton]
         for button in buttons {

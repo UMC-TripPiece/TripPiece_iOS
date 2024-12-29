@@ -6,6 +6,55 @@ import Moya
 import KeychainSwift
 import SwiftyToaster
 
+extension SignUpVC {
+    func callSendCodeAPI(email: String, completion: @escaping (Bool) -> Void) {
+        APIManager.AuthProvider.request(.postEmailSend(email: email)) { result in
+            switch result {
+            case .success(let response):
+                print(response)
+                if response.statusCode == 200 {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                if let responseData = error.response?.data,
+                   let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("서버 응답 메시지: \(jsonString)")
+                }
+                Toaster.shared.makeToast("회원가입 요청 중 오류가 발생했습니다.")
+                completion(false)
+            }
+        }
+    }
+    
+    func setupEmailCodeDTO(_ emailString: String, _ codeString: String) -> EmailVerifyRequest? {
+        return EmailVerifyRequest(email: emailString, code: codeString)
+    }
+    
+    func validateCodeAPI(_ userParameter: EmailVerifyRequest, completion: @escaping (Bool) -> Void) {
+        APIManager.AuthProvider.request(.postEmailVerify(param: userParameter)) { result in
+            switch result {
+            case .success(let response):
+                print(response)
+                if response.statusCode == 200 {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                if let responseData = error.response?.data,
+                   let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("서버 응답 메시지: \(jsonString)")
+                }
+                Toaster.shared.makeToast("회원가입 요청 중 오류가 발생했습니다.")
+                completion(false)
+            }
+        }
+    }
+}
 extension ProfileVC {
     ///자체 회원가입 API 호출
     func callSignUpAPI(completion: @escaping (Bool) -> Void) {

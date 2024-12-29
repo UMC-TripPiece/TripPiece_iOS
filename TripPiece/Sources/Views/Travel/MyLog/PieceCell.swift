@@ -7,6 +7,12 @@ import SDWebImage
 class PieceCell: UIView {
     
     // MARK: - UI Components
+    private let moreButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "ellipsis")?.withTintColor(Constants.Colors.black5 ?? .blue, renderingMode: .alwaysOriginal),for: .normal)
+        return button
+    }()
+    
     private let pieceView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -102,9 +108,13 @@ class PieceCell: UIView {
         pieceMemoView.addSubview(memoLabel)
         pieceView.addSubview(sideBar)
         
-        [titleLabel, timeIconView, timeLabel, locationIconView, locationLabel].forEach {
+        [titleLabel, timeIconView, timeLabel, locationIconView, locationLabel, moreButton].forEach {
             sideBar.addSubview($0)
         }
+        moreButton.isUserInteractionEnabled = true
+        sideBar.isUserInteractionEnabled = true
+        pieceView.isUserInteractionEnabled = true
+        moreButton.addTarget(self, action: #selector(didTapMoreButton), for: .touchUpInside)
     }
     
     private func setupConstraints() {
@@ -148,6 +158,11 @@ class PieceCell: UIView {
             make.leading.equalTo(locationIconView.snp.trailing).offset(5)
             make.centerY.equalTo(locationIconView)
         }
+        moreButton.snp.makeConstraints { make in
+                    make.top.equalTo(pieceView.snp.top).offset(10)
+                    make.trailing.equalTo(pieceView.snp.trailing).offset(-10)
+                    make.width.height.equalTo(30)
+                }
     }
     // MARK: - Configuration
     
@@ -191,4 +206,36 @@ class PieceCell: UIView {
             pieceImageView.isHidden = true
         }
     }
+    
+    @objc private func didTapMoreButton() {
+        print("수정하기 tapped)")
+            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+            
+            let editAction = UIAlertAction(title: "수정하기", style: .default) { _ in
+                print("수정하기 눌림")
+                // 수정 로직 추가
+            }
+            
+            let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
+                print("삭제하기 눌림")
+                // 삭제 로직 추가
+            }
+            
+            let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+            
+            alertController.addAction(editAction)
+            alertController.addAction(deleteAction)
+            alertController.addAction(cancelAction)
+            
+            // iPad 호환성을 위한 설정 (Action Sheet를 popover로 표시)
+            if let popoverController = alertController.popoverPresentationController {
+                popoverController.sourceView = moreButton
+                popoverController.sourceRect = moreButton.bounds
+            }
+            
+            // 부모 ViewController에서 present
+            if let parentViewController = self.parentViewController {
+                parentViewController.present(alertController, animated: true, completion: nil)
+            }
+        }
 }

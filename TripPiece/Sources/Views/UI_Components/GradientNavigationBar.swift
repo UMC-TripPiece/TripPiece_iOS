@@ -1,9 +1,4 @@
-//
-//  GradientNavigationBar.swift
-//  MyWorldApp
-//
-//  Created by 김나연 on 8/12/24.
-//
+// Copyright © 2024 TripPiece. All rights reserved
 
 import UIKit
 import SnapKit
