@@ -1,4 +1,4 @@
-// Copyright © 2024 RT4. All rights reserved
+// Copyright © 2024 TripPiece. All rights reserved
 
 import Foundation
 import Moya
