@@ -4,14 +4,9 @@ import UIKit
 import SnapKit
 import SDWebImage
 
-class PieceCell: UIView {
+class ExplorePieceCell: UIView {
     
     // MARK: - UI Components
-    private let moreButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "ellipsis")?.withTintColor(Constants.Colors.black5 ?? .blue, renderingMode: .alwaysOriginal),for: .normal)
-        return button
-    }()
     
     private let pieceView: UIView = {
         let view = UIView()
@@ -58,19 +53,7 @@ class PieceCell: UIView {
         return label
     }()
     
-    private let timeIconView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "clock")?.withTintColor(Constants.Colors.mint ?? .blue, renderingMode: .alwaysOriginal)
-        imageView.contentMode = .scaleAspectFill
-        return imageView
-    }()
-    
-    private let timeLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.textColor = UIColor(hex: "636363")
-        return label
-    }()
+    let profileView = ProfileLabelView()
     
     private let locationIconView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "locationIcon"))
@@ -108,13 +91,10 @@ class PieceCell: UIView {
         pieceMemoView.addSubview(memoLabel)
         pieceView.addSubview(sideBar)
         
-        [titleLabel, timeIconView, timeLabel, locationIconView, locationLabel, moreButton].forEach {
+        [titleLabel, profileView, locationIconView, locationLabel].forEach {
             sideBar.addSubview($0)
         }
-        moreButton.isUserInteractionEnabled = true
-        sideBar.isUserInteractionEnabled = true
         pieceView.isUserInteractionEnabled = true
-        moreButton.addTarget(self, action: #selector(didTapMoreButton), for: .touchUpInside)
     }
     
     private func setupConstraints() {
@@ -140,35 +120,26 @@ class PieceCell: UIView {
         sideBar.snp.makeConstraints { make in
             make.right.top.bottom.equalToSuperview()
         }
-        timeIconView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(5)
-            make.width.height.equalTo(15)
+        profileView.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.equalTo(titleLabel)
-        }
-        timeLabel.snp.makeConstraints { make in
-            make.leading.equalTo(timeIconView.snp.trailing).offset(5)
-            make.centerY.equalTo(timeIconView)
+            make.height.equalTo(20)
         }
         locationIconView.snp.makeConstraints { make in
-            make.top.equalTo(timeLabel.snp.bottom).offset(5)
+            make.centerY.equalTo(profileView)
+            make.leading.equalTo(profileView.snp.trailing).offset(16)
             make.width.height.equalTo(15)
-            make.leading.equalTo(titleLabel)
         }
         locationLabel.snp.makeConstraints { make in
             make.leading.equalTo(locationIconView.snp.trailing).offset(5)
             make.centerY.equalTo(locationIconView)
         }
-        moreButton.snp.makeConstraints { make in
-                    make.top.equalTo(pieceView.snp.top).offset(10)
-                    make.trailing.equalTo(pieceView.snp.trailing).offset(-10)
-                    make.width.height.equalTo(30)
-                }
     }
     // MARK: - Configuration
     
-    func configure(type: String, mediaURL: String, memo: String, createdAt: String, location: String) {
-        timeLabel.text = createdAt
+    func configure(type: String, mediaURL: String, memo: String, location: String, profileImg: String, name: String) {
         locationLabel.text = location
+        profileView.configure(profileImg: profileImg, name: name, textColor: .black)
         
         if type == "MEMO" {
             pieceMemoView.isHidden = false
@@ -176,8 +147,8 @@ class PieceCell: UIView {
             memoLabel.text = memo
             
             titleLabel.snp.remakeConstraints { make in
-                make.top.equalTo(pieceView.snp.top).offset(15)
-                make.leading.equalTo(pieceMemoView.snp.trailing).offset(15)
+                make.top.equalTo(pieceView.snp.top).offset(16)
+                make.leading.equalTo(pieceMemoView.snp.trailing).offset(16)
             }
             sideBar.snp.remakeConstraints { make in
                 make.width.equalToSuperview().multipliedBy(0.6)
@@ -194,8 +165,8 @@ class PieceCell: UIView {
             }
             
             titleLabel.snp.remakeConstraints { make in
-                make.top.equalTo(pieceView.snp.top).offset(15)
-                make.leading.equalTo(pieceImageView.snp.trailing).offset(15)
+                make.top.equalTo(pieceView.snp.top).offset(16)
+                make.leading.equalTo(pieceImageView.snp.trailing).offset(16)
             }
             
             sideBar.snp.remakeConstraints { make in
@@ -206,36 +177,4 @@ class PieceCell: UIView {
             pieceImageView.isHidden = true
         }
     }
-    
-    @objc private func didTapMoreButton() {
-        print("수정하기 tapped)")
-            let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-            
-            let editAction = UIAlertAction(title: "수정하기", style: .default) { _ in
-                print("수정하기 눌림")
-                // 수정 로직 추가
-            }
-            
-            let deleteAction = UIAlertAction(title: "삭제하기", style: .destructive) { _ in
-                print("삭제하기 눌림")
-                // 삭제 로직 추가
-            }
-            
-            let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
-            
-            alertController.addAction(editAction)
-            alertController.addAction(deleteAction)
-            alertController.addAction(cancelAction)
-            
-            // iPad 호환성을 위한 설정 (Action Sheet를 popover로 표시)
-            if let popoverController = alertController.popoverPresentationController {
-                popoverController.sourceView = moreButton
-                popoverController.sourceRect = moreButton.bounds
-            }
-            
-            // 부모 ViewController에서 present
-            if let parentViewController = self.parentViewController {
-                parentViewController.present(alertController, animated: true, completion: nil)
-            }
-        }
 }

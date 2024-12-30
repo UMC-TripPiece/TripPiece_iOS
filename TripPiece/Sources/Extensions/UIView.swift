@@ -14,4 +14,16 @@ extension UIView {
             return nil
         }
     }
+    
+        // 부모 ViewController를 찾는 유틸리티
+        var parentViewController: UIViewController? {
+            var parentResponder: UIResponder? = self
+            while parentResponder != nil {
+                parentResponder = parentResponder?.next
+                if let viewController = parentResponder as? UIViewController {
+                    return viewController
+                }
+            }
+            return nil
+        }
 }

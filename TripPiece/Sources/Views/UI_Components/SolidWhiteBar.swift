@@ -3,12 +3,12 @@
 import UIKit
 import SnapKit
 
-class GradientNavigationBar: UIView {
+class SolidWhiteBar: UIView {
 
     // 퍼즐 이미지
     private lazy var puzzleImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "puzzle icon")
+        imageView.image = UIImage(named: "puzzle_purple")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -17,7 +17,7 @@ class GradientNavigationBar: UIView {
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 22, weight: .bold)
-        label.textColor = .white
+        label.textColor = Constants.Colors.mainPurple
         return label
     }()
 
@@ -34,9 +34,7 @@ class GradientNavigationBar: UIView {
 
     // UI 설정
     private func setupUI() {
-        // 그라데이션 배경 추가
-        applyGradient()
-
+        self.backgroundColor = .white
         // 서브뷰 추가
         addSubview(puzzleImageView)
         addSubview(titleLabel)
@@ -53,22 +51,4 @@ class GradientNavigationBar: UIView {
         
     }
 
-    // 그라데이션 적용 함수
-    private func applyGradient() {
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.colors = [
-            UIColor(named: "gra1")?.cgColor ?? UIColor.clear.cgColor,
-            UIColor(named: "gra2")?.cgColor ?? UIColor.clear.cgColor
-        ]
-        gradientLayer.startPoint = CGPoint(x: 0, y: 0)
-        gradientLayer.endPoint = CGPoint(x: 1, y: 1)
-        gradientLayer.frame = bounds
-        layer.insertSublayer(gradientLayer, at: 0)
-    }
-
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        // 그라데이션 레이어의 프레임을 다시 설정
-        layer.sublayers?.first?.frame = bounds
-    }
 }
