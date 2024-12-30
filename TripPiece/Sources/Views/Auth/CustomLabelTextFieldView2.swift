@@ -15,8 +15,7 @@ class CustomLabelTextFieldView2: UIView {
 
     init(labelText: String, textFieldPlaceholder: String, validationText: String) {
         self.label = UILabel()
-        self.textField = PaddedTextField(padding: UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10
-                                                              ))
+        self.textField = PaddedTextField(padding: UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10))
         self.validationLabel = UILabel()
 
         super.init(frame: .zero)

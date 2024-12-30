@@ -6,11 +6,10 @@ import AuthenticationServices
 import KakaoSDKUser
 import SnapKit
 import Moya
+import SwiftyToaster
 
 class LoginVC: UIViewController {
-    
-    let LoginProvider = MoyaProvider<AuthAPI>(plugins: [ NetworkLoggerPlugin() ])
-    
+
     private lazy var backButton: CustomBackButton = {
         let button = CustomBackButton(title: "")
         button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
@@ -123,8 +122,16 @@ class LoginVC: UIViewController {
     //MARK: Setup Actions
     lazy var isValid = false
     
-    @objc private func didTapBackButton() {
-        navigationController?.popViewController(animated: true)
+    @objc func didTapBackButton() {
+        var currentVC: UIViewController? = self
+            while let presentingVC = currentVC?.presentingViewController {
+                if presentingVC is SelectLoginTypeVC {
+                    presentingVC.dismiss(animated: true, completion: nil)
+                    return
+                }
+                currentVC = presentingVC
+            }
+        print("SelectLoginTypeVC를 찾을 수 없습니다.")
     }
     
     @objc func loginButtonTapped() {
@@ -151,14 +158,20 @@ class LoginVC: UIViewController {
     func sendLoginRequest() {
         if isValid {
             if let loginRequest = setupLoginDTO(loginField.emailField.text!, loginField.passwordField.text!) {
-                callLoginAPI(loginRequest) { isSuccess in
-                    if isSuccess {
-                        self.proceedIfSignupSuccessful()
-                    } else {
-                        self.checkLoginInfo()
-                        print("로그인 실패")
+                callLoginAPI(loginRequest) { isSuccess, statusCode in
+                        if isSuccess {
+                            print("로그인 성공! 상태 코드: \(statusCode ?? 0)")
+                            self.proceedIfSignupSuccessful()
+                        } else {
+                            if let code = statusCode {
+                                print("로그인 실패! 상태 코드: \(code)")
+                                self.checkLoginInfo()
+                            } else {
+                                self.checkLoginInfo()
+                                print("로그인 실패! 상태 코드를 확인할 수 없습니다.")
+                            }
+                        }
                     }
-                }
             }
         }
     }

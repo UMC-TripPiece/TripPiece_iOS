@@ -7,19 +7,19 @@ import AuthenticationServices
 import KakaoSDKUser
 import SnapKit
 import KeychainSwift
+import SwiftyToaster
 
 let superViewHeight = UIScreen.main.bounds.height
 let superViewWidth = UIScreen.main.bounds.width
 
 class SelectLoginTypeVC : UIViewController {
     
-    var userInfo: [String: Any] = [:]
+    static let keychain = KeychainSwift() // For storing tokens like serverAccessToken, serverRefreshToken, accessTokenCreatedAt
     
-    static let keychain = KeychainSwift() // For storing tokens like GoogleAccessToken, GoogleRefreshToken, FCMToken, serverAccessToken, serverRefreshToken, accessTokenExpiresIn
-    
+    //TODO: 배경 이미지 대신 바꾸기...
     lazy var backgroundImage: UIImageView = {
         let view = UIImageView()
-        view.image = UIImage(named: "backgroundImage")
+        view.image = UIImage(named: "SelectLoginView")
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
         return view
@@ -34,7 +34,7 @@ class SelectLoginTypeVC : UIViewController {
         button.addTarget(self, action: #selector(emailLoginButtonTapped), for: .touchUpInside)
         return button
     }()
-
+    
     let kakaoLoginButton: UIButton = {
         let button = UIButton()
         if let image = UIImage(named: "btn_login_kakao")?.withRenderingMode(.alwaysOriginal) {
@@ -56,14 +56,14 @@ class SelectLoginTypeVC : UIViewController {
     }()
     
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
-
+    
     //MARK: - Define Method
     override func viewDidLoad() {
         super.viewDidLoad()
         setView()
         setConstraints()
     }
-
+    
     // 뷰 관련 세팅
     func setView() {
         [backgroundImage, emailLoginButton, kakaoLoginButton, loginButton].forEach {
@@ -71,7 +71,7 @@ class SelectLoginTypeVC : UIViewController {
         }
         navigationController?.navigationBar.isHidden = true
     }
-
+    
     func setConstraints() {
         let leading: CGFloat = 30
         
@@ -102,7 +102,7 @@ class SelectLoginTypeVC : UIViewController {
             make.trailing.equalToSuperview().offset(-leading)
         }
     }
-
+    
     @objc func emailLoginButtonTapped(_ sender: UIButton) {
         let SignUpVC = SignUpVC()
         SignUpVC.modalPresentationStyle = .fullScreen
@@ -116,106 +116,51 @@ class SelectLoginTypeVC : UIViewController {
     }
     
     @objc func kakaoButtonTapped(_ sender: UIButton) {
-        Task {
-            if await kakaoAuthVM.KakaoLogin() {
-                DispatchQueue.main.async {
-                    UserApi.shared.me() { [weak self] (user, error) in
-                        guard let self = self else { return }
-                        if let error = error {
-                            print(error)
-                            return
+        self.kakaoAuthVM.KakaoLogin { success in
+            if success {
+                UserApi.shared.me { (user, error) in
+                    if let error = error {
+                        print("에러 발생: \(error.localizedDescription)")
+                        DispatchQueue.main.async {
+                            Toaster.shared.makeToast("사용자 정보 가져오기 실패")
                         }
-                        
-                        let userID = user?.id ?? nil
-                        let userEmail = user?.kakaoAccount?.email ?? ""
-
-                        userInfo["providerId"] = userID
-                        userInfo["email"] = userEmail
-                        print(userInfo)
-
-                        sendLoginRequest()
+                        return
+                    }
+                    
+                    let userID = user?.id ?? 0
+                    let userEmail = user?.kakaoAccount?.email ?? ""
+                    
+                    if let _ = SelectLoginTypeVC.keychain.get("KakaoToken") {
+                        if let loginRequest = self.setupKakaoLoginDTO(userEmail, userID) {
+                            self.callKakaoLoginAPI(loginRequest) { isSuccess in
+                                if isSuccess {
+                                    self.proceedIfLoginSuccessful()
+                                } else {
+                                    print("로그인 실패")
+                                }
+                            }
+                        }
+                    } else {
+                        SocialSignUpManager.shared.setName(providerIdInt: userID, emailString: userEmail)
+                        self.proceedIfSocialNameSetSuccessful()
                     }
                 }
             } else {
-                print("Login failed.")
+                print("카카오 회원가입 실패")
             }
         }
     }
     
-    func sendLoginRequest() {
-        guard let url = URL(string: "http://3.34.111.233:8080/user/kakao/login") else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            request.setValue("*/*", forHTTPHeaderField: "accept")
-
-        print(userInfo)
-        // JSON 데이터를 문자열로 변환
-        do {
-            let jsonData = try JSONSerialization.data(withJSONObject: userInfo, options: [])
-                request.httpBody = jsonData
-            } catch {
-                print("Failed to serialize JSON: \(error)")
-                return
-            }
-            
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                if let error = error {
-                    print("Error making POST request: \(error)")
-                    return
-                }
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("Unexpected response: \(String(describing: response))")
-                    return
-                }
-                
-                if !(200...299).contains(httpResponse.statusCode) {
-                    print("Unexpected response: \(String(describing: response))")
-                    if let data = data, let errorMessage = String(data: data, encoding: .utf8) {
-                        print("Error message: \(errorMessage)")
-                        DispatchQueue.main.async {
-                            let profileVC = KakaoProfileVC()
-                            profileVC.userInfo = self.userInfo
-                            profileVC.loginPath = "/kakao"
-
-                            // Present ProfileViewController modally
-                            profileVC.modalPresentationStyle = .fullScreen
-                            self.present(profileVC, animated: true, completion: nil)
-                                        }
-                    }
-                    return
-                }
-                
-                if let data = data, let responseString = String(data: data, encoding: .utf8) {
-                    print("Response data: \(responseString)")
-                    DispatchQueue.main.async {
-                            // JSON 파싱을 통해 refreshToken을 추출
-                            if let jsonData = responseString.data(using: .utf8) {
-                                do {
-                                    if let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
-                                       let result = json["result"] as? [String: Any],
-                                       let refreshToken = result["refreshToken"] as? String {
-                                        
-                                        UserDefaults.standard.set(refreshToken, forKey: "refreshToken")
-                                        
-                                        self.proceedIfLoginSuccessful()
-                                    }
-                                } catch {
-                                    print("JSON 파싱 에러: \(error.localizedDescription)")
-                                }
-                            }
-                        }
-                }
-            }
-            task.resume()
+    func proceedIfSocialNameSetSuccessful() {
+        let profileVC = ProfileVC()
+        profileVC.isEmailLogin = true
+        profileVC.modalPresentationStyle = .fullScreen
+        present(profileVC, animated: true, completion: nil)
     }
     
     func proceedIfLoginSuccessful() {
-            let tabBarController = TabBar()
-            tabBarController.modalPresentationStyle = .fullScreen
-            present(tabBarController, animated: true, completion: nil)
+        let tabBarController = TabBar()
+        tabBarController.modalPresentationStyle = .fullScreen
+        present(tabBarController, animated: true, completion: nil)
     }
 }

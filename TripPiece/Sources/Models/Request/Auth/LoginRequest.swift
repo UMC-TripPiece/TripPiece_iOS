@@ -7,3 +7,9 @@ struct LoginRequest : Codable {
     let email : String
     let password : String
 }
+
+//KakaoLoginDto
+struct KakaoLoginRequest : Codable {
+    let email : String
+    let providerId : Int64
+}

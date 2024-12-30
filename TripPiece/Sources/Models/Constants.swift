@@ -12,6 +12,8 @@ struct Constants {
         static let mainYellow = UIColor(named: "Main2")
         static let mainPink = UIColor(named: "Main3")
         
+        static let mint = UIColor(named: "Mint")
+        
         static let black = UIColor(named: "Black")
         static let white = UIColor(named: "white")
         

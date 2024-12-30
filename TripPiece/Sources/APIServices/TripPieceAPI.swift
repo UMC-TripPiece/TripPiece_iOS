@@ -3,11 +3,11 @@
 import Foundation
 import Moya
 
-enum LoginService {
+enum TripPieceAPI {
     case deleteTripPiece(tripPieceId: Int)
     
     case getTripPiece(tripPieceId: Int)
-    case getAllTripPiece(sort: String)
+    case getAllTripPiece
 
     case updateVideoPiece(param: UpdateVideoPieceRequest)
     case updatePicturePiece(param: UpdatePhotosPieceRequest)
@@ -15,7 +15,7 @@ enum LoginService {
     case updateEmojiPiece(param: UpdateEmojiPieceRequest)
 }
 
-extension LoginService: TargetType {
+extension TripPieceAPI: TargetType {
     var baseURL: URL {
         guard let url = URL(string: Constants.NetworkManager.baseURL) else {
             fatalError("fatal error - invalid url")
@@ -25,13 +25,14 @@ extension LoginService: TargetType {
 
     var path: String {
         switch self {
-        case .deleteTripPiece(let tripPieceId): return "mytrippieces/\(tripPieceId)/delete"
+        case .deleteTripPiece(let tripPieceId): return "mytrippieces/delete/\(tripPieceId)"
         case .getTripPiece(let tripPieceId): return "mytrippieces/\(tripPieceId)"
-        case .getAllTripPiece(let sort): return "mytrippieces/all"
-        case .updateVideoPiece(let param): return "mytrippieces/video/\(param.tripPieceId)/update"
-        case .updatePicturePiece(let param): return "mytrippieces/picture/\(param.tripPieceId)/update"
-        case .updateMemoPiece(let param): return "mytrippieces/memo/\(param.tripPieceId)/update"
-        case .updateEmojiPiece(let param): return "mytrippieces/emoji/\(param.tripPieceId)/update"
+        case .getAllTripPiece: return "mytrippieces/all"
+
+        case .updateVideoPiece(let param): return "mytrippieces/video/update/\(param.tripPieceId)"
+        case .updatePicturePiece(let param): return "mytrippieces/picture/update/\(param.tripPieceId)"
+        case .updateMemoPiece(let param): return "mytrippieces/memo/update/\(param.tripPieceId)"
+        case .updateEmojiPiece(let param): return "mytrippieces/emoji/update/\(param.tripPieceId)"
         }
     }
 
@@ -51,10 +52,8 @@ extension LoginService: TargetType {
         switch self {
         case .getTripPiece(let param) :
             return .requestJSONEncodable(param)
-        case .getAllTripPiece(let param) :
-            return .requestJSONEncodable(param)
-        case .getAllTripPiece(let param) :
-            return .requestJSONEncodable(param)
+        case .getAllTripPiece :
+            return .requestPlain
         case .updateVideoPiece(let param) :
             return .requestJSONEncodable(param)
         case .updatePicturePiece(let param) :

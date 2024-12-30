@@ -2,7 +2,7 @@
 
 import Foundation
 
-struct postMapsRequest : Codable {
+struct postMapRequest : Codable {
     let userId : String
     let countryCode : String
     let color : String

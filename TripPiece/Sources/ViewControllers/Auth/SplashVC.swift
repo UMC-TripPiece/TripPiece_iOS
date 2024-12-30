@@ -4,6 +4,9 @@ import UIKit
 import SnapKit
 
 class SplashVC: UIViewController {
+    
+    let tokenPlugin = BearerTokenPlugin()
+    
     private let backgroundImageView: UIImageView = {
         let imageView = UIImageView(image: UIImage(named: "splashView"))
         imageView.contentMode = .scaleAspectFill
@@ -16,6 +19,17 @@ class SplashVC: UIViewController {
         
         setupSplashScreen()
         setConstraints()
+        
+//        SelectLoginTypeVC.keychain.clear()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.tokenPlugin.checkAuthenticationStatus { token in
+                if let token = token {
+                    self.navigateToMainScreen()
+                } else {
+                    self.navigateToSignUpScreen()
+                }
+            }
+        }
     }
     
     private func setupSplashScreen() {
@@ -32,9 +46,9 @@ class SplashVC: UIViewController {
     }
     
     func navigateToSignUpScreen() {
-        let signUpVC = SignUpVC()
-        signUpVC.modalPresentationStyle = .fullScreen
-        present(signUpVC, animated: true, completion: nil)
+        let SelectLoginTypeVC = SelectLoginTypeVC()
+        SelectLoginTypeVC.modalPresentationStyle = .fullScreen
+        present(SelectLoginTypeVC, animated: true, completion: nil)
     }
     
     func setConstraints() {

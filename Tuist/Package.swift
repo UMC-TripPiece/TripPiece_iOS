@@ -22,6 +22,7 @@
                        "InteractiveMap" : .framework,
                        "GoogleMaps" : .framework,
                        "SwiftyJSON" : .framework,
+                       "Macaw" : .framework
                       ]
     )
 #endif
@@ -39,5 +40,6 @@ let package = Package(
         .package(url: "https://github.com/grandsir/InteractiveMap", .branch("main")),
         .package(url: "https://github.com/googlemaps/ios-maps-sdk", from: "9.1.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.2"),
+        .package(url: "https://github.com/exyte/Macaw.git", from: "0.9.10")
     ]
 )
