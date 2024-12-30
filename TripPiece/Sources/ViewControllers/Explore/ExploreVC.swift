@@ -3,7 +3,9 @@
 import UIKit
 import SnapKit
 
-class ExploreVC: UIViewController {
+class ExploreVC: UIViewController, UITextFieldDelegate {
+    
+    public var searchResults: [SearchedCityResponse] = []
     
     // MARK: - UI Properties
     
@@ -21,7 +23,7 @@ class ExploreVC: UIViewController {
         return button
     }()
     
-    private lazy var searchField: UITextField = {
+    /*private lazy var searchField: UITextField = {
         let textField = UITextField()
         textField.placeholder = " | 도시 및 국가를 검색해보세요"
         textField.borderStyle = .roundedRect
@@ -36,7 +38,30 @@ class ExploreVC: UIViewController {
         paddingView.addSubview(magnifyingGlassImageView)
         textField.rightView = paddingView
         return textField
+    }()*/
+    
+    public lazy var searchBar: CustomSearchBar = {
+        let searchBarVC = CustomSearchBar()
+        
+        searchBarVC.searchBar.placeholder = "도시 및 국가를 검색해 보세요."
+        searchBarVC.searchBar.searchTextField.delegate = self
+            
+        searchBarVC.onTextDidChange = { [weak self] text in
+            self?.sendCitySearchRequest(keyword: text)
+        }
+        
+        return searchBarVC
     }()
+
+    
+    public lazy var searchTableView: CustomSearchTableView = {
+        let tableView = CustomSearchTableView()
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.backgroundColor = UIColor.white.withAlphaComponent(0.8)
+        return tableView
+    }()
+    
     
     private lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
@@ -212,6 +237,10 @@ class ExploreVC: UIViewController {
         super.viewDidLayoutSubviews()
         print("ScrollView Content Size:", scrollView.contentSize)
         print("TrendingCitiesScrollView Content Size:", trendingCitiesScrollView.contentSize)
+        
+        // searchBar를 항상 최상위로 유지
+        view.bringSubviewToFront(searchBar)
+        view.bringSubviewToFront(searchTableView)
     }
     
     // MARK: - Life Cycle
@@ -222,6 +251,7 @@ class ExploreVC: UIViewController {
         setupActions()
     }
     
+    
     // MARK: - Setup Methods
     private func setupView() {
         view.backgroundColor = Constants.Colors.bg2
@@ -229,7 +259,7 @@ class ExploreVC: UIViewController {
         scrollView.delaysContentTouches = false
         scrollView.canCancelContentTouches = true
         
-        [navBar, scrollView].forEach {
+        [navBar, scrollView, searchBar, searchTableView].forEach {
             view.addSubview($0)
         }
         navBar.addSubview(friendListButton)
@@ -237,7 +267,7 @@ class ExploreVC: UIViewController {
         trendingCitiesScrollView.addSubview(trendingCitiesStackView)
         
         
-        [searchField, trendingTitleSubtitleView,
+        [trendingTitleSubtitleView,
          trendingCitiesScrollView, dividingLine, latestLogTitleSubtitleView,
          latestLogStackView].forEach {
             contentView.addSubview($0)
@@ -263,13 +293,18 @@ class ExploreVC: UIViewController {
             make.edges.equalToSuperview()
             make.width.equalToSuperview()
         }
-        searchField.snp.makeConstraints { make in
+        searchBar.snp.makeConstraints { make in
             make.top.equalTo(contentView.snp.top).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(50)
         }
+        searchTableView.snp.makeConstraints { make in
+            make.top.equalTo(searchBar.snp.bottom).offset(3)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.height.equalTo(searchTableView.heightConstraint)
+        }
         trendingTitleSubtitleView.snp.makeConstraints { make in
-            make.top.equalTo(searchField.snp.bottom).offset(24)
+            make.top.equalTo(searchBar.snp.bottom).offset(24)
             make.leading.equalToSuperview().inset(16)
         }
         trendingCitiesScrollView.snp.makeConstraints { make in
@@ -298,6 +333,17 @@ class ExploreVC: UIViewController {
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().offset(-40)
         }
+    }
+    
+    
+    //MARK: Setup Actions
+    
+    // x 버튼 눌렀을 때 호출되는 UITextFieldDelegate 메서드
+    func textFieldShouldClear(_ textField: UITextField) -> Bool {
+        // 테이블뷰 숨김 처리
+        searchTableView.isHidden = true
+        // true를 반환하면 텍스트필드도 비워짐
+        return true
     }
     
     private func setupActions() {
@@ -341,4 +387,28 @@ class ExploreVC: UIViewController {
 //            latestLogStackView.addArrangedSubview(cell)
 //        }
 //    }
+    
+    
+    //MARK: API call
+    
+    func sendCitySearchRequest(keyword: String) {
+        MapManager.getSearchedCities(keyword: keyword) { result in
+            switch result {
+            case .success(let searchResult):
+                //print("검색 결과: \(searchResult)")
+                self.searchResults = searchResult.result
+                self.searchTableView.calculateHeight(rowCount: searchResult.result.count)
+                self.searchTableView.isHidden = self.searchResults.isEmpty
+                self.searchTableView.reloadData()
+            case .failure(let error):
+                print("오류 발생: \(error.localizedDescription)")
+            }
+        }
+
+    }
+    
+    
+    
 }
+
+

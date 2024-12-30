@@ -11,7 +11,6 @@ class TabBar: UITabBarController {
     func setTabBar() {
         //TODO:여기서 월드 부분 뭐시기 컨트롤러? 뭐 그런걸로 해야 스유랑 연결됨
         let vc1 = UINavigationController(rootViewController: WorldVC())
-
         vc1.tabBarItem = UITabBarItem(title: "월드", image: UIImage(named: "World"), tag: 1)
         let vc2 = UINavigationController(rootViewController: MyLogVC())
         vc2.tabBarItem = UITabBarItem(title: "나의 기록", image: UIImage(named: "MyLog"), tag: 2)
