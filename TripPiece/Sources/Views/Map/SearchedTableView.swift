@@ -46,6 +46,9 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
             
         self.searchBar.searchBar.text = cityData.cityName
         self.searchTableView.isHidden = true
+        
+        guard let country = CountryEnum.find(byName: cityData.countryName) else { return }
+        focusOnCountry(with: country)
             
         //let selectedCityViewController = SelectedCityViewController()
         //selectedCityViewController.cityData = cityData

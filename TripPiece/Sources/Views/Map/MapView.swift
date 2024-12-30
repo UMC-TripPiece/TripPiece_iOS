@@ -13,8 +13,15 @@ class MapView: MacawView {
     //weak var delegate: MapViewDelegate?
     
     
+    
+    
     /// Custom initializer
     init() {
+        
+        /*guard let filePath = Bundle.main.path(forResource: "world map", ofType: "svg") else {
+            fatalError("no resource found")
+        }*/
+        
         // SVG 파싱 및 bounds 처리
         guard let svg = try? SVGParser.parse(resource: "world") else {
             fatalError("Failed to parse SVG file")
@@ -34,21 +41,8 @@ class MapView: MacawView {
     }
     
     /*override init(frame: CGRect) {
-        map = Group()
         
-        guard let svg = try? SVGParser.parse(resource: "world") else {
-            fatalError("failed to parse svg file")
-        }
-        
-        // svg.bounds가 nil인지 확인
-        guard let bounds = svg.bounds?.toCG() else {
-            fatalError("SVG bounds is nil")
-        }
-        
-        super.init(frame: bounds)
-        map = Group(contents: [svg], place: .identity)
-        self.node = map
-        
+     // 모든 국가에 대해 touch event 수행
         /*for countryEnum in CountryEnum.allCases {
             map.nodeBy(tag: countryEnum.rawValue)?.onTouchPressed({ [weak self] touch in
                 //self?.delegate?.onClick(country: countryEnum)
@@ -71,4 +65,9 @@ class MapView: MacawView {
     @MainActor required convenience init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func getCountryBounds(country: CountryEnum) -> CGRect? {
+        return map.nodeBy(tag: country.rawValue)?.bounds?.toCG()
+    }
+
 }

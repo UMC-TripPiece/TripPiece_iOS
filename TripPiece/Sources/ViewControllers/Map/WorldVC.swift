@@ -13,7 +13,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     
 
     
-    private lazy var mapView: MapView = {
+    public lazy var mapView: MapView = {
         let mapView = MapView()
         mapView.clipsToBounds = true
         //mapView.delegate = self // 필요시 delegate 설정
@@ -21,7 +21,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }()
     
     
-    private lazy var scrollView: UIScrollView = {
+    public lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.maximumZoomScale = 5
         scrollView.minimumZoomScale = 1
@@ -71,9 +71,12 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         super.viewWillAppear(animated)
         view.layoutIfNeeded()
         // 이 부분 꼭 필요한가?
-        scrollView.maximumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h * 10
+        scrollView.maximumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h * 3
         scrollView.minimumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h
         scrollView.zoomScale = scrollView.minimumZoomScale
+        
+        
+        focusOnCountry(with: .southKorea)  
     }
     
     
@@ -131,7 +134,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         
         mapView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            //이건 왜 필요하지?
             make.width.equalTo(mapView.map.bounds!.w)
             make.height.equalTo(mapView.map.bounds!.h)
         }
@@ -169,8 +171,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 self.searchTableView.isHidden = self.searchResults.isEmpty
                 self.searchTableView.reloadData()
             case .failure(let error):
-                print("오류 발생: \(error.localizedDescription)")
-                // 사용자에게 에러 메시지 표시
+                print("오류 발생: \(error.localizedDescription)") 
             }
         }
 
