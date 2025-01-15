@@ -15,7 +15,7 @@ extension WorldVC: UIScrollViewDelegate {
     
     /// 나라별 zoom in 메소드
     func focusOnCountry(with country: CountryEnum) {
-        print("focusOnCountry: \(country)")
+        print("focus on country", country)
         let scrollViewSize = scrollView.bounds.size
         guard let countryBounds = mapView.getCountryBounds(country: country) else { return }
         

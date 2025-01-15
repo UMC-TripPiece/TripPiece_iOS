@@ -11,7 +11,7 @@ enum MapAPI {
     case getMapSearch(keyword: String)
     case getMapMarkers
     
-    case postMaps(param: postMapRequest)
+    case postMaps(param: PostMapRequest)
     
     //TODO: API update 필요
 }

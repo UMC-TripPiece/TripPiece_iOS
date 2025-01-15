@@ -3,6 +3,7 @@
 import Foundation
 
 struct MemberInfoResult: Codable {
+    let userId: Int
     let nickname: String
     let profileImg: String
     let travelNum: Int

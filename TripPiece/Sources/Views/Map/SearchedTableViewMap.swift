@@ -50,18 +50,17 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
         guard let country = CountryEnum.find(byName: cityData.countryName) else { return }
         focusOnCountry(with: country)
             
-        //let selectedCityViewController = SelectedCityViewController()
-        //selectedCityViewController.cityData = cityData
-            
-    // TODO: Macaw로 변환하면서 수정 못한 것
+    // TODO: Macaw로 변환하면서 수정 못한 것 (?)
     //        updateWorldViewUI(with: cityData["countryName"] ?? "한국")
             
-            
+        let selectedCityVC = SelectedCityVC()
+        selectedCityVC.cityData = cityData
+        selectedCityVC.userId = userId
         // 모달로 표시할 때 기존 뷰 컨트롤러를 배경에 반투명하게 보이도록 설정
-        /*selectedCityViewController.modalPresentationStyle = .overCurrentContext
-        selectedCityViewController.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해
+        selectedCityVC.modalPresentationStyle = .overCurrentContext
+        selectedCityVC.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해
         // 모달로 뷰 컨트롤러를 표시
-        present(selectedCityViewController, animated: true, completion: nil)*/
+        present(selectedCityVC, animated: true, completion: nil)
             
     }
     
