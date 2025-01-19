@@ -2,6 +2,7 @@
 
 
 import UIKit
+import SwiftyToaster
 
 class ColoringVC: UIViewController {
     
@@ -285,23 +286,63 @@ class ColoringVC: UIViewController {
             completion()
         }
     }
+    
+    private func dismissWhenEditing() {
+        // 현재 화면에서 네비게이션 스택 닫기
+        if let navigationController = self.navigationController {
+            navigationController.popToRootViewController(animated: false)
+                
+            navigationController.dismiss(animated: false)
+        } else {
+            self.presentingViewController?.dismiss(animated: true, completion: nil)
+        }
+    }
+
+
+
 
     @objc private func saveButtonTapped(_ sender: UIButton) {        // 서버에 해당 유저의 기록을 올릴 것
         guard let selectedColor = selectedButton?.accessibilityIdentifier else { return }
-        print("savedButtonTapped")
+        guard let userId = userId else { return }
         
-        colorCountry(selectedColor) { result in
-            switch result {
-            case .success(let message):
-                print("업로드 성공: \(message)")
-                DispatchQueue.main.async {
-                    self.dismissMultipleTimes(from: self) {
-                        NotificationCenter.default.post(name: .didPostMapData, object: nil)
+        self.getCountryStatsData(userId) { [weak self] result in
+            guard let self = self else { return }
+            guard let data = result else { return }
+            guard let cityData = self.cityData else { return }
+            
+            //수정
+            if data.cityIds.contains(cityData.cityId) {
+                Toaster.shared.makeToast("색칠되었던 색상을 수정합니다.")
+                editColor(selectedColor) { editResult in
+                    switch editResult {
+                    case .success(let message):
+                        print("색상 수정 성공: \(message)")
+                        DispatchQueue.main.async {
+                            self.dismissMultipleTimes(from: self) {
+                                NotificationCenter.default.post(name: .updateCollectionView, object: nil)
+                            }
+                        }
+                    case .failure(let error):
+                        print("색상 수정 오류 발생: \(error.localizedDescription)")
                     }
                 }
-            case .failure(let error):
-                print("오류 발생: \(error.localizedDescription)")
+                // 첫 업로드
+            } else {
+                colorCountry(selectedColor) { result in
+                    switch result {
+                    case .success(let message):
+                        print("업로드 성공: \(message)")
+                        DispatchQueue.main.async {
+                            self.dismissMultipleTimes(from: self) {
+                                NotificationCenter.default.post(name: .changeMapColor, object: nil)
+                            }
+                        }
+                    case .failure(let error):
+                        print("오류 발생: \(error.localizedDescription)")
+                    }
+                }
             }
+            
         }
     }
         
@@ -316,13 +357,13 @@ class ColoringVC: UIViewController {
             return
         }
 
-        let data = PostMapRequest(
+        let data = MapRequest(
             userId: userId,
             countryCode: "\(countryCode)",
-            color: "BLUE",  // 서버에서 수정 완료되면 color로 수정할 것
+            color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
         )
-        print("colorCountry - 보내는 정보: \(data)")
+        print("colorCountry - 처음 지도 색칠: \(data)")
 
         MapManager.postCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -339,6 +380,51 @@ class ColoringVC: UIViewController {
         }
     }
     
+    func editColor(_ color: String, completion: @escaping (Result<Any, Error>) -> Void) {
+        guard
+            let userId = userId,
+            let cityData = cityData,
+            let countryCode = CountryEnum.find(byName: cityData.countryName)?.rawValue
+        else {
+            return
+        }
+
+        let data = MapRequest(
+            userId: userId,
+            countryCode: "\(countryCode)",
+            color: color,  // 서버에서 수정 완료되면 color로 수정할 것
+            cityId: cityData.cityId
+        )
+        print("editColor - 지도 색깔 수정: \(data)")
+        
+        MapManager.changeCountryColor(data) { isSuccess, response in
+            if isSuccess {
+                completion(.success("color change successful"))
+            } else {
+                if let data = response?.data,  // 서버 응답 데이터 확인
+                   let errorMessage = String(data: data, encoding: .utf8) {
+                        print("서버 에러 메시지: \(errorMessage)")
+                }
+                        
+                let error = NSError(domain: "MapError", code: -1, userInfo: [NSLocalizedDescriptionKey: "Color update failed."])
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    
+    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats(userId: userId) { result in
+            switch result {
+            case .success(let statsInfo):
+                print("나라 stats data: \(statsInfo.result)")
+                completion(statsInfo.result)
+            case .failure(let error):
+                print("오류 발생: \(error.localizedDescription)")
+                completion(nil)
+            }
+        }
+    }
     
     
 }
@@ -354,10 +440,6 @@ extension UIImage {
     }
 }
 
-// 왜 필요한 거야 도대체???
-extension Notification.Name {
-    static let didPostMapData = Notification.Name("didPostMapData")
-}
 
 
 

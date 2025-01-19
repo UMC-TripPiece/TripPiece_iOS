@@ -71,7 +71,7 @@ class MapManager {
         }
     }
     
-    static func postCountryColor(_ userParameter: PostMapRequest, completion: @escaping (Bool, Response?) -> Void) {
+    static func postCountryColor(_ userParameter: MapRequest, completion: @escaping (Bool, Response?) -> Void) {
         APIManager.MapProvider.request(.postMaps(param: userParameter)) { result in
             switch result {
             case .success(let response):
@@ -93,6 +93,49 @@ class MapManager {
         }
     }
     
+    static func deleteCountryColor(_ userParameter: MapRequest, completion: @escaping (Bool, Response?) -> Void) {
+        APIManager.MapProvider.request(.deleteMapColor(param: userParameter)) { result in
+            switch result {
+            case .success(let response):
+                print(response)
+                if response.statusCode == 200 {
+                    completion(true, response)
+                } else {
+                    completion(false, response)
+                }
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                if let responseData = error.response?.data,
+                   let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("색칠 정보 삭제/서버 응답 메시지: \(jsonString)")
+                }
+                Toaster.shared.makeToast("색칠한 컬러 삭제 중 오류가 발생했습니다.")
+                completion(false, error.response)
+            }
+        }
+    }
+    
+    static func changeCountryColor(_ userParameter: MapRequest, completion: @escaping (Bool, Response?) -> Void) {
+        APIManager.MapProvider.request(.changeMapColor(param: userParameter)) { result in
+            switch result {
+            case .success(let response):
+                print(response)
+                if response.statusCode == 200 {
+                    completion(true, response)
+                } else {
+                    completion(false, response)
+                }
+            case .failure(let error):
+                print("Error: \(error.localizedDescription)")
+                if let responseData = error.response?.data,
+                   let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("색칠 정보 수정/서버 응답 메시지: \(jsonString)")
+                }
+                Toaster.shared.makeToast("색칠한 컬러 수정 중 오류가 발생했습니다.")
+                completion(false, error.response)
+            }
+        }
+    }
     
     
     

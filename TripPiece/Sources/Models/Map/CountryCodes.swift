@@ -10,6 +10,7 @@ protocol Country {
 
 protocol City {
     var country: CountryEnum { get }
+    var cityId: Int { get }
 }
 
 enum CountryEnum: String, CaseIterable {
@@ -807,6 +808,7 @@ enum CityEnum: String, CaseIterable {
     case denfasar       = "덴파사르"
     case osaka          = "오사카"
     case fukuoka        = "후쿠오카"
+    case sapporo        = "삿포로"
     case tokyo          = "도쿄"
     case okinawa        = "오키나와"
     case nagoya         = "나고야"
@@ -859,6 +861,7 @@ extension CityEnum: City {
         case .denfasar:         return .indonesia
         case .osaka:            return .japan
         case .fukuoka:          return .japan
+        case .sapporo:          return .japan
         case .tokyo:            return .japan
         case .okinawa:          return .japan
         case .nagoya:           return .japan
@@ -899,10 +902,76 @@ extension CityEnum: City {
     }
 }
 
+extension CityEnum {
+    var cityId: Int {
+        switch self {
+        case .hanoi:            return 1
+        case .daNang:           return 2
+        case .hoChiMinh:        return 3
+        case .nhaTrang:         return 4
+        case .bangkok:          return 5
+        case .cebu:             return 6
+        case .manila:           return 7
+        case .singapore:        return 8
+        case .taipei:           return 9
+        case .denfasar:         return 10
+        case .osaka:            return 11
+        case .fukuoka:          return 12
+        case .sapporo:          return 13
+        case .tokyo:            return 14
+        case .okinawa:          return 15
+        case .nagoya:           return 16
+        case .brisbane:         return 17
+        case .sydney:           return 18
+        case .melbourne:        return 19
+        case .oakland:          return 20
+        case .shanghai:         return 21
+        case .beijing:          return 22
+        case .simcheon:         return 23
+        case .guangzhou:        return 24
+        case .cheongdo:         return 25
+        case .yeongil:          return 26
+        case .paris:            return 27
+        case .roma:             return 28
+        case .frankfurt:        return 29
+        case .london:           return 30
+        case .barcelona:        return 31
+        case .istanbul:         return 32
+        case .losAngeles:       return 33
+        case .newYork:          return 34
+        case .vancouver:        return 35
+        case .honolulu:         return 36
+        case .sanFrancisco:     return 37
+        case .guam:             return 38
+        case .saipan:           return 39
+        case .toronto:          return 40
+        case .zurich:           return 41
+        case .vienna:           return 42
+        case .praha:            return 43
+        case .kairo:            return 44
+        case .hongKong:         return 45
+        case .macao:            return 46
+        case .ulaanbaatar:      return 47
+        case .cancun:           return 48
+        case .dubai:            return 49
+            
+         }
+    }
+    
+    // Find city by ID
+    static func find(byId id: Int) -> CityEnum? {
+        return CityEnum.allCases.first { $0.cityId == id }
+    }
+}
+
 
 // helper method
 extension CountryEnum {
     static func find(byName name: String) -> CountryEnum? {
         return CountryEnum.allCases.first(where: { $0.name == name })
+    }
+    
+    static func find(byEnum country: CountryEnum) -> String {
+        return country.name
     }
 }

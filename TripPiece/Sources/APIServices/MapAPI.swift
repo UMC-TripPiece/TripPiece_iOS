@@ -4,16 +4,15 @@ import Foundation
 import Moya
 
 enum MapAPI {
-    case deleteMapColor(mapId: Int)
-    
     case getUserMap(userId: Int)
     case getUserMapStats(userId: Int)
     case getMapSearch(keyword: String)
     case getMapMarkers
     
-    case postMaps(param: PostMapRequest)
+    case postMaps(param: MapRequest)
     
-    //TODO: API update 필요
+    case deleteMapColor(param: MapRequest)
+    case changeMapColor(param: MapRequest)
 }
 
 extension MapAPI: TargetType {
@@ -26,15 +25,15 @@ extension MapAPI: TargetType {
 
     var path: String {
         switch self {
-        case .deleteMapColor(let mapId): return "maps/color/delete/\(mapId)"
-            
         case .getUserMap(let userId): return "maps/\(userId)"
         case .getUserMapStats(let userId): return "maps/stats/\(userId)"
         case .getMapSearch(let keyword): return "maps/search"
         case .getMapMarkers: return "maps/markers"
             
         case .postMaps(let param): return "maps"
-        //TODO: put case 추가 필요
+            
+        case .deleteMapColor(let param): return "maps/color"
+        case .changeMapColor(let param): return "maps/color"
         }
     }
 
@@ -42,17 +41,17 @@ extension MapAPI: TargetType {
         switch self {
         case .getUserMap, .getUserMapStats, .getMapSearch, .getMapMarkers:
             return .get
-        case .deleteMapColor:
-            return .delete
         case .postMaps:
             return .post
+        case .deleteMapColor:
+            return .delete
+        case .changeMapColor:
+            return .put
         }
     }
 
     var task: Moya.Task {
         switch self {
-        case .deleteMapColor :
-            return .requestPlain
         case .getUserMap :
             return .requestPlain
         case .getUserMapStats :
@@ -62,6 +61,10 @@ extension MapAPI: TargetType {
         case .getMapMarkers:
             return .requestPlain
         case .postMaps(let param) :
+            return .requestJSONEncodable(param)
+        case .deleteMapColor(let param) :
+            return .requestJSONEncodable(param)
+        case .changeMapColor(param: let param) :
             return .requestJSONEncodable(param)
         }
     }

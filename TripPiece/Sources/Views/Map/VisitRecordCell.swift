@@ -3,11 +3,11 @@
 
 import UIKit
 
-class VisitRecordCell: UITableViewCell {
+class VisitRecordCell: UICollectionViewCell {
     
     static let identifier = "VisitRecordCell"
+    weak var delegate: VisitRecordCellDelegate?
     
-    var buttonAction: (([String: String]) -> Void)?
 
     var cityData: [String: String]? // 전달할 데이터
     
@@ -35,7 +35,6 @@ class VisitRecordCell: UITableViewCell {
     
     var editOptionsView: EditOptionsView?
     
-    
     let containerView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 5
@@ -47,20 +46,23 @@ class VisitRecordCell: UITableViewCell {
         view.layer.shadowRadius = 5                     // 그림자 블러 반경
         return view
     }()
-
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
+    
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupCell()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    
     func setupCell() {
         // 컨테이너 뷰 설정
         contentView.addSubview(containerView)
-        contentView.backgroundColor = UIColor(hex: "#F7F7F7")
+        self.backgroundColor = UIColor(hex: "#F9F9F9")
+        contentView.backgroundColor = UIColor(hex: "#F9F9F9")
         
         // 국기 이미지 뷰 설정
         containerView.addSubview(puzzleImageView)
@@ -68,15 +70,11 @@ class VisitRecordCell: UITableViewCell {
         containerView.addSubview(editCountryLogButton)
         editCountryLogButton.addTarget(self, action: #selector(showOptions), for: .touchUpInside)
 
-        // 오토레이아웃 설정
-        contentView.snp.makeConstraints { make in
-            make.top.equalTo(containerView.snp.top).offset(-30)
-            make.bottom.equalTo(containerView.snp.bottom).offset(5)
-        }
         containerView.snp.makeConstraints { make in
-            make.width.equalToSuperview().multipliedBy(0.892307692)
-            make.height.equalTo(68)
+            make.leading.trailing.equalToSuperview().inset(20)
+            make.height.lessThanOrEqualTo(68)
             make.centerX.equalToSuperview()
+            make.top.equalToSuperview().offset(25)
         }
         puzzleImageView.snp.makeConstraints { make in
             make.centerY.equalToSuperview()
@@ -94,24 +92,35 @@ class VisitRecordCell: UITableViewCell {
         }
     }
 
+
     func configure(countryName: String, flagEmoji: String, puzzleColor: String) {
         setupCell()
         countryLabel.text = "\(flagEmoji) \(countryName)"
+        
         // 퍼즐 컬러에 따라 이미지를 다르게 설정
         switch puzzleColor {
         case "BLUE":
-            puzzleImageView.image = UIImage(named: "Puzzle1")
+            puzzleImageView.image = createPuzzle(color: "6744FF")
         case "YELLOW":
-            puzzleImageView.image = UIImage(named: "Puzzle2")
+            puzzleImageView.image = createPuzzle(color: "FFB40F")
         case "CYAN":
-            puzzleImageView.image = UIImage(named: "Puzzle3")
+            puzzleImageView.image = createPuzzle(color: "25CEC1")
         case "RED":
-            puzzleImageView.image = UIImage(named: "Puzzle4")
+            puzzleImageView.image = createPuzzle(color: "FD2D69")
         default:
-            puzzleImageView.image = nil // 기본값으로 이미지를 제거하거나 원하는 다른 이미지를 설정
-            }
+            puzzleImageView.image = createPuzzle(color: puzzleColor)
+        }
         
     }
+    
+    // 공통된 UIButton 생성 함수
+    public func createPuzzle(color: String) -> UIImage {
+        // 이미지를 리사이즈하고 설정
+        guard let baseImage = UIImage(named: "Puzzle") else { return UIImage() }
+        guard let coloredImage = baseImage.tinted(with: UIColor(hex: color) ?? UIColor.black) else { return UIImage() }
+        return coloredImage
+    }
+    
     
     @objc private func showOptions() {
         guard let superview = self.superview else { return }
@@ -140,20 +149,21 @@ class VisitRecordCell: UITableViewCell {
     }
     
     
-    
     @objc private func editLogAction() {
-            // 수정하기 액션 처리
-        if let cityData = cityData {
-            buttonAction?(cityData)
-        }
+        // 수정하기 액션 처리
+        guard let collectionView = self.superview as? UICollectionView,
+              let indexPath = collectionView.indexPath(for: self) else { return }
+        delegate?.didTapEditButton(at: indexPath)
     }
 
-        @objc private func deleteLogAction() {
-            // 삭제하기 액션 처리
-            print("기록 삭제 선택됨")
-        }
+    @objc private func deleteLogAction() {
+        // 삭제하기 액션 처리
+        guard let collectionView = self.superview as? UICollectionView,
+              let indexPath = collectionView.indexPath(for: self) else { return }
+        delegate?.didTapDeleteButton(at: indexPath)
+    }
+    
 }
-
 
 
 
@@ -165,8 +175,8 @@ class EditOptionsView: UIView {
         button.setTitle("수정하기", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
         button.setImage(UIImage(named: "editPencil"), for: .normal)  // 펜슬 아이콘
-        button.tintColor = Constants.Colors.bg2
-        button.setTitleColor(Constants.Colors.bg2, for: .normal)
+        button.tintColor = UIColor(hex: "#636363")
+        button.setTitleColor(UIColor(hex: "#636363"), for: .normal)
         button.contentHorizontalAlignment = .left
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
         
@@ -194,7 +204,7 @@ class EditOptionsView: UIView {
         guard let imageView = button.imageView else { return button }
         imageView.snp.makeConstraints { make in
             make.width.height.equalTo(24)
-            make.centerY.equalToSuperview().offset(-22)
+            make.centerY.equalToSuperview().offset(1)
             make.leading.equalToSuperview().offset(5)
         }
         return button
@@ -222,13 +232,20 @@ class EditOptionsView: UIView {
 
         // Auto Layout 설정
         editButton.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.centerX.equalToSuperview().offset(-5)
             make.height.equalTo(36.5)
         }
         deleteButton.snp.makeConstraints { make in
             make.top.equalTo(editButton.snp.bottom)
-            make.leading.trailing.bottom.equalToSuperview()
+            make.centerX.equalToSuperview().offset(-5)
+            make.bottom.equalToSuperview()
         }
 
     }
+}
+
+protocol VisitRecordCellDelegate: AnyObject {
+    func didTapEditButton(at indexPath: IndexPath)
+    func didTapDeleteButton(at indexPath: IndexPath)
 }

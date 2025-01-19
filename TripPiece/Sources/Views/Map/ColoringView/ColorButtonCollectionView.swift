@@ -24,7 +24,7 @@ extension ColoringVC: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             // 기존 퍼즐 색상 버튼
             let color = selectedColors[indexPath.item]
-            let baseImage = UIImage(named: "Puzzle1")
+            let baseImage = UIImage(named: "Puzzle")
             let coloredImage = baseImage?.tinted(with: UIColor(hex: color) ?? UIColor.black)
             let button = createButton(
                 image: coloredImage, // 이미지 이름을 동적으로 설정
@@ -33,7 +33,7 @@ extension ColoringVC: UICollectionViewDelegate, UICollectionViewDataSource {
                 buttonImageSize: CGSize(width: 38, height: 38)
             )
             button.backgroundColor = .clear
-            //button.accessibilityIdentifier = color.toHexString() // 색상 정보를 버튼에 저장
+            button.accessibilityIdentifier = color // 색상 정보를 버튼에 저장
             cell.configure(with: button)
         }
 

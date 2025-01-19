@@ -6,6 +6,8 @@ import Macaw
 class WorldVC: UIViewController, UITextFieldDelegate {
     private var isAPICalled = false
     public var searchResults: [SearchedCityResponse] = []
+    public var coloredCountries: [ColorVisitRecord] = []
+    public var statsCountries: StatsVisitRecord = StatsVisitRecord(countryCount: 0, cityCount: 0, countryCodes: [], cityIds: [])
     public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
@@ -17,6 +19,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public lazy var mapView: MapView = {
         let mapView = MapView()
         mapView.clipsToBounds = true
+        mapView.isUserInteractionEnabled = true
         return mapView
     }()
     
@@ -60,6 +63,10 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 
         self.view.backgroundColor = .white
         setupUI()
+        mapView.delegate = self
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleChangeMapColorNotification), name: .changeMapColor, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteMapColorNotification), name: .deleteMapColor, object: nil)
     }
     
     
@@ -130,7 +137,31 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    // NotificationCenter에서 호출할 메서드
+    @objc private func handleChangeMapColorNotification(_ notification: Notification) {
+        guard let userId = userId else { return }
+        getCountryColorsData(userId) { colorInfo in
+            if let data = colorInfo {
+                DispatchQueue.main.async {
+                    self.coloredCountries = data
+                    self.setUpCountryColor(data)
+                }
+                
+            }
+        }
+
+    }
     
+    @objc private func handleDeleteMapColorNotification(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let deletedItem = userInfo["deletedItem"] as? String else {
+            return
+        }
+        guard let countryEnum = CountryEnum(rawValue: deletedItem) else { return }
+        guard let defaultColor = UIColor(hex: "#c8c4c4") else { return }
+        mapView.colorMap(countryEnum: countryEnum, color: defaultColor)
+    
+    }
     
     
     
@@ -149,11 +180,13 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 self.userId = userInfo.userId
                 self.getCountryStatsData(userInfo.userId) { statsInfo in
                     if let data = statsInfo {
+                        self.statsCountries = data
                         self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg, visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
                     }
                 }
                 self.getCountryColorsData(userInfo.userId) { colorInfo in
                     if let data = colorInfo {
+                        self.coloredCountries = data
                         self.setUpCountryColor(data)
                     }
                 }
@@ -193,10 +226,9 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         // 데이터 반복 처리
         for data in colorData {
             // 매핑된 색상 값을 가져오고, 없으면 기존 값을 사용
-            print("색칠된 나라 정보들: \(data)")
             let countryColor = colorMapping[data.color] ?? data.color
             // 색상을 변경
-            self.mapView.changeCountryColor(
+            self.mapView.colorMap(
                 countryEnum: CountryEnum(rawValue: data.countryCode) ?? .southKorea,
                 color: UIColor(hex: countryColor) ?? .gray
             )
@@ -239,6 +271,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
+                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")
@@ -259,6 +292,13 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 print("오류 발생: \(error.localizedDescription)")
             }
         }
+    }
+    
+    
+    // 옵저버 제거 (deinit에서 옵저버 해제)
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .changeMapColor, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .deleteMapColor, object: nil)
     }
 
 
