@@ -40,6 +40,6 @@ let package = Package(
         .package(url: "https://github.com/grandsir/InteractiveMap", .branch("main")),
         .package(url: "https://github.com/googlemaps/ios-maps-sdk", from: "9.1.0"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "5.0.2"),
-        .package(url: "https://github.com/H0sungKim/Macaw.git", from: "0.9.7")
+        .package(url: "https://github.com/H0sungKim/Macaw.git", branch: "master")
     ]
 )

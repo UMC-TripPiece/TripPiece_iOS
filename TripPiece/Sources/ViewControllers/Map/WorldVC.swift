@@ -26,7 +26,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     
     public lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.maximumZoomScale = 5
+        scrollView.maximumZoomScale = 10
         scrollView.minimumZoomScale = 1
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false

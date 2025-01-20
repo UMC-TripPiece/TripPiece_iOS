@@ -1,5 +1,5 @@
 {
-  "originHash" : "2a146c08d4a3dbe43c6170c2137995e2c81af5f3c1317a84f1a315a928d8a9bd",
+  "originHash" : "37a231185608e74902da425d6cc3d3e1d7a12d2422ea33ee6096e0d53358f4dd",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -139,10 +139,10 @@
     {
       "identity" : "macaw",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/exyte/Macaw.git",
+      "location" : "https://github.com/H0sungKim/Macaw.git",
       "state" : {
-        "revision" : "29ec199cbc9c814f8ceffc1a33b8775b7349dcdd",
-        "version" : "0.9.10"
+        "branch" : "master",
+        "revision" : "478cf1691922c05f8c5bdc3316375e7e90b8782b"
       }
     },
     {
