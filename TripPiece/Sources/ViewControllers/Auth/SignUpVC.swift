@@ -152,7 +152,7 @@ class SignUpVC: UIViewController {
             make.leading.equalToSuperview().inset(20)
         }
         passwordField.snp.makeConstraints { make in
-            make.top.equalTo(confirmCodeField.snp.bottom).offset(20)
+            make.top.equalTo(codeValidationLabel.snp.bottom).offset(20)
             make.leading.trailing.equalToSuperview().inset(20)
         }
         confirmPasswordField.snp.makeConstraints { make in
@@ -239,7 +239,9 @@ class SignUpVC: UIViewController {
                 callSendCodeAPI(email: email) { isSuccess in
                     if isSuccess {
                         self.confirmCodeButton.setTitle("인증번호 확인", for: .normal)
-                        self.confirmCodeButton.isEnabled = false
+                        self.confirmCodeButton.isEnabled = true
+                        self.codeValidationLabel.isHidden = false
+                        self.codeValidationLabel.text = "입력하신 이메일로 코드가 전송되었습니다!"
                         print("인증번호 요청 성공")
                     } else {
                         print("인증번호 요청 실패")
@@ -251,6 +253,7 @@ class SignUpVC: UIViewController {
                         if isSuccess {
                             self.isEmailValid = true
                             self.codeValidationLabel.text = "인증번호 확인 완료!"
+                            self.validateInputs()
                             print("인증번호 확인 성공")
                         } else {
                             print("인증번호 확인 실패")
