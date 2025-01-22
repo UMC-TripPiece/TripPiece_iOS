@@ -43,14 +43,14 @@ class TabBar: UITabBarController {
         
         // 탭바 아이템 위치 조정
         self.tabBar.itemPositioning = .centered
-        self.tabBar.itemSpacing = 55
+        self.tabBar.itemSpacing = DynamicPadding.dynamicValue(55)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         var tabFrame = tabBar.frame
-        tabFrame.size.height = 100
-        tabFrame.origin.y = view.frame.size.height - 100
+        tabFrame.size.height = DynamicPadding.dynamicValue(100)
+        tabFrame.origin.y = view.frame.size.height - DynamicPadding.dynamicValue(100)
         tabBar.frame = tabFrame
     }
 }

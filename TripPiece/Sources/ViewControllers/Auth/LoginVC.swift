@@ -77,7 +77,6 @@ class LoginVC: UIViewController {
     }
     
     private func setupNavigationBar() {
-        // itemTitle을 네비게이션 바 제목으로 설정
         navigationBarManager.setTitle(to: navigationItem, title: "LOGIN", textColor: Constants.Colors.mainPurple!)
         navigationBarManager.addBackButton(to: navigationItem, target: self, action: #selector(didTapBackButton))
     }
@@ -90,23 +89,23 @@ class LoginVC: UIViewController {
     
     private func setupConstraints() {
         welcomeLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
-            make.leading.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(30)
+            make.leading.equalToSuperview().offset(DynamicPadding.dynamicValue(20.0))
         }
         joinLabel.snp.makeConstraints { make in
             make.top.equalTo(welcomeLabel.snp.top).offset(50)
-            make.leading.equalToSuperview().offset(20)
+            make.leading.equalTo(welcomeLabel)
         }
         imageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(60)
-            make.trailing.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.trailing.equalToSuperview().offset(DynamicPadding.dynamicValue(20.0))
             make.height.equalTo(150)
         }
         
         loginField.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(140)
+            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
+            make.height.equalTo(150)
         }
         
         loginButton.snp.makeConstraints { make in

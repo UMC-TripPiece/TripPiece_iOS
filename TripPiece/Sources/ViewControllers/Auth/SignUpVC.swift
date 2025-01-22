@@ -85,6 +85,8 @@ class SignUpVC: UIViewController {
         setupConstraints()
         setupActions()
         validateInputs()
+        
+        //TODO: 테스트용, 지워야 함
         signUpButton.isEnabled = true
     }
     
@@ -137,7 +139,7 @@ class SignUpVC: UIViewController {
             make.leading.trailing.equalTo(usernameField)
         }
         signUpButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-DynamicPadding.dynamicValue(40.0))
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }

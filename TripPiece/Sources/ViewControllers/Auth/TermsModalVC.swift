@@ -91,11 +91,11 @@ class TermsModalVC: UIViewController {
     private func setupConstraints() {
         subHeaderLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(32.0))
-            make.leading.equalToSuperview().inset(DynamicPadding.dynamicValue(32.0))
+            make.leading.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
         }
         allToggleButton.snp.makeConstraints { make in
             make.top.equalTo(subHeaderLabel.snp.bottom).offset(DynamicPadding.dynamicValue(50.0))
-            make.leading.equalToSuperview().inset(DynamicPadding.dynamicValue(32.0))
+            make.leading.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
             make.width.height.equalTo(24)
         }
         
@@ -125,8 +125,8 @@ class TermsModalVC: UIViewController {
         }
         
         startButton.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(32.0))
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
+            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(30.0))
             make.height.equalTo(50)
         }
     }

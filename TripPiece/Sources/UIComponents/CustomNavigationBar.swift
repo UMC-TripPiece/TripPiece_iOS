@@ -46,7 +46,7 @@ public class NavigationBarManager {
     }
     
     // MARK: - 네비게이션 타이틀 설정
-    public func setTitle(to navigationItem: UINavigationItem, title: String, textColor: UIColor = .label, font: UIFont = .systemFont(ofSize: 20, weight: .semibold)) {
+    public func setTitle(to navigationItem: UINavigationItem, title: String, textColor: UIColor = .label, font: UIFont = .systemFont(ofSize: 20, weight: .bold)) {
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = font
