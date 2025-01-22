@@ -317,9 +317,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func proceedIfSignupSuccessful() {
-        let VC = TabBar()
-        VC.modalPresentationStyle = .fullScreen
-        present(VC, animated: true, completion: nil)
-        
+        let VC = SelectLoginTypeVC()
+        navigationController?.pushViewController(VC, animated: true)
     }
 }

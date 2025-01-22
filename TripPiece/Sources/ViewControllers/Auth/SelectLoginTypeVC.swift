@@ -16,12 +16,18 @@ class SelectLoginTypeVC : UIViewController {
     
     static let keychain = KeychainSwift() // For storing tokens like serverAccessToken, serverRefreshToken, accessTokenCreatedAt
     
-    //TODO: 배경 이미지 대신 바꾸기...
     lazy var backgroundImage: UIImageView = {
         let view = UIImageView()
         view.image = UIImage(named: "SelectLoginView")
         view.contentMode = .scaleAspectFill
         view.clipsToBounds = true
+        return view
+    }()
+    
+    lazy var dividerImage: UIImageView = {
+        let view = UIImageView()
+        view.image = UIImage(named: "LoginTypeDividerView")
+        view.contentMode = .scaleAspectFit
         return view
     }()
     
@@ -58,15 +64,35 @@ class SelectLoginTypeVC : UIViewController {
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     
     //MARK: - Define Method
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // 현재 뷰 컨트롤러가 내비게이션 컨트롤러 안에 있는지 확인
+        if self.navigationController == nil {
+            // 네비게이션 컨트롤러가 없으면 새로 설정
+            let navController = UINavigationController(rootViewController: self)
+            navController.modalPresentationStyle = .fullScreen
+            
+            // 현재 창의 rootViewController 교체
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navController
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
+        }
+        
         setView()
         setConstraints()
     }
     
     // 뷰 관련 세팅
     func setView() {
-        [backgroundImage, emailLoginButton, kakaoLoginButton, loginButton].forEach {
+        [backgroundImage, dividerImage, emailLoginButton, /*kakaoLoginButton,*/ loginButton].forEach {
             view.addSubview($0)
         }
         navigationController?.navigationBar.isHidden = true
@@ -81,23 +107,28 @@ class SelectLoginTypeVC : UIViewController {
             make.leading.equalToSuperview().offset(-UIScreen.main.bounds.width * 0.1)
             make.trailing.equalToSuperview().offset(UIScreen.main.bounds.width * 0.1)
         }
+        dividerImage.snp.makeConstraints { make in
+            make.bottom.equalTo(emailLoginButton.snp.top).inset(-DynamicPadding.dynamicValue(15.0))
+            make.leading.trailing.equalToSuperview()
+//            make.height.equalTo(emailLoginButton.snp.width).multipliedBy(0.15)
+        }
         
         emailLoginButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(superViewHeight * 0.795)
+            make.bottom.equalTo(loginButton.snp.top).inset(-DynamicPadding.dynamicValue(10.0))
             make.leading.equalToSuperview().offset(leading)
             make.trailing.equalToSuperview().offset(-leading)
             make.height.equalTo(emailLoginButton.snp.width).multipliedBy(0.15)
         }
         
-        kakaoLoginButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(superViewHeight * 0.87)
-            make.leading.equalToSuperview().offset(leading)
-            make.trailing.equalToSuperview().offset(-leading)
-            make.height.equalTo(kakaoLoginButton.snp.width).multipliedBy(0.15)
-        }
+//        kakaoLoginButton.snp.makeConstraints { make in
+//            make.top.equalToSuperview().offset(superViewHeight * 0.87)
+//            make.leading.equalToSuperview().offset(leading)
+//            make.trailing.equalToSuperview().offset(-leading)
+//            make.height.equalTo(kakaoLoginButton.snp.width).multipliedBy(0.15)
+//        }
         
         loginButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(superViewHeight * 0.94)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(20.0))
             make.leading.equalToSuperview().offset(leading)
             make.trailing.equalToSuperview().offset(-leading)
         }
@@ -105,14 +136,12 @@ class SelectLoginTypeVC : UIViewController {
     
     @objc func emailLoginButtonTapped(_ sender: UIButton) {
         let SignUpVC = SignUpVC()
-        SignUpVC.modalPresentationStyle = .fullScreen
-        present(SignUpVC, animated: true, completion: nil)
+        navigationController?.pushViewController(SignUpVC, animated: true)
     }
     
     @objc func loginButtonTapped(_ sender: UIButton) {
         let loginVC = LoginVC()
-        loginVC.modalPresentationStyle = .fullScreen
-        present(loginVC, animated: true, completion: nil)
+        navigationController?.pushViewController(loginVC, animated: true)
     }
     
     @objc func kakaoButtonTapped(_ sender: UIButton) {
