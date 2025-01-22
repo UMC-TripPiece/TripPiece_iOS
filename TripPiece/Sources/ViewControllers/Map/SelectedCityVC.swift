@@ -21,7 +21,8 @@ class SelectedCityVC: UIViewController {
     // 오른쪽 위 'X'자 버튼
     private let dismissButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "dismissButton"), for: .normal)
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.tintColor = UIColor(named: "Black3")
         button.isUserInteractionEnabled = true
         return button
     }()
@@ -147,15 +148,20 @@ class SelectedCityVC: UIViewController {
     
     
     private func setupConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         // Container view constraints
         containerView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.width.equalToSuperview().multipliedBy(0.89230769)
-            make.height.equalToSuperview().multipliedBy(0.39454976)
+            if screenSize.height >= 812 {
+                make.height.equalToSuperview().multipliedBy(0.39454976)
+            } else {
+                make.height.equalToSuperview().multipliedBy(0.45)
+            }
         }
         //나라 image
         countryImage.snp.makeConstraints { make in
-            make.top.equalTo(containerView.snp.top).offset(34)
+            make.centerY.equalToSuperview().multipliedBy(0.4)
             make.centerX.equalToSuperview()
             make.width.height.equalTo(87)
         }

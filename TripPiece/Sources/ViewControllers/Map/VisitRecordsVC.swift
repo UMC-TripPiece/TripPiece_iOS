@@ -83,8 +83,8 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         
         // Back 버튼 추가
         let backButton = UIButton(type: .custom)
-        backButton.setImage(UIImage(named: "backButton"), for: .normal)
-        backButton.setTitleColor(UIColor(hex: "#A7A7A7)"), for: .normal)
+        backButton.setImage(UIImage(systemName: "arrow.backward"), for: .normal)
+        backButton.tintColor = UIColor(named: "Black3")
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         customNavBar.addSubview(backButton)
         

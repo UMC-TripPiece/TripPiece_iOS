@@ -23,7 +23,8 @@ class ColoringVC: UIViewController {
     // 오른쪽 위 'X'자 버튼
     private let dismissButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "dismissButton"), for: .normal)
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.tintColor = UIColor(named: "Black3")
         button.isUserInteractionEnabled = true
         button.snp.makeConstraints { make in
             make.width.height.equalTo(14)
@@ -190,11 +191,16 @@ class ColoringVC: UIViewController {
     }
     
     private func setupConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         // Container view constraints
         containerView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.width.equalToSuperview().multipliedBy(0.89230769)
-            make.height.equalToSuperview().multipliedBy(0.39454976)
+            if screenSize.height >= 812 {
+                make.height.equalToSuperview().multipliedBy(0.39454976)
+            } else {
+                make.height.equalToSuperview().multipliedBy(0.45)
+            }
         }
         //dismissButton constraints
         dismissButton.snp.makeConstraints { make in
@@ -217,7 +223,7 @@ class ColoringVC: UIViewController {
         }
         // 색깔 선택 뷰 (수정 필요)
         colorSelectBackgroundView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.top.equalTo(titleLabel.snp.bottom).offset(17)
             make.bottom.equalTo(buttonsStackView.snp.top).offset(-13)
             make.horizontalEdges.equalToSuperview()
         }
@@ -228,7 +234,7 @@ class ColoringVC: UIViewController {
         // Color selection view constraints
         colorSelectionCollectionView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.bottom.equalTo(colorSelectBackgroundView.snp.bottom).offset(-20)
+            make.centerY.equalTo(colorSelectBackgroundView.snp.centerY).multipliedBy(1.1)
             make.horizontalEdges.equalToSuperview().inset(10)
             make.height.equalTo(60)
         }
@@ -244,7 +250,6 @@ class ColoringVC: UIViewController {
     
     
     //MARK: Setup Actions
-    
     private func setUpColorPicker() {
         // 저장된 색상 불러오기
         selectedColors = loadSelectedColors()

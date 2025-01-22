@@ -43,12 +43,14 @@ class GradientNavigationBar: UIView {
 
         puzzleImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(21)
-            make.top.equalToSuperview().offset(68)
+            make.bottom.equalToSuperview().offset(-18)
+            //make.top.equalToSuperview().offset(68)
             make.height.width.lessThanOrEqualTo(20)
         }
         titleLabel.snp.makeConstraints{ make in
             make.leading.equalToSuperview().offset(51)
-            make.top.equalToSuperview().offset(66)
+            make.bottom.equalToSuperview().offset(-14)
+            //make.top.equalToSuperview().offset(66)
         }
         
     }

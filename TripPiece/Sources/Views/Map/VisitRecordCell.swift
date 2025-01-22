@@ -27,9 +27,10 @@ class VisitRecordCell: UICollectionViewCell {
     
     
     private let editCountryLogButton: UIButton = {
-            let button = UIButton()
-            button.setImage(UIImage(named: "editButton"), for: .normal)  // 버튼 모양을 이미지로 설정
-            return button
+        let button = UIButton()
+        let image = UIImage(named: "editButton")
+        button.setImage(image, for: .normal)
+        return button
     }()
     
     
@@ -116,7 +117,7 @@ class VisitRecordCell: UICollectionViewCell {
     // 공통된 UIButton 생성 함수
     public func createPuzzle(color: String) -> UIImage {
         // 이미지를 리사이즈하고 설정
-        guard let baseImage = UIImage(named: "Puzzle") else { return UIImage() }
+        guard let baseImage = UIImage(named: "puzzle_purple") else { return UIImage() }
         guard let coloredImage = baseImage.tinted(with: UIColor(hex: color) ?? UIColor.black) else { return UIImage() }
         return coloredImage
     }
@@ -194,7 +195,8 @@ class EditOptionsView: UIView {
         let button = UIButton(type: .system)
         button.setTitle("기록 삭제", for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        button.setImage(UIImage(named: "deleteBin"), for: .normal)  // 휴지통 아이콘
+        let trashImage = UIImage(systemName: "trash")?.resized(to: CGSize(width: 26, height: 26)) // 원하는 크기로 리사이즈
+        button.setImage(trashImage, for: .normal)
         button.tintColor = Constants.Colors.mainPink
         button.setTitleColor(Constants.Colors.mainPink, for: .normal)
         button.contentHorizontalAlignment = .left

@@ -11,7 +11,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
-        return GradientNavigationBar(title: "여행자님의 세계지도")
+        let navBar = GradientNavigationBar(title: "여행자님의 세계지도")
+        return navBar
     }()
     
 
@@ -104,11 +105,16 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
 
     private func setupConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         // navigation bar
         navBar.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.top.equalToSuperview()
-            make.height.equalTo(107)
+            if screenSize.height >= 812 {
+                make.height.equalTo(107)
+            } else {
+                make.height.equalTo(77)
+            }
         }
             
         // search bar
