@@ -227,7 +227,6 @@ class SelectedCityVC: UIViewController {
     
     // 세계지도 색칠하기
     @objc func mapColorButtonTapped(_ sender: UIButton) {
-        print("map color button tapped")
         let coloringVC = ColoringVC()
         coloringVC.modalPresentationStyle = .overCurrentContext
         coloringVC.modalTransitionStyle = .crossDissolve

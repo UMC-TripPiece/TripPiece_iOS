@@ -8,8 +8,8 @@ class VisitRecordCell: UICollectionViewCell {
     static let identifier = "VisitRecordCell"
     weak var delegate: VisitRecordCellDelegate?
     
-
     var cityData: [String: String]? // 전달할 데이터
+    var editOptionsView: EditOptionsView?
     
     private let puzzleImageView: UIImageView = {
         let imageView = UIImageView()
@@ -33,18 +33,15 @@ class VisitRecordCell: UICollectionViewCell {
         return button
     }()
     
-    
-    var editOptionsView: EditOptionsView?
-    
     let containerView: UIView = {
         let view = UIView()
         view.layer.cornerRadius = 5
         view.backgroundColor = .white
-        // 그림자 설정
-        view.layer.shadowColor = UIColor.black.cgColor  // 그림자 색상
-        view.layer.shadowOpacity = 0.1                 // 그림자 불투명도 (0.0 - 1.0)
-        view.layer.shadowOffset = CGSize(width: 0, height: 0) // 그림자 오프셋 (x, y)
-        view.layer.shadowRadius = 5                     // 그림자 블러 반경
+        
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0.1
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+        view.layer.shadowRadius = 5
         return view
     }()
     
@@ -164,88 +161,11 @@ class VisitRecordCell: UICollectionViewCell {
         delegate?.didTapDeleteButton(at: indexPath)
     }
     
+    
+    
 }
 
 
-
-// 기록 수정 버튼 custom
-class EditOptionsView: UIView {
-
-    let editButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("수정하기", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        button.setImage(UIImage(named: "editPencil"), for: .normal)  // 펜슬 아이콘
-        button.tintColor = UIColor(hex: "#636363")
-        button.setTitleColor(UIColor(hex: "#636363"), for: .normal)
-        button.contentHorizontalAlignment = .left
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        
-        // 제약 조건 설정
-        guard let imageView = button.imageView else { return button }
-        imageView.snp.makeConstraints { make in
-            make.width.height.equalTo(28)
-            make.centerY.equalToSuperview().offset(2)
-            make.leading.equalToSuperview().offset(5)
-        }
-        return button
-    }()
-
-    let deleteButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("기록 삭제", for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .medium)
-        let trashImage = UIImage(systemName: "trash")?.resized(to: CGSize(width: 26, height: 26)) // 원하는 크기로 리사이즈
-        button.setImage(trashImage, for: .normal)
-        button.tintColor = Constants.Colors.mainPink
-        button.setTitleColor(Constants.Colors.mainPink, for: .normal)
-        button.contentHorizontalAlignment = .left
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        
-        // 제약 조건 설정
-        guard let imageView = button.imageView else { return button }
-        imageView.snp.makeConstraints { make in
-            make.width.height.equalTo(24)
-            make.centerY.equalToSuperview().offset(1)
-            make.leading.equalToSuperview().offset(5)
-        }
-        return button
-    }()
-
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupView()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupView() {
-        backgroundColor = .white
-        layer.cornerRadius = 5
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.1
-        layer.shadowOffset = CGSize(width: 0, height: 2)
-        layer.shadowRadius = 5
-
-        addSubview(editButton)
-        addSubview(deleteButton)
-
-        // Auto Layout 설정
-        editButton.snp.makeConstraints { make in
-            make.top.equalToSuperview()
-            make.centerX.equalToSuperview().offset(-5)
-            make.height.equalTo(36.5)
-        }
-        deleteButton.snp.makeConstraints { make in
-            make.top.equalTo(editButton.snp.bottom)
-            make.centerX.equalToSuperview().offset(-5)
-            make.bottom.equalToSuperview()
-        }
-
-    }
-}
 
 protocol VisitRecordCellDelegate: AnyObject {
     func didTapEditButton(at indexPath: IndexPath)

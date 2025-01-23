@@ -67,7 +67,6 @@ extension ColoringVC {
     @objc func didTapAddButton(_ sender: UIButton) {
         let colorPicker = UIColorPickerViewController()
         colorPicker.delegate = self
-        print("색깔 더하기 버튼 눌림!!!")
         present(colorPicker, animated: true, completion: nil)
     }
     
@@ -132,7 +131,6 @@ extension ColoringVC {
         
         // 기본 색상 + 저장된 색상 합치기
         let combinedColors = defaultColors + savedColors
-        print("userDefault-불러온 색상 배열: \(combinedColors)")
         return combinedColors
     }
     
@@ -140,7 +138,6 @@ extension ColoringVC {
         // 기본 색상을 제외하고 유저가 추가한 색상만 저장
         let userColors = colors.filter { !defaultColors.contains($0) }
         UserDefaults.standard.set(userColors, forKey: "selectedColors")
-        print("userDefault-유저가 추가한 색상 저장 완료: \(userColors)")
     }
     
     // 저장한 색깔 삭제
@@ -151,7 +148,6 @@ extension ColoringVC {
         saveSelectedColors(selectedColors)
         // 컬렉션 뷰 갱신
         colorSelectionCollectionView.reloadData()
-        print("색상 삭제 완료! 현재 색상 배열: \(selectedColors)")
     }
 
     

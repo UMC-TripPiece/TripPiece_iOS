@@ -12,7 +12,6 @@ class MapManager {
             case .success(let response):
                 do {
                     let searchResult = try response.map(DefaultMultiResponse<SearchedCityResponse>.self)
-                    print("success")
                     completion(.success(searchResult))
                 } catch {
                     print("mapping error: \(error.localizedDescription)")

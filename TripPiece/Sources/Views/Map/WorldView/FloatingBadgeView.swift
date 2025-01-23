@@ -74,9 +74,15 @@ class FloatingBadgeView: UIView {
     
     
     func setUpConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         userProfileStackView.snp.makeConstraints { make in
             make.horizontalEdges.equalToSuperview().inset(15)
-            make.top.equalToSuperview().inset(15)
+            if screenSize.height >= 812 {
+                make.top.equalToSuperview().inset(15)
+            } else {
+                make.top.equalToSuperview().inset(9)
+            }
+            
         }
         
         subtitleLabel.snp.makeConstraints { make in

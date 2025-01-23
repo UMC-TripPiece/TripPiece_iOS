@@ -76,7 +76,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         getUserData()
         
         view.layoutIfNeeded()
-        // 이 부분 꼭 필요한가?
         scrollView.maximumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h * 3
         scrollView.minimumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h
         scrollView.zoomScale = scrollView.minimumZoomScale
@@ -277,7 +276,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
-                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")

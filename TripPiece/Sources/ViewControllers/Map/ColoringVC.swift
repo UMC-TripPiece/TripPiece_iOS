@@ -321,10 +321,10 @@ class ColoringVC: UIViewController {
                 editColor(selectedColor) { editResult in
                     switch editResult {
                     case .success(let message):
-                        print("색상 수정 성공: \(message)")
                         DispatchQueue.main.async {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
+                                NotificationCenter.default.post(name: .changeMapColor, object: nil)
                             }
                         }
                     case .failure(let error):
@@ -336,7 +336,6 @@ class ColoringVC: UIViewController {
                 colorCountry(selectedColor) { result in
                     switch result {
                     case .success(let message):
-                        print("업로드 성공: \(message)")
                         DispatchQueue.main.async {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
@@ -368,7 +367,6 @@ class ColoringVC: UIViewController {
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
         )
-        print("colorCountry - 처음 지도 색칠: \(data)")
 
         MapManager.postCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -400,7 +398,6 @@ class ColoringVC: UIViewController {
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
         )
-        print("editColor - 지도 색깔 수정: \(data)")
         
         MapManager.changeCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -422,7 +419,6 @@ class ColoringVC: UIViewController {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
-                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")
