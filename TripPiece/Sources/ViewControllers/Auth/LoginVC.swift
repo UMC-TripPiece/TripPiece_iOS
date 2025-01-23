@@ -9,21 +9,8 @@ import Moya
 import SwiftyToaster
 
 class LoginVC: UIViewController {
-
-    private lazy var backButton: CustomBackButton = {
-        let button = CustomBackButton(title: "")
-        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
-        return button
-    }()
     
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "Log In"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        label.textColor = Constants.Colors.mainPurple
-        label.textAlignment = .center
-        return label
-    }()
+    let navigationBarManager = NavigationBarManager()
     
     let imageView: UIImageView = {
         let imageView = UIImageView()
@@ -61,10 +48,37 @@ class LoginVC: UIViewController {
         return button
     }()
     
+    // MARK: - Initialization
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        view.backgroundColor = Constants.Colors.bg4
+        
+        setupViews()
+        setupNavigationBar()
+        setupActions()
+        setupConstraints()
+    }
+    
+    // MARK: - Setup Methods
     func setupViews() {
-        [backButton, titleLabel, welcomeLabel, joinLabel, imageView, loginField, loginButton].forEach {
+        [welcomeLabel, joinLabel, imageView, loginField, loginButton].forEach {
             view.addSubview($0)
         }
+    }
+    
+    private func setupNavigationBar() {
+        navigationBarManager.setTitle(to: navigationItem, title: "LOGIN", textColor: Constants.Colors.mainPurple!)
+        navigationBarManager.addBackButton(to: navigationItem, target: self, action: #selector(didTapBackButton))
     }
     
     func setupActions() {
@@ -73,43 +87,25 @@ class LoginVC: UIViewController {
         loginButton.addTarget(self, action: #selector(loginButtonTapped), for: .touchUpInside)
     }
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        view.backgroundColor = Constants.Colors.bg4
-        
-        setupViews()
-        setupActions()
-        setupConstraints()
-    }
-    
     private func setupConstraints() {
-        backButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-            make.leading.equalToSuperview().offset(20)
-        }
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(10)
-            make.centerX.equalToSuperview()
-        }
         welcomeLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
-            make.leading.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(30)
+            make.leading.equalToSuperview().offset(DynamicPadding.dynamicValue(20.0))
         }
         joinLabel.snp.makeConstraints { make in
             make.top.equalTo(welcomeLabel.snp.top).offset(50)
-            make.leading.equalToSuperview().offset(20)
+            make.leading.equalTo(welcomeLabel)
         }
         imageView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(60)
-            make.trailing.equalToSuperview().offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide)
+            make.trailing.equalToSuperview().offset(DynamicPadding.dynamicValue(20.0))
             make.height.equalTo(150)
         }
         
         loginField.snp.makeConstraints { make in
             make.top.equalTo(imageView.snp.bottom).offset(10)
-            make.leading.trailing.equalToSuperview().inset(20)
-            make.height.equalTo(140)
+            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
+            make.height.equalTo(150)
         }
         
         loginButton.snp.makeConstraints { make in
@@ -123,15 +119,7 @@ class LoginVC: UIViewController {
     lazy var isValid = false
     
     @objc func didTapBackButton() {
-        var currentVC: UIViewController? = self
-            while let presentingVC = currentVC?.presentingViewController {
-                if presentingVC is SelectLoginTypeVC {
-                    presentingVC.dismiss(animated: true, completion: nil)
-                    return
-                }
-                currentVC = presentingVC
-            }
-        print("SelectLoginTypeVC를 찾을 수 없습니다.")
+        navigationController?.popViewController(animated: true)
     }
     
     @objc func loginButtonTapped() {

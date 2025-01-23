@@ -70,6 +70,16 @@ class MyLogVC: UIViewController {
         return stackView
     }()
     
+    private lazy var emptyStateLabel: UILabel = {
+        let label = UILabel()
+        label.text = "아직 여행한 나라가 없어요"
+        label.textColor = Constants.Colors.black3
+        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        label.textAlignment = .center
+        label.isHidden = true // 초기에는 숨김 처리
+        return label
+    }()
+    
     private lazy var historyTitle: UILabel = {
         let label = UILabel()
         label.text = "여행자님의 지난 여행 조각"
@@ -123,7 +133,7 @@ class MyLogVC: UIViewController {
     let allButton = PieceSortButton(title: "전체", tag: 0, target: self, action: #selector(filterButtonTapped(_:)))
     let photoButton = PieceSortButton(title: "📷 사진", tag: 1, target: self, action: #selector(filterButtonTapped(_:)))
     let videoButton = PieceSortButton(title: "🎬 영상", tag: 2, target: self, action: #selector(filterButtonTapped(_:)))
-    let musicButton = PieceSortButton(title: "🎶 음악", tag: 3, target: self, action: #selector(filterButtonTapped(_:)))
+//    let musicButton = PieceSortButton(title: "🎶 음악", tag: 3, target: self, action: #selector(filterButtonTapped(_:)))
     let memoButton = PieceSortButton(title: "✍🏻 메모", tag: 4, target: self, action: #selector(filterButtonTapped(_:)))
     
     private lazy var addButton: UIButton = {
@@ -187,7 +197,8 @@ class MyLogVC: UIViewController {
         }
         scrollView.addSubview(contentView)
         travelLogScrollView.addSubview(travelLogStackView)
-        [allButton, photoButton, videoButton, musicButton, memoButton].forEach {
+        travelLogScrollView.addSubview(emptyStateLabel)
+        [allButton, photoButton, videoButton, /*musicButton,*/ memoButton].forEach {
             sortStackView.addArrangedSubview($0)
         }
         sortScrollView.addSubview(sortStackView)
@@ -240,6 +251,10 @@ class MyLogVC: UIViewController {
             make.trailing.top.bottom.equalToSuperview()
             make.height.equalToSuperview()
         }
+        emptyStateLabel.snp.makeConstraints { make in
+            make.centerX.equalToSuperview()
+            make.top.equalTo(mapView.snp.bottom).offset(20) // 지도 아래에 배치
+        }
         historyTitle.snp.makeConstraints { make in
             make.top.equalTo(travelLogScrollView.snp.bottom)
             make.leading.equalToSuperview().offset(16)
@@ -274,7 +289,7 @@ class MyLogVC: UIViewController {
     
     // MARK: func 세팅
     @objc private func startTravel() {
-        //TODO: 여행기 클릭 시 넘어가는 뷰
+        //TODO: 여행기 생성 클릭 시 넘어가는 뷰
         let viewController = TestVC()
         viewController.modalPresentationStyle = .fullScreen
         self.present(viewController, animated: true, completion: nil)
@@ -287,28 +302,65 @@ class MyLogVC: UIViewController {
         self.present(viewController, animated: true, completion: nil)
     }
     
-    func updateTravelLogStackView() { //여행기 cell 추가
+//    func updateTravelLogStackView() { //여행기 cell 추가
+//        travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+//        
+//        for TravelsInfo in fetchedTravelsInfo.reversed() {
+//            let cell = TravelLogCardCell()
+//            let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
+//            let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
+//            let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
+//            cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+//            travelLogStackView.addArrangedSubview(cell)
+//            
+//            if TravelsInfo.status == "ONGOING" {
+//                progressTravelSectionTitle.isHidden = false
+//                progressTravelCard.isHidden = false
+//                let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
+//                let subtitle = "Day \(daysElapsed)"
+//                let title = "[\(TravelsInfo.cityName)] \(TravelsInfo.title)"
+//                self.progressTravelCard.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: subtitle)
+//                
+//            }
+//        }
+//        updateLayoutForProgressTravelCardVisibility()
+//    }
+    
+    func updateTravelLogStackView() {
         travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        for TravelsInfo in fetchedTravelsInfo.reversed() {
-            let cell = TravelLogCardCell()
-            let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
-            let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
-            let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
-            cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
-            travelLogStackView.addArrangedSubview(cell)
-            
-            if TravelsInfo.status == "ONGOING" {
-                progressTravelSectionTitle.isHidden = false
-                progressTravelCard.isHidden = false
-                let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
-                let subtitle = "Day \(daysElapsed)"
-                let title = "[\(TravelsInfo.cityName)] \(TravelsInfo.title)"
-                self.progressTravelCard.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: subtitle)
+        if fetchedTravelsInfo.isEmpty {
+            // 데이터가 없을 때
+            emptyStateLabel.isHidden = false
+            travelLogStackView.isHidden = true
+        } else {
+            // 데이터가 있을 때
+            emptyStateLabel.isHidden = true
+            travelLogStackView.isHidden = false
+
+            for TravelsInfo in fetchedTravelsInfo.reversed() {
+                let cell = TravelLogCardCell()
+                let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
+                let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
+                let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
+                cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+                travelLogStackView.addArrangedSubview(cell)
                 
+                if TravelsInfo.status == "ONGOING" {
+                    progressTravelSectionTitle.isHidden = false
+                    progressTravelCard.isHidden = false
+                    let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
+                    let subtitle = "Day \(daysElapsed)"
+                    let title = "[\(TravelsInfo.cityName)] \(TravelsInfo.title)"
+                    self.progressTravelCard.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: subtitle)
+                    
+                }
             }
+            updateLayoutForProgressTravelCardVisibility()
         }
-        updateLayoutForProgressTravelCardVisibility()
+        
+        travelLogScrollView.setNeedsLayout()
+        travelLogScrollView.layoutIfNeeded()
     }
     
     private func updateGoogleMap() {
@@ -369,7 +421,7 @@ class MyLogVC: UIViewController {
     }
     //TODO: 최신순 sorting 추가
     func updateSelectedFilterButton(selectedButton: PieceSortButton) {
-        let buttons = [allButton, photoButton, videoButton, musicButton, memoButton]
+        let buttons = [allButton, photoButton, videoButton, /*musicButton,*/ memoButton]
         for button in buttons {
             button.updateSelection(isSelected: button == selectedButton)
         }

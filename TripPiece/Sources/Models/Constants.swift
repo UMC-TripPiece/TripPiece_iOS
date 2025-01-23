@@ -30,3 +30,13 @@ struct Constants {
         static let bg4 = UIColor(named: "BgColor4")
     }
 }
+
+public struct DynamicPadding {
+    private static var superViewHeight: CGFloat {
+        UIScreen.main.bounds.height
+    }
+    
+    public static func dynamicValue(_ baseValue: CGFloat) -> CGFloat {
+        return baseValue * (superViewHeight / 844)
+    }
+}

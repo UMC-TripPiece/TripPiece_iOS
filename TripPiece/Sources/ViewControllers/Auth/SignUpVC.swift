@@ -7,11 +7,8 @@ import FirebaseCore
 import Moya
 
 class SignUpVC: UIViewController {
-    private lazy var backButton: CustomBackButton = {
-        let button = CustomBackButton(title: "")
-        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
-        return button
-    }()
+    // MARK: - UI Properties
+    let navigationBarManager = NavigationBarManager()
     
     private lazy var usernameField = CustomLabelTextFieldView2(labelText: "이름", textFieldPlaceholder: "| 이름을 입력해 주세요", validationText: "이름을 입력해주세요")
     
@@ -58,28 +55,6 @@ class SignUpVC: UIViewController {
         return field
     }()
     
-    // MARK: - UI Properties
-    private lazy var titleLabel: UILabel = {
-        let label = UILabel()
-        label.text = "SIGN UP"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .semibold)
-        label.textColor = Constants.Colors.mainPurple
-        label.textAlignment = .center
-        return label
-    }()
-    
-    private lazy var termsCheckBox: CheckBoxButton = {
-        return CheckBoxButton(title: " 이용약관 (필수)")
-    }()
-    
-    private lazy var privacyCheckBox: CheckBoxButton = {
-        return CheckBoxButton(title: " 개인정보 수집 및 이용 (필수)")
-    }()
-    
-    private lazy var allAgreeCheckBox: CheckBoxButton = {
-        return CheckBoxButton(title: " 전체동의")
-    }()
-    
     private lazy var signUpButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("가입하기", for: .normal)
@@ -87,31 +62,43 @@ class SignUpVC: UIViewController {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         button.backgroundColor = Constants.Colors.bgGray
         button.layer.cornerRadius = 8
-        button.addTarget(self, action: #selector(signUpButtonTapped), for: .touchUpInside)
+        button.isEnabled = false
+        button.addTarget(self, action: #selector(showTermsModal), for: .touchUpInside)
         return button
     }()
     
-    private lazy var termsValidationLabel: UILabel = {
-        let label = UILabel()
-        label.text = "이용 약관 및 개인정보 수집에 동의해주세요"
-        label.textColor = Constants.Colors.mainPink
-        label.font = UIFont.systemFont(ofSize: 12)
-        label.isHidden = true
-        return label
-    }()
-    
     // MARK: - Initialization
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
+    }
+    
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupView()
+        setupNavigationBar()
         setupConstraints()
         setupActions()
         validateInputs()
+        
+        //TODO: 테스트용, 지워야 함
+        signUpButton.isEnabled = true
     }
     
     // MARK: - Setup Methods
+    private func setupNavigationBar() {
+        // itemTitle을 네비게이션 바 제목으로 설정
+        navigationBarManager.setTitle(to: navigationItem, title: "SIGN UP", textColor: Constants.Colors.mainPurple!)
+        navigationBarManager.addBackButton(to: navigationItem, target: self, action: #selector(didTapBackButton))
+    }
+    
     private func setupView() {
-        [backButton, titleLabel, usernameField, emailField, confirmCodeField, confirmCodeButton, codeValidationLabel, passwordField, confirmPasswordField, termsCheckBox, privacyCheckBox, allAgreeCheckBox, termsValidationLabel, signUpButton].forEach {
+        [usernameField, emailField, confirmCodeField, confirmCodeButton, codeValidationLabel, passwordField, confirmPasswordField, signUpButton].forEach {
             view.addSubview($0)
         }
         
@@ -119,25 +106,17 @@ class SignUpVC: UIViewController {
     }
     
     private func setupConstraints() {
-        backButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).inset(superViewWidth * 0.03)
-            make.leading.equalToSuperview().inset(superViewWidth * 0.07)
-        }
-        titleLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(backButton)
-            make.centerX.equalToSuperview()
-        }
         usernameField.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
             make.leading.trailing.equalToSuperview().inset(20)
         }
         emailField.snp.makeConstraints { make in
-            make.top.equalTo(usernameField.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(usernameField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
+            make.leading.trailing.equalTo(usernameField)
         }
         confirmCodeField.snp.makeConstraints { make in
-            make.top.equalTo(emailField.snp.bottom).offset(10)
-            make.leading.equalToSuperview().inset(20)
+            make.top.equalTo(emailField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
+            make.leading.equalTo(usernameField)
             make.width.equalTo(superViewWidth * 0.6)
             make.height.equalTo(50)
         }
@@ -148,40 +127,19 @@ class SignUpVC: UIViewController {
             make.height.equalTo(50)
         }
         codeValidationLabel.snp.makeConstraints { make in
-            make.top.equalTo(confirmCodeField.snp.bottom).offset(10)
-            make.leading.equalToSuperview().inset(20)
+            make.top.equalTo(confirmCodeField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
+            make.leading.equalTo(usernameField)
         }
         passwordField.snp.makeConstraints { make in
-            make.top.equalTo(confirmCodeField.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(codeValidationLabel.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
+            make.leading.trailing.equalTo(usernameField)
         }
         confirmPasswordField.snp.makeConstraints { make in
-            make.top.equalTo(passwordField.snp.bottom).offset(20)
-            make.leading.trailing.equalToSuperview().inset(20)
-        }
-        termsValidationLabel.snp.makeConstraints { make in
-            make.bottom.equalTo(confirmPasswordField.snp.bottom).offset(40)
-            make.leading.equalToSuperview().inset(20)
-        }
-        termsCheckBox.snp.makeConstraints { make in
-            make.top.equalTo(termsValidationLabel.snp.bottom).offset(10)
-            make.leading.equalToSuperview().inset(20)
-            make.height.equalTo(20)
-        }
-        
-        privacyCheckBox.snp.makeConstraints { make in
-            make.top.equalTo(termsCheckBox.snp.bottom).offset(10)
-            make.leading.equalToSuperview().inset(20)
-            make.height.equalTo(20)
-        }
-        
-        allAgreeCheckBox.snp.makeConstraints { make in
-            make.top.equalTo(privacyCheckBox.snp.bottom).offset(10)
-            make.leading.equalToSuperview().inset(20)
-            make.height.equalTo(20)
+            make.top.equalTo(passwordField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
+            make.leading.trailing.equalTo(usernameField)
         }
         signUpButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-40)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(50)
         }
@@ -192,11 +150,7 @@ class SignUpVC: UIViewController {
         emailField.textField.addTarget(self, action: #selector(emailValidate), for: .editingChanged)
         passwordField.textField.addTarget(self, action: #selector(passwordValidate), for: .editingChanged)
         confirmPasswordField.textField.addTarget(self, action: #selector(confirmPasswordValidate), for: .editingChanged)
-        
-        allAgreeCheckBox.addTarget(self, action: #selector(allAgreeTapped), for: .touchUpInside)
-        termsCheckBox.addTarget(self, action: #selector(termsTapped), for: .touchUpInside)
-        privacyCheckBox.addTarget(self, action: #selector(privacyTapped), for: .touchUpInside)
-        
+
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
         view.addGestureRecognizer(tapGesture)
@@ -208,15 +162,7 @@ class SignUpVC: UIViewController {
     
     // MARK: - Actions
     @objc func didTapBackButton() {
-        var currentVC: UIViewController? = self
-        while let presentingVC = currentVC?.presentingViewController {
-            if presentingVC is SelectLoginTypeVC {
-                presentingVC.dismiss(animated: true, completion: nil)
-                return
-            }
-            currentVC = presentingVC
-        }
-        print("SelectLoginTypeVC를 찾을 수 없습니다.")
+        navigationController?.popViewController(animated: true)
     }
     
     @objc func confirmButtonTapped() {
@@ -239,10 +185,9 @@ class SignUpVC: UIViewController {
                 callSendCodeAPI(email: email) { isSuccess in
                     if isSuccess {
                         self.confirmCodeButton.setTitle("인증번호 확인", for: .normal)
-                        self.confirmCodeButton.isEnabled = false
-                        print("인증번호 요청 성공")
-                    } else {
-                        print("인증번호 요청 실패")
+                        self.confirmCodeButton.isEnabled = true
+                        self.codeValidationLabel.isHidden = false
+                        self.codeValidationLabel.text = "입력하신 이메일로 코드가 전송되었습니다!"
                     }
                 }
             } else if confirmCodeButton.title(for: .normal) == "인증번호 확인" {
@@ -250,10 +195,8 @@ class SignUpVC: UIViewController {
                     self.validateCodeAPI(emailCodeRequest) { isSuccess in
                         if isSuccess {
                             self.isEmailValid = true
-                            self.codeValidationLabel.text = "인증번호 확인 완료!"
-                            print("인증번호 확인 성공")
-                        } else {
-                            print("인증번호 확인 실패")
+                            self.codeValidationLabel.text = "인증번호 확인이 완료되었어요!"
+                            self.validateInputs()
                         }
                     }
                 }
@@ -267,70 +210,31 @@ class SignUpVC: UIViewController {
         }
     }
     
-    @objc func signUpButtonTapped() {
-        if isValid {
-            print("회원가입 버튼 클릭")
-            self.navigateToProfileVC()
-        } else {
-            print("조건값 확인 필요")
-        }
+    @objc func showTermsModal() {
+        SignUpManager.shared.setName(username: usernameField.text!, emailString: emailField.text!, pwString: passwordField.text!)
+        let termsModalVC = TermsModalVC()
+        termsModalVC.isModalInPresentation = true
+        termsModalVC.loadViewIfNeeded()
+        let navigationController = UINavigationController(rootViewController: termsModalVC)
+
+        navigationController.modalPresentationStyle = .pageSheet
+        navigationController.sheetPresentationController?.detents = [.medium(), .large()]
+        navigationController.sheetPresentationController?.prefersGrabberVisible = true
+
+        present(navigationController, animated: true, completion: nil)
     }
     
     func navigateToProfileVC() {
         let profileVC = ProfileVC()
-        //userInfoManager에 입력된 기본 개인정보 저장
-        SignUpManager.shared.setName(username: usernameField.text!, emailString: emailField.text!, pwString: passwordField.text!)
         profileVC.isEmailLogin = true
         profileVC.modalPresentationStyle = .fullScreen
         present(profileVC, animated: true, completion: nil)
     }
     
-    @objc func allAgreeTapped() {
-        let isSelected = !allAgreeCheckBox.isSelected
-        print("전체 동의 함수 실행")
-        allAgreeCheckBox.isSelected = isSelected
-        termsCheckBox.isSelected = isSelected
-        privacyCheckBox.isSelected = isSelected
-        if allAgreeCheckBox.isSelected {
-            termsValidationLabel.isHidden = true
-        } else {
-            termsValidationLabel.isHidden = false
-        }
-        termsAgreeValidate()
-    }
-    
-    @objc func termsTapped() {
-        termsCheckBox.isSelected.toggle()
-        updateAllAgreeState()
-        if allAgreeCheckBox.isSelected {
-            termsValidationLabel.isHidden = true
-        } else {
-            termsValidationLabel.isHidden = false
-        }
-        termsAgreeValidate()
-    }
-    
-    @objc func privacyTapped() {
-        privacyCheckBox.isSelected.toggle()
-        updateAllAgreeState()
-        if allAgreeCheckBox.isSelected {
-            termsValidationLabel.isHidden = true
-        } else {
-            termsValidationLabel.isHidden = false
-        }
-        termsAgreeValidate()
-    }
-    
-    func updateAllAgreeState() {
-        allAgreeCheckBox.isSelected = termsCheckBox.isSelected && privacyCheckBox.isSelected
-    }
-    
-    //TODO: 유효성 체크 함수 간단화 필요
     lazy var isUsernameValid = false
     lazy var isEmailValid = false
     lazy var isPasswordValid = false
     lazy var isConfirmPasswordValid = false
-    lazy var isTermsAgreeValid = false
     
     @objc func usernameValidate(){
         if let username = usernameField.text, !username.isEmpty {
@@ -381,19 +285,9 @@ class SignUpVC: UIViewController {
         validateInputs()
     }
     
-    @objc func termsAgreeValidate() {
-        if allAgreeCheckBox.isSelected {
-            termsValidationLabel.isHidden = true
-            isTermsAgreeValid = true
-        } else {
-            termsValidationLabel.isHidden = false
-        }
-        validateInputs()
-    }
-    
     var isValid = false
     @objc func validateInputs() {
-        isValid = isUsernameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid && isTermsAgreeValid
+        isValid = isUsernameValid && isEmailValid && isPasswordValid && isConfirmPasswordValid
         signUpButton.isEnabled = isValid
         signUpButton.backgroundColor = isValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray
     }

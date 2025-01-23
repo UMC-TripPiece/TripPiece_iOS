@@ -10,6 +10,7 @@ let project = Project(
             bundleId: "io.tuist.TripPiece",
             infoPlist: .extendingDefault(
                 with: [
+                    "UIUserInterfaceStyle" : "Light", // 다크모드 제거
                     "UILaunchStoryboardName": "",
                     "CFBundleDevelopmentRegion" : "ko_KR",
                     "UIApplicationSceneManifest": [
@@ -56,7 +57,7 @@ let project = Project(
                 .external(name: "FirebaseFirestore"),
 //                .external(name: "FirebaseAnalytics"),
                 .external(name: "SDWebImage"),
-                
+                .external(name: "Then"),
                 .external(name: "SwiftyToaster"),
                 .external(name: "InteractiveMap"),
                 .external(name: "GoogleMaps"),

@@ -128,7 +128,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
         
         profileImageView.snp.makeConstraints { make in
-            make.top.equalTo(profileLabel.snp.bottom).offset(20)
+            make.top.equalTo(profileLabel.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
             make.centerX.equalToSuperview()
             make.width.height.equalTo(120)
         }
@@ -139,8 +139,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         
         nicknameTextField.snp.makeConstraints { make in
             make.top.equalTo(profileImageView.snp.bottom).offset(20)
-            make.leading.equalToSuperview().offset(20)
-            make.trailing.equalToSuperview().offset(-20)
+            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
         }
         
         genderLabel.snp.makeConstraints { make in
@@ -179,8 +178,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
         
         startButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-40)
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
+            make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
             make.height.equalTo(50)
         }
     }
@@ -317,9 +316,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func proceedIfSignupSuccessful() {
-        let VC = TabBar()
-        VC.modalPresentationStyle = .fullScreen
-        present(VC, animated: true, completion: nil)
-        
+        let VC = SelectLoginTypeVC()
+        navigationController?.pushViewController(VC, animated: true)
     }
 }

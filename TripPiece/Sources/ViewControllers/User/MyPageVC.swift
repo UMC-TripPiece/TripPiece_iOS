@@ -189,7 +189,7 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
     func setupConstraints() {
         backgroundImageView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(200) // 고정 높이 설정
+            make.height.equalTo(DynamicPadding.dynamicValue(200.0)) // 고정 높이 설정
         }
         myPageLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
@@ -197,7 +197,7 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
         }
         profileImageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.top.equalTo(backgroundImageView.snp.bottom).offset(-70) // 이미지가 겹쳐 보이도록 설정
+            make.top.equalTo(backgroundImageView.snp.bottom).offset(-DynamicPadding.dynamicValue(70.0)) // 이미지가 겹쳐 보이도록 설정
             make.width.height.equalTo(140)
         }
         profileEditIconView.snp.makeConstraints { make in

@@ -17,6 +17,19 @@ class SplashVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // 현재 뷰 컨트롤러가 내비게이션 컨트롤러 안에 있는지 확인
+        if self.navigationController == nil {
+            // 네비게이션 컨트롤러가 없으면 새로 설정
+            let navController = UINavigationController(rootViewController: self)
+            navController.modalPresentationStyle = .fullScreen
+            
+            // 현재 창의 rootViewController 교체
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navController
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
+        }
         setupSplashScreen()
         setConstraints()
         
@@ -47,8 +60,7 @@ class SplashVC: UIViewController {
     
     func navigateToSignUpScreen() {
         let SelectLoginTypeVC = SelectLoginTypeVC()
-        SelectLoginTypeVC.modalPresentationStyle = .fullScreen
-        present(SelectLoginTypeVC, animated: true, completion: nil)
+        navigationController?.pushViewController(SelectLoginTypeVC, animated: true)
     }
     
     func setConstraints() {

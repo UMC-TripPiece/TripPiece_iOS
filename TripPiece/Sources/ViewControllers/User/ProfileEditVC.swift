@@ -6,33 +6,12 @@ import SDWebImage
 
 class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
+    let navigationBarManager = NavigationBarManager()
+    
     // MARK: - Properties
     var selectedImageData: Data?
     
     // MARK: - UI Elements
-    private lazy var backButton: CustomBackButton = {
-        let button = CustomBackButton(title: "")
-        button.addTarget(self, action: #selector(didTapBackButton), for: .touchUpInside)
-        return button
-    }()
-    
-    private let updateButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("완료", for: .normal)
-        button.setTitleColor(Constants.Colors.black3, for: .normal)
-        button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        button.addTarget(self, action: #selector(updateButtonTapped), for: .touchUpInside)
-        return button
-    }()
-    
-    private let profileLabel: UILabel = {
-        let label = UILabel()
-        label.text = "PROFILE"
-        label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
-        label.textColor = Constants.Colors.mainPurple
-        return label
-    }()
-    
     private let profileImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -107,6 +86,7 @@ class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     // MARK: - Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: animated)
         UserInfoManager.fetchMemberInfo { result in
             switch result {
             case .success(let memberInfo):
@@ -127,13 +107,18 @@ class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         }
     }
     
+    public override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Constants.Colors.bg4
-        self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: backButton)
         
         setupViews()
         setupConstraints()
+        setupNavigationBar()
         
         // 기타 설정
         configureTapGestureForProfileImage()
@@ -141,11 +126,24 @@ class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
     }
     
     // MARK: - UI Setup
+    private func setupNavigationBar() {
+        // itemTitle을 네비게이션 바 제목으로 설정
+        navigationBarManager.setTitle(to: navigationItem, title: "PROFILE", textColor: Constants.Colors.mainPurple!)
+        navigationBarManager.addBackButton(to: navigationItem, target: self, action: #selector(didTapBackButton))
+        navigationBarManager.addRightButton(
+            to: navigationItem,
+            title: "완료",
+            target: self,
+            action: #selector(updateButtonTapped),
+            tintColor: Constants.Colors.black2 ?? .gray,
+            font: UIFont.systemFont(ofSize: 16, weight: .medium)
+        )
+    }
+    
+    
     private func setupViews() {
         // UI 요소를 뷰에 추가
-        [backButton,
-         profileLabel,
-         profileImageView,
+        [profileImageView,
          photoEditIconView,
          nicknameTextField,
          genderLabel,
@@ -153,24 +151,14 @@ class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
          birthdateLabel,
          birthdateTextField,
          countryLabel,
-         countryTextField,
-         updateButton
+         countryTextField
         ].forEach { view.addSubview($0) }
     }
     
     // MARK: - Constraints
     private func setupConstraints() {
-        profileLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide)
-            make.centerX.equalToSuperview()
-        }
-        updateButton.snp.makeConstraints { make in
-            make.centerY.equalTo(profileLabel)
-            make.trailing.equalTo(nicknameTextField)
-        }
-        
         profileImageView.snp.makeConstraints { make in
-            make.top.equalTo(profileLabel.snp.bottom).offset(20)
+            make.top.equalTo(view.safeAreaLayoutGuide).offset(20)
             make.centerX.equalToSuperview()
             make.width.height.equalTo(100)
         }
