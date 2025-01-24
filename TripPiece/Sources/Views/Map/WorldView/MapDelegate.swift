@@ -20,7 +20,6 @@ extension WorldVC: MapDelegate {
 
             // VisitRecordsVC로 이동
             let visitRecordsVC = VisitRecordsVC()
-            visitRecordsVC.userId = userId
             visitRecordsVC.colorRecords = coloredCountries
             visitRecordsVC.cityIds = statsCountries.cityIds
             navigationController?.pushViewController(visitRecordsVC, animated: true)

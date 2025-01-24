@@ -7,7 +7,6 @@ import SwiftyToaster
 class ColoringVC: UIViewController {
     
     var cityData: SearchedCityResponse? // 받아올 도시 정보
-    var userId: Int?
     let defaultColors = ["6744FF", "FFB40F", "25CEC1", "FD2D69"]
     var selectedColors: [String] = []
 
@@ -308,9 +307,8 @@ class ColoringVC: UIViewController {
 
     @objc private func saveButtonTapped(_ sender: UIButton) {        // 서버에 해당 유저의 기록을 올릴 것
         guard let selectedColor = selectedButton?.accessibilityIdentifier else { return }
-        guard let userId = userId else { return }
         
-        self.getCountryStatsData(userId) { [weak self] result in
+        self.getCountryStatsData { [weak self] result in
             guard let self = self else { return }
             guard let data = result else { return }
             guard let cityData = self.cityData else { return }
@@ -354,7 +352,6 @@ class ColoringVC: UIViewController {
     //MARK: API call
     func colorCountry(_ color: String, completion: @escaping (Result<Any, Error>) -> Void) {
         guard
-            let userId = userId,
             let cityData = cityData,
             let countryCode = CountryEnum.find(byName: cityData.countryName)?.rawValue
         else {
@@ -362,7 +359,6 @@ class ColoringVC: UIViewController {
         }
 
         let data = MapRequest(
-            userId: userId,
             countryCode: "\(countryCode)",
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
@@ -385,7 +381,6 @@ class ColoringVC: UIViewController {
     
     func editColor(_ color: String, completion: @escaping (Result<Any, Error>) -> Void) {
         guard
-            let userId = userId,
             let cityData = cityData,
             let countryCode = CountryEnum.find(byName: cityData.countryName)?.rawValue
         else {
@@ -393,7 +388,6 @@ class ColoringVC: UIViewController {
         }
 
         let data = MapRequest(
-            userId: userId,
             countryCode: "\(countryCode)",
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
@@ -415,8 +409,8 @@ class ColoringVC: UIViewController {
     }
     
     
-    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
-        MapManager.getCountryStats(userId: userId) { result in
+    func getCountryStatsData(completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats { result in
             switch result {
             case .success(let statsInfo):
                 completion(statsInfo.result)

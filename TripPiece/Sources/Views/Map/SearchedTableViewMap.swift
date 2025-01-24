@@ -52,7 +52,6 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
             
         let selectedCityVC = SelectedCityVC()
         selectedCityVC.cityData = cityData
-        selectedCityVC.userId = userId
         // 모달로 표시할 때 기존 뷰 컨트롤러를 배경에 반투명하게 보이도록 설정
         selectedCityVC.modalPresentationStyle = .overCurrentContext
         selectedCityVC.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해

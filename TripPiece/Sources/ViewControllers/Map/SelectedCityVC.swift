@@ -5,7 +5,6 @@ import UIKit
 class SelectedCityVC: UIViewController {
     
     var cityData: SearchedCityResponse? // 받아올 도시 정보
-    var userId: Int?
 
     
     // MARK: - UI Components
@@ -231,7 +230,6 @@ class SelectedCityVC: UIViewController {
         coloringVC.modalPresentationStyle = .overCurrentContext
         coloringVC.modalTransitionStyle = .crossDissolve
         coloringVC.cityData = cityData
-        coloringVC.userId = userId
         present(coloringVC, animated: true, completion: nil)
     }
     

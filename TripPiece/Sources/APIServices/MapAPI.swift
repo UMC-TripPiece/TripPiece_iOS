@@ -4,8 +4,8 @@ import Foundation
 import Moya
 
 enum MapAPI {
-    case getUserMap(userId: Int)
-    case getUserMapStats(userId: Int)
+    case getUserMap
+    case getUserMapStats
     case getMapSearch(keyword: String)
     case getMapMarkers
     
@@ -25,8 +25,8 @@ extension MapAPI: TargetType {
 
     var path: String {
         switch self {
-        case .getUserMap(let userId): return "maps/\(userId)"
-        case .getUserMapStats(let userId): return "maps/stats/\(userId)"
+        case .getUserMap: return "maps"
+        case .getUserMapStats: return "maps/stats"
         case .getMapSearch(let keyword): return "maps/search"
         case .getMapMarkers: return "maps/markers"
             

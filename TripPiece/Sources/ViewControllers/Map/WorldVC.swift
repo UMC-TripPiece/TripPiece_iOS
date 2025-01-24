@@ -8,7 +8,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public var searchResults: [SearchedCityResponse] = []
     public var coloredCountries: [ColorVisitRecord] = []
     public var statsCountries: StatsVisitRecord = StatsVisitRecord(countryCount: 0, cityCount: 0, countryCodes: [], cityIds: [])
-    public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
         let navBar = GradientNavigationBar(title: "여행자님의 세계지도")
@@ -144,8 +143,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     
     // NotificationCenter에서 호출할 메서드
     @objc private func handleChangeMapColorNotification(_ notification: Notification) {
-        guard let userId = userId else { return }
-        getCountryColorsData(userId) { colorInfo in
+        getCountryColorsData { colorInfo in
             if let data = colorInfo {
                 DispatchQueue.main.async {
                     self.coloredCountries = data
@@ -182,14 +180,13 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     func getUserData() {
         getUserId { userInfo in
             if let userInfo = userInfo {
-                self.userId = userInfo.userId
-                self.getCountryStatsData(userInfo.userId) { statsInfo in
+                self.getCountryStatsData { statsInfo in
                     if let data = statsInfo {
                         self.statsCountries = data
                         self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg, visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
                     }
                 }
-                self.getCountryColorsData(userInfo.userId) { colorInfo in
+                self.getCountryColorsData { colorInfo in
                     if let data = colorInfo {
                         self.coloredCountries = data
                         self.setUpCountryColor(data)
@@ -260,8 +257,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
     
 
-    func getCountryColorsData(_ userId: Int, completion: @escaping ([ColorVisitRecord]?) -> Void) {
-        MapManager.getCountryColors(userId: userId) { result in
+    func getCountryColorsData(completion: @escaping ([ColorVisitRecord]?) -> Void) {
+        MapManager.getCountryColors { result in
             switch result {
             case .success(let colorInfo):
                 completion(colorInfo.result)
@@ -272,8 +269,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
-        MapManager.getCountryStats(userId: userId) { result in
+    func getCountryStatsData(completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats { result in
             switch result {
             case .success(let statsInfo):
                 completion(statsInfo.result)
