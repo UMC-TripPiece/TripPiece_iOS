@@ -3,7 +3,7 @@
 import Foundation
 
 struct CreateEmojiPieceRequest : Codable {
-    let travelId : String
+    let travelId : Int
     let description : String
     let emojis : [String]
 }

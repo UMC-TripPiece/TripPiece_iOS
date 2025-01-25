@@ -17,15 +17,18 @@ class RecordButton: UIButton {
         stackView.axis = .vertical
         stackView.alignment = .center
         stackView.spacing = 3
+        stackView.isUserInteractionEnabled = false
 
         let emojiLabel = UILabel()
         emojiLabel.text = emoji
         emojiLabel.font = UIFont.systemFont(ofSize: 30)
+        emojiLabel.isUserInteractionEnabled = false
 
         let titleLabel = UILabel()
         titleLabel.text = title
         titleLabel.font = UIFont.systemFont(ofSize: 14)
         titleLabel.textColor = .darkGray
+        titleLabel.isUserInteractionEnabled = false
 
         stackView.addArrangedSubview(emojiLabel)
         stackView.addArrangedSubview(titleLabel)

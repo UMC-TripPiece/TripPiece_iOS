@@ -67,6 +67,8 @@ class OngoingLogVC: UIViewController {
         setupUI()
         fetchTravelSummary()
         configureMissionCell()
+        configureRecordButtons()
+        navigationItem.hidesBackButton = true // 뒤로 버튼 숨기기
     }
 
     private func setupUI() {
@@ -83,6 +85,7 @@ class OngoingLogVC: UIViewController {
         recordStack.axis = .horizontal
         recordStack.spacing = 8
         recordStack.distribution = .fillEqually
+        recordStack.isUserInteractionEnabled = true
 
         view.addSubview(recordStack)
         view.addSubview(endTripButton)
@@ -93,17 +96,18 @@ class OngoingLogVC: UIViewController {
         }
 
         travelSummary.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+            make.top.equalToSuperview().offset(50)
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
         xButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.top.equalToSuperview().offset(89)
             make.trailing.equalToSuperview().offset(-25)
+            make.width.height.equalTo(25)
         }
         
         recordStatusLabel.snp.makeConstraints { make in
-            make.top.equalTo(travelSummary.snp.bottom).offset(16)
+            make.top.equalToSuperview().offset(265)
             make.leading.equalToSuperview().offset(16)
         }
         
@@ -119,7 +123,7 @@ class OngoingLogVC: UIViewController {
         
         missionCell.snp.makeConstraints { make in
             make.top.equalTo(recordMissionLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(30)
+            make.leading.trailing.equalToSuperview()
             make.height.equalTo(180)
         }
 
@@ -136,7 +140,10 @@ class OngoingLogVC: UIViewController {
     }
     //MARK: - Function
     @objc private func closeView() {
-        dismiss(animated: true, completion: nil)
+//        dismiss(animated: true, completion: nil)
+        print("dkddk나는 바보")
+        navigationController?.popViewController(animated: true)
+
     }
     
     // MARK: - Fetch Data
@@ -198,4 +205,34 @@ class OngoingLogVC: UIViewController {
         ]
         missionCell.configure(images: images)
     }
+    
+    // 버튼에 액션 추가
+    private func configureRecordButtons() {
+        for (index, button) in recordButtons.enumerated() {
+            button.tag = index // 버튼 태그 설정 (버튼 식별용)
+            button.addTarget(self, action: #selector(handleRecordButtonTapped(_:)), for: .touchUpInside)
+        }
+    }
+    @objc private func handleRecordButtonTapped(_ sender: UIButton) {
+        guard let travelId = progressTravelsInfo?.id else {
+                print("Travel ID is nil")
+                return
+            }
+        print("Button with tag \(sender.tag) clicked")
+
+        switch sender.tag {
+        case 0: // "사진" 버튼
+            let photoVC = PhotoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(photoVC, animated: true)
+        case 1: // "동영상" 버튼
+            let videoVC = VideoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(videoVC, animated: true)
+        case 2: // "메모" 버튼
+            let memoVC = MemoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(memoVC, animated: true)
+        default:
+            break
+        }
+    }
+
 }
