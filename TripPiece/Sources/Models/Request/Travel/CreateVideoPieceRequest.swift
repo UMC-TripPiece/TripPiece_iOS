@@ -3,7 +3,7 @@
 import Foundation
 
 struct CreateVideoPieceRequest : Codable {
-    let travelId : String
+    let travelId : Int
     let description : String
     let video : Data
 }

@@ -3,7 +3,7 @@
 import Foundation
 
 struct CreateMemoPieceRequest : Codable {
-    let travelId : String
+    let travelId : Int
     let description : String
 }
 
