@@ -68,6 +68,7 @@ class OngoingLogVC: UIViewController {
         fetchTravelSummary()
         configureMissionCell()
         configureRecordButtons()
+        navigationItem.hidesBackButton = true // 뒤로 버튼 숨기기
     }
 
     private func setupUI() {
@@ -95,13 +96,14 @@ class OngoingLogVC: UIViewController {
         }
 
         travelSummary.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(5)
+            make.top.equalToSuperview().offset(50)
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
         xButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(10)
+            make.top.equalToSuperview().offset(89)
             make.trailing.equalToSuperview().offset(-25)
+            make.width.height.equalTo(25)
         }
         
         recordStatusLabel.snp.makeConstraints { make in
@@ -121,7 +123,6 @@ class OngoingLogVC: UIViewController {
         
         missionCell.snp.makeConstraints { make in
             make.top.equalTo(recordMissionLabel.snp.bottom).offset(16)
-//            make.leading.trailing.equalToSuperview().inset(30)
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(180)
         }
@@ -139,7 +140,10 @@ class OngoingLogVC: UIViewController {
     }
     //MARK: - Function
     @objc private func closeView() {
-        dismiss(animated: true, completion: nil)
+//        dismiss(animated: true, completion: nil)
+        print("dkddk나는 바보")
+        navigationController?.popViewController(animated: true)
+
     }
     
     // MARK: - Fetch Data
@@ -214,6 +218,8 @@ class OngoingLogVC: UIViewController {
                 print("Travel ID is nil")
                 return
             }
+        print("Button with tag \(sender.tag) clicked")
+
         switch sender.tag {
         case 0: // "사진" 버튼
             let photoVC = PhotoLogViewController(travelId: travelId)
