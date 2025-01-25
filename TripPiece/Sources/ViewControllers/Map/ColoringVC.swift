@@ -320,7 +320,12 @@ class ColoringVC: UIViewController {
                     switch editResult {
                     case .success(let message):
                         DispatchQueue.main.async {
-                            self.dismissMultipleTimes(from: self) {
+                            // 수정 필요.
+                            /*self.dismissMultipleTimes(from: self) {
+                                NotificationCenter.default.post(name: .updateCollectionView, object: nil)
+                                NotificationCenter.default.post(name: .changeMapColor, object: nil)
+                            }*/
+                            self.dismiss(animated: true) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
                             }
