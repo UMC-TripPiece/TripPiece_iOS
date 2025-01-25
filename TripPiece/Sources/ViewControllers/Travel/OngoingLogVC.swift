@@ -67,6 +67,7 @@ class OngoingLogVC: UIViewController {
         setupUI()
         fetchTravelSummary()
         configureMissionCell()
+        configureRecordButtons()
     }
 
     private func setupUI() {
@@ -83,6 +84,7 @@ class OngoingLogVC: UIViewController {
         recordStack.axis = .horizontal
         recordStack.spacing = 8
         recordStack.distribution = .fillEqually
+        recordStack.isUserInteractionEnabled = true
 
         view.addSubview(recordStack)
         view.addSubview(endTripButton)
@@ -103,7 +105,7 @@ class OngoingLogVC: UIViewController {
         }
         
         recordStatusLabel.snp.makeConstraints { make in
-            make.top.equalTo(travelSummary.snp.bottom).offset(16)
+            make.top.equalToSuperview().offset(265)
             make.leading.equalToSuperview().offset(16)
         }
         
@@ -119,7 +121,8 @@ class OngoingLogVC: UIViewController {
         
         missionCell.snp.makeConstraints { make in
             make.top.equalTo(recordMissionLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(30)
+//            make.leading.trailing.equalToSuperview().inset(30)
+            make.leading.trailing.equalToSuperview()
             make.height.equalTo(180)
         }
 
@@ -198,4 +201,32 @@ class OngoingLogVC: UIViewController {
         ]
         missionCell.configure(images: images)
     }
+    
+    // 버튼에 액션 추가
+    private func configureRecordButtons() {
+        for (index, button) in recordButtons.enumerated() {
+            button.tag = index // 버튼 태그 설정 (버튼 식별용)
+            button.addTarget(self, action: #selector(handleRecordButtonTapped(_:)), for: .touchUpInside)
+        }
+    }
+    @objc private func handleRecordButtonTapped(_ sender: UIButton) {
+        guard let travelId = progressTravelsInfo?.id else {
+                print("Travel ID is nil")
+                return
+            }
+        switch sender.tag {
+        case 0: // "사진" 버튼
+            let photoVC = PhotoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(photoVC, animated: true)
+        case 1: // "동영상" 버튼
+            let videoVC = VideoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(videoVC, animated: true)
+        case 2: // "메모" 버튼
+            let memoVC = MemoLogViewController(travelId: travelId)
+            navigationController?.pushViewController(memoVC, animated: true)
+        default:
+            break
+        }
+    }
+
 }
