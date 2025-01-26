@@ -140,10 +140,7 @@ class OngoingLogVC: UIViewController {
     }
     //MARK: - Function
     @objc private func closeView() {
-//        dismiss(animated: true, completion: nil)
-        print("dkddk나는 바보")
         navigationController?.popViewController(animated: true)
-
     }
     
     // MARK: - Fetch Data

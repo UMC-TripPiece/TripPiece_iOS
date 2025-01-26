@@ -123,6 +123,7 @@ class VideoLogViewController: UIViewController {
     override func viewDidLoad() {
         setupDismissKeyboardGesture()
         super.viewDidLoad()
+        navigationItem.hidesBackButton = true
         self.view.backgroundColor = .white
         self.view.addSubview(customNavBar)
         setupUI()
