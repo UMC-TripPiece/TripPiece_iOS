@@ -49,7 +49,7 @@ final class BearerTokenPlugin: PluginType {
                     completion(nil)
                 }
             case .failure(let error):
-                Toaster.shared.makeToast("\(error.localizedDescription)")
+//                Toaster.shared.makeToast("\(error.localizedDescription)")
                 if let response = error.response {
                     print("Response Body: \(String(data: response.data, encoding: .utf8) ?? "")")
                 }
