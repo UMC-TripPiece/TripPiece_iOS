@@ -12,11 +12,13 @@ extension ColoringVC: UICollectionViewDelegate, UICollectionViewDataSource {
         // 마지막 셀은 + 버튼
         if indexPath.item == selectedColors.count {
             let addButton = createButton(
-                image: UIImage(named: "addButton"),
+                image: UIImage(systemName: "plus")?.withRenderingMode(.alwaysTemplate),
                 target: self,
                 action: #selector(didTapAddButton(_:)),
                 buttonImageSize: CGSize(width: 20, height: 20)
             )
+            addButton.tintColor = UIColor(named: "Black3")
+            addButton.setImage(addButton.image(for: .normal)?.withRenderingMode(.alwaysTemplate),for: .normal)
             cell.configure(with: addButton)
             addButton.snp.makeConstraints { make in
                 make.center.equalToSuperview()
@@ -24,7 +26,7 @@ extension ColoringVC: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             // 기존 퍼즐 색상 버튼
             let color = selectedColors[indexPath.item]
-            let baseImage = UIImage(named: "Puzzle")
+            let baseImage = UIImage(named: "puzzle_purple")
             let coloredImage = baseImage?.tinted(with: UIColor(hex: color) ?? UIColor.black)
             let button = createButton(
                 image: coloredImage, // 이미지 이름을 동적으로 설정

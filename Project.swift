@@ -5,13 +5,22 @@ let project = Project(
     targets: [
         .target(
             name: "TripPiece",
-            destinations: .iOS,
+            destinations: .init([.iPhone]),
             product: .app,
-            bundleId: "io.tuist.TripPiece",
+            bundleId: "url.MyWorldApp.TripPieces",
+            deploymentTargets: .iOS("16.6"),
             infoPlist: .extendingDefault(
                 with: [
                     "UIUserInterfaceStyle" : "Light", // 다크모드 제거
+                    "UISupportedInterfaceOrientations" : ["UIInterfaceOrientationPortrait"], // 화면 방향 세로 고정
                     "UILaunchStoryboardName": "",
+                    "CFBundleDisplayName" : "여행조각",
+                    "CFBundleIcons": [
+                                "CFBundlePrimaryIcon": [
+                                    "CFBundleIconFiles": ["AppIcon"],
+                                    "UIPrerenderedIcon": true
+                                ]
+                            ],
                     "CFBundleDevelopmentRegion" : "ko_KR",
                     "UIApplicationSceneManifest": [
                         "UIApplicationSupportsMultipleScenes": false,

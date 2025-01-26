@@ -39,10 +39,6 @@ class CustomSearchTableView: UITableView {
         let maxVisibleRows = 7 // 표시할 최대 행 수
         let visibleRows = min(rowCount, maxVisibleRows)
         heightConstraint = (CGFloat(visibleRows) * rowHeight) + 55
-        /*UIView.animate(withDuration: 0.3) { // 애니메이션으로 높이 변경
-            self.view.layoutIfNeeded()
-        }*/
-        print("heightConstraint: \(heightConstraint)")
     }
     
 

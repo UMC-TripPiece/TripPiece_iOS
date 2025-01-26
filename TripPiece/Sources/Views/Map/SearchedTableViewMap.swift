@@ -50,9 +50,6 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
         guard let country = CountryEnum.find(byName: cityData.countryName) else { return }
         focusOnCountry(with: country)
             
-    // TODO: Macaw로 변환하면서 수정 못한 것 (?)
-    //        updateWorldViewUI(with: cityData["countryName"] ?? "한국")
-            
         let selectedCityVC = SelectedCityVC()
         selectedCityVC.cityData = cityData
         selectedCityVC.userId = userId
