@@ -5,6 +5,7 @@ import UIKit
 import SnapKit
 
 class XButton: UIButton {
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -19,9 +20,5 @@ class XButton: UIButton {
         let image = UIImage(systemName: "xmark", withConfiguration: config)
         setImage(image, for: .normal)
         tintColor = .white
-
-        snp.makeConstraints { make in
-            make.width.height.equalTo(25) // 터치 영역 확보
-        }
     }
 }

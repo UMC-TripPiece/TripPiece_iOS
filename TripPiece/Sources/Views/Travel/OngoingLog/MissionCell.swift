@@ -10,11 +10,11 @@ class MissionCell: UIView {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 264, height: 148)
-        layout.minimumLineSpacing = 50
-        
+        layout.minimumLineSpacing = 70
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.isPagingEnabled = true
+        collectionView.decelerationRate = .fast
+        collectionView.isPagingEnabled = false
         collectionView.backgroundColor = .clear
         collectionView.dataSource = self
         collectionView.delegate = self
@@ -78,10 +78,47 @@ extension MissionCell: UICollectionViewDataSource, UICollectionViewDelegate {
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let pageIndex = round(scrollView.contentOffset.x / scrollView.frame.width)
-        pageControl.currentPage = Int(pageIndex)
+        guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
+
+        let cellWidthIncludingSpacing = layout.itemSize.width + layout.minimumLineSpacing
+        let currentIndex = round(scrollView.contentOffset.x / cellWidthIncludingSpacing)
+        pageControl.currentPage = Int(currentIndex)
+    }
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+            guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
+
+            let cellWidthIncludingSpacing = layout.itemSize.width + layout.minimumLineSpacing
+
+            // 현재 인덱스를 계산
+            let estimatedIndex = scrollView.contentOffset.x / cellWidthIncludingSpacing
+            let index: Int
+            if velocity.x > 0 {
+                index = Int(ceil(estimatedIndex)) // 오른쪽으로 스크롤
+            } else if velocity.x < 0 {
+                index = Int(floor(estimatedIndex)) // 왼쪽으로 스크롤
+            } else {
+                index = Int(round(estimatedIndex)) // 속도가 없으면 가까운 셀로
+            }
+
+            // 타겟 오프셋을 설정
+            let horizontalInset = (collectionView.frame.width - layout.itemSize.width) / 2
+            targetContentOffset.pointee = CGPoint(x: CGFloat(index) * cellWidthIncludingSpacing, y: 0)
     }
 }
+extension MissionCell: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return .zero }
+
+        let cellWidth = layout.itemSize.width
+        let spacing = layout.minimumLineSpacing
+        let totalWidth = cellWidth + spacing
+
+        // 첫 번째와 마지막 셀을 가운데 정렬하기 위한 여백 계산
+        let horizontalInset = (collectionView.frame.width - cellWidth) / 2
+        return UIEdgeInsets(top: 0, left: horizontalInset, bottom: 0, right: horizontalInset)
+    }
+}
+
 
 class MissionItemCell: UICollectionViewCell {
     private let imageView: UIImageView = {

@@ -3,6 +3,7 @@
 import Foundation
 
 struct ProgressTravelsInfo: Codable {
+    let id: Int
     let profileImg: String
     let nickname: String
     let title: String

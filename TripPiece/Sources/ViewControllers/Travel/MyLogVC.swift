@@ -308,9 +308,20 @@ class MyLogVC: UIViewController {
     
     
     @objc private func getProgressTravel() {
-        let viewController = OngoingLogVC()
-        viewController.modalPresentationStyle = .fullScreen
-        self.present(viewController, animated: true, completion: nil)
+        guard let tabBarController = self.tabBarController else {
+            print("TabBarController is nil")
+            return
+        }
+        tabBarController.selectedIndex = 1 // MyLogVC가 두 번째 탭이므로 index 1
+            
+        // 선택된 탭의 네비게이션 컨트롤러 가져오기
+        if let navigationController = tabBarController.selectedViewController as? UINavigationController {
+            let viewController = OngoingLogVC()
+            navigationController.pushViewController(viewController, animated: true)
+        }
+//        let viewController = OngoingLogVC()
+//        viewController.modalPresentationStyle = .fullScreen
+//        self.present(viewController, animated: true, completion: nil)
     }
     
     func updateTravelLogStackView() {
