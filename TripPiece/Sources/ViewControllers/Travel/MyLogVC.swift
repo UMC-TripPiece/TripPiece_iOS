@@ -132,7 +132,7 @@ class MyLogVC: UIViewController {
     
     private lazy var emptyPieceLabel: UILabel = {
         let label = UILabel()
-        label.text = "아직 기록한 조각 없어요."
+        label.text = "아직 기록한 조각이 없어요."
         label.textColor = Constants.Colors.black3
         label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
@@ -169,6 +169,7 @@ class MyLogVC: UIViewController {
             switch result {
             case .success(let TravelsInfo):
                     self.fetchedTravelsInfo = TravelsInfo.result // 데이터를 저장
+                print(self.fetchedTravelsInfo)
                     self.updateTravelLogStackView()
                     self.updateGoogleMap()
             case .failure(let error):
@@ -326,7 +327,7 @@ class MyLogVC: UIViewController {
     
     func updateTravelLogStackView() {
         travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        if allPiece.isEmpty {
+        if fetchedTravelsInfo.isEmpty {
             // 데이터가 없을 때
             emptyStateLabel.isHidden = false
             travelLogStackView.isHidden = true
@@ -366,7 +367,7 @@ class MyLogVC: UIViewController {
             MyLogManager.fetchGeocoding(country: travelsInfo.countryName, city: travelsInfo.cityName) { [weak self] result in
                 switch result {
                 case .success(let geocodingResponse):
-                    print(geocodingResponse)
+//                    print(geocodingResponse)
                     if let result = geocodingResponse.results.first {
                         self?.appendMarker(position: CLLocationCoordinate2D(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng), color: UIColor.red, imageURL: travelsInfo.thumbnail, zIndex: index)
                     }
@@ -407,7 +408,7 @@ class MyLogVC: UIViewController {
     func updateTripPieceStackView(items: [TripPieceInfo]) { //여행 조각 관련 함수
         tripPieceStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        if fetchedTravelsInfo.isEmpty {
+        if allPiece.isEmpty {
             // 데이터가 없을 때
             emptyPieceLabel.isHidden = false
         } else {

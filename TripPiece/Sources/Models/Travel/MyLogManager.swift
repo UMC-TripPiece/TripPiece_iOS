@@ -50,7 +50,7 @@ class MyLogManager {
             switch result {
             case .success(let response):
                 if let decodedString = String(data: response.data, encoding: .utf8) {
-                    print("Decoded String: \(decodedString)")
+//                    print("Decoded String: \(decodedString)")
                 }
                 do {
                     let data = try JSONDecoder().decode(GeocodingResponse.self, from: response.data)

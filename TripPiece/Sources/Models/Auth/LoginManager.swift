@@ -11,7 +11,7 @@ extension SignUpVC {
         APIManager.AuthProvider.request(.postEmailSend(email: email)) { result in
             switch result {
             case .success(let response):
-                print(response)
+                print("response ==== \(response)")
                 if response.statusCode == 200 {
                     completion(true)
                 } else {
