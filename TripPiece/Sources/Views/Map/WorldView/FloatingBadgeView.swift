@@ -34,6 +34,7 @@ class FloatingBadgeView: UIView {
         label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         label.textAlignment = .left
+        label.numberOfLines = 2
         return label
     }()
     

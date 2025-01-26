@@ -212,7 +212,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         floatingBadgeView.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(42)
             make.leading.trailing.equalToSuperview().inset(21)
-            make.height.equalToSuperview().multipliedBy(0.131516588)
+            make.height.equalTo(DynamicPadding.dynamicValue(120))
+//            make.height.equalToSuperview().multipliedBy(0.131516588)
             make.centerX.equalToSuperview()
         }
     }

@@ -11,7 +11,7 @@ struct DefaultResponse<T: Codable>: Codable {
 
 struct DefaultMultiResponse<T: Codable>: Codable {
     let isSuccess: Bool
-    let code: String
+    let code: String?
     let message: String
     let result: [T]
 }
