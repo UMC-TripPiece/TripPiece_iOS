@@ -362,7 +362,7 @@ class ExploreVC: UIViewController, UITextFieldDelegate {
             let cell = TrendingCityCardCell()
             let title = "\(TrendingResponse.city), \(TrendingResponse.country)"
             let subtitle = "\(TrendingResponse.count)명이 여행했어요"
-            //TODO: 데이터 null 아니게 되는 거면 수정 필요 (데이터 구조도)
+            //TODO: 데이터 null 아니게 되는 거면 수정 필요
             cell.configure(imageURL: TrendingResponse.thumbnail ?? "https://via.placeholder.com/150", title: title, subtitle: subtitle)
             trendingCitiesStackView.addArrangedSubview(cell)
         }
