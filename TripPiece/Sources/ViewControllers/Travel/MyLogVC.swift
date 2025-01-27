@@ -302,7 +302,7 @@ class MyLogVC: UIViewController {
     // MARK: func 세팅
     @objc private func startTravel() {
         //TODO: 여행기 생성 클릭 시 넘어가는 뷰
-        let viewController = TestVC()
+        let viewController = StartLogVC()
         viewController.modalPresentationStyle = .fullScreen
         self.present(viewController, animated: true, completion: nil)
     }

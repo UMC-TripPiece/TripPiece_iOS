@@ -102,6 +102,7 @@ class MemoLogViewController: UIViewController {
     //MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationItem.hidesBackButton = true
         self.view.backgroundColor = .white
         self.view.addSubview(customNavBar)
         setupUI()
