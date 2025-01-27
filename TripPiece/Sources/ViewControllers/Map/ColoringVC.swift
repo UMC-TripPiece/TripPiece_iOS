@@ -26,7 +26,7 @@ class ColoringVC: UIViewController {
         button.tintColor = UIColor(named: "Black3")
         button.isUserInteractionEnabled = true
         button.snp.makeConstraints { make in
-            make.width.height.equalTo(14)
+            make.width.height.equalTo(16)
         }
         return button
     }()
@@ -270,26 +270,36 @@ class ColoringVC: UIViewController {
     }
     
     @objc private func dismissButtonTapped(_ sender: UIButton) {    // 모달로 표시된 뷰 컨트롤러를 전부 닫음
-        self.presentingViewController?.presentingViewController?.dismiss(animated: true, completion: nil)
+        dismissMultipleTimes(from: self, completion: nil)
     }
     
     
-    func dismissMultipleTimes(from viewController: UIViewController?, completion: @escaping () -> Void) {
-        guard let viewController = viewController else {
-            completion()
+    private func dismissMultipleTimes(from viewController: UIViewController?, completion: (() -> Void)?) {
+        guard let currentViewController = viewController else {
+            completion?() // 더 이상 dismiss할 ViewController가 없으면 종료
             return
         }
-                
-        // 두 번의 dismiss를 동시에 실행
-        if let firstPresentingViewController = viewController.presentingViewController?.presentingViewController {
-            viewController.dismiss(animated: false) // 첫 번째 뷰 닫기
-            firstPresentingViewController.dismiss(animated: true, completion: completion) // 두 번째 뷰 닫기
-        } else if let firstPresentingViewController = viewController.presentingViewController {
-                viewController.dismiss(animated: true, completion: completion) // 한 번만 닫기
+        
+        // 현재 ViewController를 present한 VC의 타입 확인
+        if let presentingVC = currentViewController.presentingViewController {
+            if presentingVC is UINavigationController {
+                // VisitRecordsVC가 presenting한 경우 -> 한 번만 dismiss
+                currentViewController.dismiss(animated: true, completion: completion)
+            } else if presentingVC is SelectedCityVC {
+                // SelectColorVC가 presenting한 경우 -> 두 번 dismiss
+                currentViewController.dismiss(animated: true) {
+                    presentingVC.dismiss(animated: true, completion: completion)
+                }
+            } else {
+                // 조건에 해당하지 않는 경우 그냥 종료
+                completion?()
+            }
         } else {
-            completion()
+            // presentingViewController가 없는 경우 종료
+            completion?()
         }
     }
+
     
     private func dismissWhenEditing() {
         // 현재 화면에서 네비게이션 스택 닫기
@@ -320,12 +330,7 @@ class ColoringVC: UIViewController {
                     switch editResult {
                     case .success(let message):
                         DispatchQueue.main.async {
-                            // 수정 필요.
-                            /*self.dismissMultipleTimes(from: self) {
-                                NotificationCenter.default.post(name: .updateCollectionView, object: nil)
-                                NotificationCenter.default.post(name: .changeMapColor, object: nil)
-                            }*/
-                            self.dismiss(animated: true) {
+                            self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
                             }
@@ -340,6 +345,7 @@ class ColoringVC: UIViewController {
                     switch result {
                     case .success(let message):
                         DispatchQueue.main.async {
+                            // 무조건 2번 dismiss
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
                             }

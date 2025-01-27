@@ -36,7 +36,7 @@ extension WorldVC: UIScrollViewDelegate {
             self.scrollView.setContentOffset(newContentOffset, animated: false) // Smooth scroll with animation block
         }, completion: { _ in
             // Ensure the content scale factor is updated after animation
-            self.mapView.contentScaleFactor = self.scrollView.zoomScale
+            self.mapView.contentScaleFactor = self.scrollView.zoomScale+3
         })
     }
 }

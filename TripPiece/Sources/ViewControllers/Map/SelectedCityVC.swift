@@ -219,7 +219,19 @@ class SelectedCityVC: UIViewController {
     
     // 여행 기록 시작
     @objc func logStartButtonTapped(_ sender: UIButton) {
-        print("여행 기록 시작 뷰")
+        let startLogVC = StartLogVC()
+        if let cityData = cityData {
+            startLogVC.rootView.titleLabel.text = "\(cityData.countryImage) \(cityData.cityName), \(cityData.countryName)"
+            startLogVC.travelRequest.updateInfo(cityName: cityData.cityName, countryName: cityData.countryName)
+            startLogVC.updateStartLogButtonState()
+            startLogVC.showAddphotoBtnController()
+        } else {
+            startLogVC.rootView.titleLabel.text = "도시 추가"
+        }
+
+        
+        startLogVC.modalPresentationStyle = .fullScreen
+        self.present(startLogVC, animated: true, completion: nil)
     }
     
     
