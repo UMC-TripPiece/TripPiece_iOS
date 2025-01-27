@@ -11,14 +11,14 @@ import SnapKit
 class CustomNavigationLogoBar: UINavigationBar {
     private let logoImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "logo")
+        imageView.image = UIImage(named: "colorlogo")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
 
     private lazy var iconImageView: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.setImage(UIImage(systemName: "arrow.left")?.withTintColor(Constants.Colors.black3 ?? .systemGray, renderingMode: .alwaysOriginal), for: .normal)
         button.addTarget(self, action: #selector(back), for: .touchUpInside)
         return button
     }()

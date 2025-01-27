@@ -3,6 +3,12 @@
 import UIKit
 import SnapKit
 
+extension UIViewController {
+    func postPuzzleCompletion(index: Int) {
+        NotificationCenter.default.post(name: .puzzlePieceCompleted, object: index)
+    }
+}
+
 class OngoingLogVC: UIViewController {
 
     private lazy var backgroundImageView: UIImageView = {
@@ -49,8 +55,32 @@ class OngoingLogVC: UIViewController {
     
     private lazy var missionCell: MissionCell = {
         let cell = MissionCell()
+        cell.onClickCell = { [weak self] missionEnum in
+            self?.onClickMissionCell(missionEnum: missionEnum)
+        }
         return cell
     }()
+    
+    private func onClickMissionCell(missionEnum: MissionEnum) {
+        guard let travelId = progressTravelsInfo?.id else {
+            print("Travel ID가 없습니다.")
+            return
+        }
+        switch missionEnum {
+        case .selfie:
+            let mission1VC = SelfieLogVC(travelId: travelId)
+            mission1VC.modalPresentationStyle = .fullScreen
+            self.present(mission1VC, animated: true, completion: nil)
+        case .liveVideo:
+            let mission2VC = LiveVideoLogVC(travelId: travelId)
+            mission2VC.modalPresentationStyle = .fullScreen
+            self.present(mission2VC, animated: true, completion: nil)
+        case .emoji:
+            let mission3VC = EmojiLogVC(travelId: travelId)
+            mission3VC.modalPresentationStyle = .fullScreen
+            self.present(mission3VC, animated: true, completion: nil)
+        }
+    }
     
     private lazy var recordButtons: [RecordButton] = [
         RecordButton(emoji: "📷", title: "사진", borderColor: Constants.Colors.mainPurple ?? .purple),
@@ -59,7 +89,11 @@ class OngoingLogVC: UIViewController {
         RecordButton(emoji: "😁", title: "이모지", borderColor: Constants.Colors.mainPink ?? .systemPink)
     ]
     
-    private lazy var endTripButton = EndTripButton()
+    private lazy var endTripButton: EndTripButton = {
+        let button = EndTripButton()
+        button.addTarget(self, action: #selector(endTravelButtonTapped), for: .touchUpInside)
+        return button
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -234,5 +268,18 @@ class OngoingLogVC: UIViewController {
             break
         }
     }
-
+    
+    @objc private func endTravelButtonTapped() {
+        guard let travelId = progressTravelsInfo?.id else {
+            print("Travel ID가 없습니다.")
+            return
+        }
+        // 이동할 뷰 컨트롤러 생성
+        let endTravelAlertVC = EndTravelAlertVC(travelId: travelId)
+        // 모달로 표시할 때 기존 뷰 컨트롤러를 배경에 반투명하게 보이도록 설정
+        endTravelAlertVC.modalPresentationStyle = .overCurrentContext
+        endTravelAlertVC.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해
+        // 화면 이동
+        self.present(endTravelAlertVC, animated: true, completion: nil)
+    }
 }

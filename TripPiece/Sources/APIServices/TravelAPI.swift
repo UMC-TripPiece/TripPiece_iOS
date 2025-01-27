@@ -9,6 +9,8 @@ enum TravelAPI {
     case getTravels
     case getTravelsInfo(travelId: Int)
     case getTravelsInfoDetails(travelId: Int)
+    case getThumbnail(travelId: Int)
+    case getAllPictures(travelId: Int)
     
     //여행기 생성
     case postCreateTravel(param: CreateTravelRequest)
@@ -23,6 +25,9 @@ enum TravelAPI {
     
     //여행 완료
     case postTravelEnd(travelId: Int)
+    
+    // 썸네일 수정
+    case postUpdateThumbnail(param: UpdateThumbnailRequest)
 }
 
 extension TravelAPI: TargetType {
@@ -38,7 +43,9 @@ extension TravelAPI: TargetType {
         case .getProgressTravels: return "mytravels"
         case .getTravels: return "travels"
         case .getTravelsInfo(let travelId): return "travels/\(travelId)"
-        case .getTravelsInfoDetails(let travelId): return "mytravels/\(travelId)/continue"
+        case .getTravelsInfoDetails(let travelId): return "mytravels/continue/\(travelId)"
+        case .getThumbnail(let travelId): return "mytravels/thumbnail/\(travelId)"
+        case .getAllPictures(let travelId): return "mytravels/update/\(travelId)"
             
         case .postCreateTravel: return "mytravels"
             
@@ -56,22 +63,25 @@ extension TravelAPI: TargetType {
             return "mytravels/emoji/\(param.travelId)"
             
         case .postTravelEnd(let travelId): return "mytravels/end/\(travelId)"
+            
+        case .postUpdateThumbnail(let param):
+            return "mytravels/thumbnail/update/\(param.travelId)"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .getProgressTravels, .getTravels, .getTravelsInfo, .getTravelsInfoDetails:
+        case .getProgressTravels, .getTravels, .getTravelsInfo, .getTravelsInfoDetails, .getThumbnail, .getAllPictures:
             return .get
         case .postCreateTravel, .postWherePiece, .postVideoPiece, .postSelfiePiece,
-                .postPicturePiece, .postMemoPiece, .postEmojiPiece, .postTravelEnd:
+                .postPicturePiece, .postMemoPiece, .postEmojiPiece, .postTravelEnd, .postUpdateThumbnail:
             return .post
         }
     }
     
     var task: Task {
         switch self {
-        case .getProgressTravels, .getTravels, .getTravelsInfo, .getTravelsInfoDetails:
+        case .getProgressTravels, .getTravels, .getTravelsInfo, .getTravelsInfoDetails, .getThumbnail, .getAllPictures:
             return .requestPlain
             
         case .postCreateTravel(let param):
@@ -82,7 +92,14 @@ extension TravelAPI: TargetType {
         case .postVideoPiece(let param):
             return .requestJSONEncodable(param)
         case .postSelfiePiece(let param):
-            return .requestJSONEncodable(param)
+            var multipartFormDatas: [MultipartFormData] = []
+            let memoDescription = ["description": param.memo]
+            if let memoData = try? JSONSerialization.data(withJSONObject: memoDescription, options: []),
+               let memoJSONString = String(data: memoData, encoding: .utf8) {
+                multipartFormDatas.append(MultipartFormData(provider: .data(memoJSONString.data(using: .utf8)!), name: "memo"))
+            }
+            multipartFormDatas.append(MultipartFormData(provider: .data(param.photo), name: "photo", fileName: "\(UUID().uuidString).png", mimeType: "image/png"))
+            return .uploadMultipart(multipartFormDatas)
         case .postPicturePiece(let param):
             return .requestJSONEncodable(param)
         case .postMemoPiece(let param):
@@ -92,6 +109,10 @@ extension TravelAPI: TargetType {
             
         case .postTravelEnd:
             return .requestPlain
+        case .postUpdateThumbnail(let param):
+            return .requestParameters(parameters: [
+                "pictureIdList": param.pictureIdList
+            ], encoding: URLEncoding.queryString)
         }
     }
     
