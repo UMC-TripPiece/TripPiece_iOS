@@ -10,6 +10,11 @@ import SnapKit
 
 class MemoLogViewController: UIViewController {
     
+    func didTapBackButton() {
+        print("didTapBackButton called")
+        navigationController?.popViewController(animated: true)
+    }
+    
     var travelId: Int
         
     init(travelId: Int) {
@@ -60,6 +65,14 @@ class MemoLogViewController: UIViewController {
         return view
     }()
     
+    // ✅ grayBackgroundView 안에 들어갈 스크롤 뷰
+    private lazy var grayScrollView: UIScrollView = {
+        let scroll = UIScrollView()
+        scroll.showsVerticalScrollIndicator = true
+        scroll.backgroundColor = .clear
+        return scroll
+    }()
+    
     private lazy var contentStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -102,7 +115,10 @@ class MemoLogViewController: UIViewController {
     //MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
+        // ID 반환
+        print("🚀 Travel ID: \(travelId)")
         navigationItem.hidesBackButton = true
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTap), name: .backButtonTapped, object: nil)
         self.view.backgroundColor = .white
         self.view.addSubview(customNavBar)
         setupUI()
@@ -117,14 +133,15 @@ class MemoLogViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(subtitleLabel)
         view.addSubview(titleImageView)
-        view.addSubview(addButton)
+//        view.addSubview(addButton)
         
         view.addSubview(grayBackgroundView)
-        grayBackgroundView.addSubview(contentStackView)
+        grayBackgroundView.addSubview(grayScrollView)
+        grayScrollView.addSubview(contentStackView)
         contentStackView.addArrangedSubview(memoTitleLabel)
         contentStackView.addArrangedSubview(createSpacer(height: 10))
         contentStackView.addArrangedSubview(memoTextView)
-        contentStackView.addArrangedSubview(createSpacer(height: 232))
+        contentStackView.addArrangedSubview(createSpacer(height: 256))
         contentStackView.addArrangedSubview(addButton)
 
         setConstraints()
@@ -143,6 +160,10 @@ class MemoLogViewController: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.height.equalTo(48)
         }
+        grayScrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview() // grayBackgroundView 전체를 채움
+        }
+
         titleLabel.snp.makeConstraints{ make in
             make.top.equalTo(customNavBar.snp.bottom).offset(41)
             make.leading.equalToSuperview().offset(21)
@@ -161,10 +182,12 @@ class MemoLogViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalToSuperview()
         }
-                
         contentStackView.snp.makeConstraints { make in
-            make.top.equalTo(grayBackgroundView.snp.top).offset(30)
-            make.leading.trailing.equalToSuperview().inset(21)
+//            make.top.equalTo(grayBackgroundView.snp.top).offset(30)
+//            make.leading.trailing.equalToSuperview().inset(21)
+            make.edges.equalTo(grayScrollView.contentLayoutGuide).inset(16)
+            make.width.equalTo(grayScrollView.frameLayoutGuide).inset(16)
+            
         }
         
         memoTextView.snp.makeConstraints { make in

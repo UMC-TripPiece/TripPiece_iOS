@@ -75,7 +75,7 @@ class RecordProgressView: UIView {
     }
 
     func configure(pictureCount: Int, videoCount: Int, memoCount: Int) {
-        let counts = [memoCount, pictureCount, 0, videoCount] // 3번째 칸은 0개로 고정
+        let counts = [pictureCount, videoCount, 0, memoCount] // 3번째 칸은 0개로 고정
         for (index, count) in counts.enumerated() {
             progressLabels[index].text = "\(count)"
         }

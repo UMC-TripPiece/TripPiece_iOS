@@ -124,6 +124,7 @@ class VideoLogViewController: UIViewController {
         setupDismissKeyboardGesture()
         super.viewDidLoad()
         navigationItem.hidesBackButton = true
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTap), name: .backButtonTapped, object: nil)
         self.view.backgroundColor = .white
         self.view.addSubview(customNavBar)
         setupUI()

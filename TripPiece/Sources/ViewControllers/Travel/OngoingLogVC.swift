@@ -286,19 +286,23 @@ class OngoingLogVC: UIViewController {
             return
         }
         print("Button with tag \(sender.tag) clicked")
-
+        
+        var viewController: UIViewController?
+        
         switch sender.tag {
         case 0:
-            let photoVC = PhotoLogViewController(travelId: travelId)
-            navigationController?.pushViewController(photoVC, animated: true)
+            viewController = PhotoLogViewController(travelId: travelId)
         case 1:
-            let videoVC = VideoLogViewController(travelId: travelId)
-            navigationController?.pushViewController(videoVC, animated: true)
+            viewController = VideoLogViewController(travelId: travelId)
         case 2:
-            let memoVC = MemoLogViewController(travelId: travelId)
-            navigationController?.pushViewController(memoVC, animated: true)
+            viewController = MemoLogViewController(travelId: travelId)
         default:
-            break
+            return
+        }
+        
+        if let viewController = viewController {
+            viewController.modalPresentationStyle = .fullScreen
+            self.present(viewController, animated: true, completion: nil)
         }
     }
 }
