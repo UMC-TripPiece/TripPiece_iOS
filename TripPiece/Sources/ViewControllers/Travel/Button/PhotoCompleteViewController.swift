@@ -56,7 +56,7 @@ class PhotoCompleteViewController: UIViewController {
     private lazy var previewImgStackView: UIStackView = {
             let stackView = UIStackView()
             stackView.axis = .vertical
-            stackView.spacing = 10
+            stackView.spacing = 0
             stackView.alignment = .center
             return stackView
         }()
@@ -64,7 +64,7 @@ class PhotoCompleteViewController: UIViewController {
     private lazy var previewStackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: [previewImgStackView, previewTextView])
         stackView.axis = .vertical
-        stackView.spacing = 20
+        stackView.spacing = 0
         stackView.alignment = .center
         return stackView
     }()
@@ -126,7 +126,7 @@ class PhotoCompleteViewController: UIViewController {
         }
         
         previewLabel.snp.makeConstraints{ make in
-            make.top.equalTo(dateLabel.snp.bottom).offset(114)
+            make.top.equalTo(dateLabel.snp.bottom).offset(100)
             make.leading.trailing.equalToSuperview().inset(24)
         }
 
@@ -137,7 +137,7 @@ class PhotoCompleteViewController: UIViewController {
         }
         
         previewStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(20)
+            make.edges.equalToSuperview().inset(30)
         }
         
         doneButton.snp.makeConstraints { make in
@@ -150,45 +150,65 @@ class PhotoCompleteViewController: UIViewController {
     //선택된 이미지 수에 따라 레이아웃 조정
     private func adjustLayoutBasedOnImageCount() {
         let imageCount = images.count
-        
-        if imageCount == 1 {
+        previewImgStackView.subviews.forEach { $0.removeFromSuperview() } // 기존 뷰 제거
+
+        switch imageCount {
+        case 1:
             // 이미지가 1개일 때 중앙에 크게 배치
             let imageView = createImageView(image: images[0])
+            previewImgStackView.axis = .vertical
+            previewImgStackView.alignment = .center
             previewImgStackView.addArrangedSubview(imageView)
+            
             imageView.snp.makeConstraints { make in
-                make.height.equalTo(72)
+                make.width.equalToSuperview().multipliedBy(0.8) // 부모 뷰 대비 80% 크기
+                make.height.equalTo(imageView.snp.width)
             }
-        } else if imageCount == 2 {
+            
+        case 2:
             // 이미지가 2개일 때 수평으로 배치
             previewImgStackView.axis = .horizontal
             previewImgStackView.distribution = .fillEqually
+            previewImgStackView.spacing = 10
             
             for image in images {
                 let imageView = createImageView(image: image)
                 previewImgStackView.addArrangedSubview(imageView)
             }
-        } else if imageCount == 3 {
-            // 이미지가 3개일 때 맨 위에 1개, 그 밑에 2개 배치
+            
+        case 3: // 이미지 3 개 일 때
+            // ✅ 개선: 상단 이미지 60%, 하단 40% 비율로 배치
+            previewImgStackView.axis = .vertical
+            previewImgStackView.spacing = 5
+            
             let upperImageView = createImageView(image: images[0])
             previewImgStackView.addArrangedSubview(upperImageView)
-            
+
             let lowerStackView = UIStackView()
             lowerStackView.axis = .horizontal
             lowerStackView.distribution = .fillEqually
-            lowerStackView.spacing = 10
+            lowerStackView.spacing = 5
             previewImgStackView.addArrangedSubview(lowerStackView)
-            
+
             for i in 1..<3 {
                 let imageView = createImageView(image: images[i])
                 lowerStackView.addArrangedSubview(imageView)
             }
-            
+
+            // ✅ 비율 조정 (상단 이미지가 너무 작지 않도록)
             upperImageView.snp.makeConstraints { make in
-                make.width.equalTo(144)
+                make.width.equalToSuperview().multipliedBy(0.9)
+                make.height.equalTo(upperImageView.snp.width).multipliedBy(0.5)
             }
-        } else if imageCount == 4 {
+
+            lowerStackView.snp.makeConstraints { make in
+                make.height.equalTo(upperImageView.snp.height).multipliedBy(0.65)
+            }
+            
+        case 4:
             // 이미지가 4개일 때 2x2 그리드로 배치
             previewImgStackView.axis = .vertical
+            previewImgStackView.spacing = 10
             
             let upperStackView = UIStackView()
             upperStackView.axis = .horizontal
@@ -211,9 +231,17 @@ class PhotoCompleteViewController: UIViewController {
                 let imageView = createImageView(image: images[i])
                 lowerStackView.addArrangedSubview(imageView)
             }
+            
+            [upperStackView, lowerStackView].forEach { stack in
+                stack.snp.makeConstraints { make in
+                    make.height.equalTo(previewImgStackView.snp.width).multipliedBy(0.5) // 정사각형 유지
+                }
+            }
+            
+        default:
+            break
         }
     }
-    
     private func createImageView(image: UIImage) -> UIImageView {
         let imageView = UIImageView(image: image)
         imageView.contentMode = .scaleAspectFill

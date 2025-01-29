@@ -9,10 +9,6 @@ import UIKit
 import SnapKit
 import AVFoundation
 
-import UIKit
-import SnapKit
-import AVFoundation
-
 class VideoLogViewController: UIViewController, UITextViewDelegate {
 
     // MARK: - Properties
@@ -433,6 +429,10 @@ extension VideoLogViewController: UIImagePickerControllerDelegate, UINavigationC
             return
         }
         self.selectedVideoURL = videoURL
+        if let videoURL = selectedVideoURL {
+            print("📌 선택한 동영상 파일 확장자: \(videoURL.pathExtension)")
+        }
+
 
         // (2) 썸네일 생성
         let videoThumbnail = getThumbnailImage(forUrl: videoURL)
