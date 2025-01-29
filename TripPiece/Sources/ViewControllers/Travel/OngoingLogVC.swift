@@ -3,8 +3,14 @@
 import UIKit
 import SnapKit
 
+import UIKit
+import SnapKit
+
 class OngoingLogVC: UIViewController {
 
+    // MARK: - 상단(비스크롤 영역)에 들어갈 UI
+
+    // 1) 배경 이미지
     private lazy var backgroundImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "ongoingLogTop")
@@ -13,22 +19,70 @@ class OngoingLogVC: UIViewController {
         return imageView
     }()
     
-    private lazy var scrollView: UIScrollView = {
-        return UIScrollView()
-    }()
-    
-    private lazy var travelSummary: TravelSummaryView = {
-        let view = TravelSummaryView()
-        view.isHidden = true
-        return view
-    }()
-        
+    // 2) 닫기 버튼
     private lazy var xButton: XButton = {
         let button = XButton()
         button.addTarget(self, action: #selector(closeView), for: .touchUpInside)
         return button
     }()
     
+    // 3) 여행 요약 뷰
+    private lazy var travelSummary: TravelSummaryView = {
+        let view = TravelSummaryView()
+        view.isHidden = true
+        return view
+    }()
+    
+    /**
+     배경 + X버튼을 겹쳐놓을 컨테이너
+     (배경이 전체를 채우고, 우측 상단에 버튼을 올리는 식)
+     */
+    private lazy var backgroundContainerView: UIView = {
+        let container = UIView()
+        
+        // 배경 이미지 전부 채움
+        container.addSubview(backgroundImageView)
+        backgroundImageView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview()
+            make.edges.equalToSuperview()
+            // 30% 높이 비율 (원하는 값으로 조정)
+            make.height.equalTo(UIScreen.main.bounds.height * 0.3)
+        }
+        
+        // travelSummary을 배경 위에 겹쳐서 좌측에
+        container.addSubview(travelSummary)
+        travelSummary.snp.makeConstraints { make in
+            make.centerY.equalTo(container.snp.centerY)
+            make.trailing.equalTo(container.snp.trailing).offset(-16)
+            make.leading.equalTo(container.snp.leading).offset(16)
+        }
+        
+        // xButton을 배경 위에 겹쳐서 우측 상단에
+        container.addSubview(xButton)
+        xButton.snp.makeConstraints { make in
+            make.centerY.equalTo(travelSummary.snp.centerY).offset(-36)
+            make.trailing.equalTo(container.snp.trailing).offset(-16)
+            make.width.height.equalTo(25)
+        }
+        
+        return container
+    }()
+    
+    
+    
+    // MARK: - 스크롤 뷰 및 나머지 UI
+
+    private lazy var scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
+    }()
+
+    // 스크롤 콘텐츠를 담는 컨테이너 뷰
+    private lazy var contentView: UIView = {
+        return UIView()
+    }()
+
     private lazy var recordStatusLabel: UILabel = {
         let label = UILabel()
         label.text = "기록 현황"
@@ -61,66 +115,79 @@ class OngoingLogVC: UIViewController {
     
     private lazy var endTripButton = EndTripButton()
 
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        
         setupUI()
         fetchTravelSummary()
         configureMissionCell()
         configureRecordButtons()
-        navigationItem.hidesBackButton = true // 뒤로 버튼 숨기기
+        
+        // 뒤로 버튼 숨기기
+        navigationItem.hidesBackButton = true
     }
 
-    private func setupUI() {
-        view.addSubview(backgroundImageView)
-        view.addSubview(travelSummary)
-        view.addSubview(xButton)
-        view.addSubview(recordStatusLabel)
-        view.addSubview(recordProgressView)
-        view.addSubview(recordMissionLabel)
-        view.addSubview(missionCell)
-        view.addSubview(endTripButton)
+    // MARK: - UI Setup
 
+    private func setupUI() {
+        
+        // (1) topStackView(배경+버튼+travelSummary) 먼저 추가
+        view.addSubview(backgroundContainerView)
+        backgroundContainerView.snp.makeConstraints { make in
+            // SafeArea 상단에 붙이고, 좌우는 화면 끝까지
+            make.top.equalToSuperview()
+//            make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
+        }
+        
+        // (2) 스크롤 뷰는 그 아래
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(backgroundContainerView.snp.bottom)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+        }
+        
+        // (3) 스크롤 내부 컨텐츠
+        scrollView.addSubview(contentView)
+        contentView.snp.makeConstraints { make in
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
+        }
+
+        // (4) contentView에 나머지 UI 요소 배치
+        contentView.addSubview(recordStatusLabel)
+        contentView.addSubview(recordProgressView)
+        contentView.addSubview(recordMissionLabel)
+        contentView.addSubview(missionCell)
+        
         let recordStack = UIStackView(arrangedSubviews: recordButtons)
         recordStack.axis = .horizontal
         recordStack.spacing = 8
         recordStack.distribution = .fillEqually
-        recordStack.isUserInteractionEnabled = true
-
-        view.addSubview(recordStack)
-        view.addSubview(endTripButton)
-
-        backgroundImageView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(235)
-        }
-
-        travelSummary.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(50)
-            make.leading.trailing.equalToSuperview().inset(16)
-        }
-
-        xButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(89)
-            make.trailing.equalToSuperview().offset(-25)
-            make.width.height.equalTo(25)
-        }
+        contentView.addSubview(recordStack)
         
+        contentView.addSubview(endTripButton)
+        
+        // (5) 배치 잡기
         recordStatusLabel.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(265)
+            make.top.equalToSuperview().offset(16)
             make.leading.equalToSuperview().offset(16)
         }
-        
+
         recordProgressView.snp.makeConstraints { make in
             make.top.equalTo(recordStatusLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
         }
-        
+
         recordMissionLabel.snp.makeConstraints { make in
             make.top.equalTo(recordProgressView.snp.bottom).offset(16)
             make.leading.equalToSuperview().offset(16)
         }
-        
+
         missionCell.snp.makeConstraints { make in
             make.top.equalTo(recordMissionLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview()
@@ -133,12 +200,16 @@ class OngoingLogVC: UIViewController {
         }
 
         endTripButton.snp.makeConstraints { make in
-            make.top.equalTo(recordStack.snp.bottom).offset(32)
+            make.top.equalTo(recordStack.snp.bottom).offset(35)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(50)
+            // 마지막 뷰이므로 contentView의 bottom을 잡아주기
+            make.bottom.equalTo(contentView.snp.bottom).offset(-41)
         }
     }
-    //MARK: - Function
+    
+    // MARK: - Button Action
+
     @objc private func closeView() {
         navigationController?.popViewController(animated: true)
     }
@@ -150,7 +221,7 @@ class OngoingLogVC: UIViewController {
         OngoingLogManager.fetchProgressTravelsInfo { result in
             switch result {
             case .success(let ProgressTravelsInfo):
-                self.progressTravelsInfo = ProgressTravelsInfo.result // 데이터를 저장
+                self.progressTravelsInfo = ProgressTravelsInfo.result
                 self.updateTravelSummary()
                 self.updatePuzzleCount()
                 print("데이터 불러오기")
@@ -166,10 +237,8 @@ class OngoingLogVC: UIViewController {
             print("No ongoing travels available.")
             return
         }
-        // 캘린더 텍스트 생성
         let calendarText = "\(travelInfo.startDate) ~ \(travelInfo.endDate)"
 
-        // TravelSummaryView 구성
         travelSummary.configure(
             userImage: travelInfo.profileImg,
             userName: travelInfo.nickname,
@@ -182,6 +251,7 @@ class OngoingLogVC: UIViewController {
         )
         travelSummary.isHidden = false
     }
+
     private func updatePuzzleCount() {
         guard let travelInfo = progressTravelsInfo else {
             print("No ongoing travels available.")
@@ -203,33 +273,32 @@ class OngoingLogVC: UIViewController {
         missionCell.configure(images: images)
     }
     
-    // 버튼에 액션 추가
     private func configureRecordButtons() {
         for (index, button) in recordButtons.enumerated() {
-            button.tag = index // 버튼 태그 설정 (버튼 식별용)
+            button.tag = index
             button.addTarget(self, action: #selector(handleRecordButtonTapped(_:)), for: .touchUpInside)
         }
     }
+    
     @objc private func handleRecordButtonTapped(_ sender: UIButton) {
         guard let travelId = progressTravelsInfo?.id else {
-                print("Travel ID is nil")
-                return
-            }
+            print("Travel ID is nil")
+            return
+        }
         print("Button with tag \(sender.tag) clicked")
 
         switch sender.tag {
-        case 0: // "사진" 버튼
+        case 0:
             let photoVC = PhotoLogViewController(travelId: travelId)
             navigationController?.pushViewController(photoVC, animated: true)
-        case 1: // "동영상" 버튼
+        case 1:
             let videoVC = VideoLogViewController(travelId: travelId)
             navigationController?.pushViewController(videoVC, animated: true)
-        case 2: // "메모" 버튼
+        case 2:
             let memoVC = MemoLogViewController(travelId: travelId)
             navigationController?.pushViewController(memoVC, animated: true)
         default:
             break
         }
     }
-
 }

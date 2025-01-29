@@ -75,7 +75,39 @@ extension TravelAPI: TargetType {
             return .requestPlain
             
         case .postCreateTravel(let param):
-            return .requestJSONEncodable(param)
+            var formData = [MultipartFormData]()
+
+                // (1) data 파트: 여행 정보(도시, 날짜 등)를 JSON으로 만들어서 담기
+                let travelDict: [String: Any] = [
+                    "cityName": param.cityName,
+                    "countryName": param.countryName,
+                    "title": param.title,
+                    "startDate": param.startDate,
+                    "endDate": param.endDate
+                ]
+                
+                if let jsonData = try? JSONSerialization.data(withJSONObject: travelDict, options: []) {
+                    let multipartItem = MultipartFormData(
+                        provider: .data(jsonData),
+                        name: "data",                // 서버가 요구하는 파라미터 key (스웨거에서 'data'라고 표기)
+                        fileName: "data.json",       // 굳이 파일명은 아무거나, 없애도 상관없을 수 있음
+                        mimeType: "application/json" // JSON으로 전송
+                    )
+                    formData.append(multipartItem)
+                }
+
+                // (2) thumbnail 파트: 실제 이미지 “바이너리”를 파일 형식으로 전송
+                if let thumbnailData = param.thumbnail {
+                    let thumbnailPart = MultipartFormData(
+                        provider: .data(thumbnailData),
+                        name: "thumbnail",           // 스웨거에서 'thumbnail' 파라미터
+                        fileName: "thumbnail.jpg",   // 확장자 jpg/png 맞춰서
+                        mimeType: "image/jpeg"       // jpeg라면 "image/jpeg"
+                    )
+                    formData.append(thumbnailPart)
+                }
+
+                return .uploadMultipart(formData)
             
         case .postWherePiece(let param):
             return .requestJSONEncodable(param)
