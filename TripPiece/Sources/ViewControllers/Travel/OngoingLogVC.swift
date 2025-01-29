@@ -305,4 +305,5 @@ class OngoingLogVC: UIViewController {
             self.present(viewController, animated: true, completion: nil)
         }
     }
+    
 }

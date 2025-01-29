@@ -366,7 +366,7 @@ class PhotoLogViewController: UIViewController {
         }
         let data = CreatePhotosPieceRequest(
             travelId: travelId,
-            memo: memo,
+            memo: MemoObject(description: memo),
             photos: photos
         )
         print("사진 기록 추가 완료: \(data)")
