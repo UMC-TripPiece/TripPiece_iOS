@@ -281,22 +281,24 @@ final class StartLogVC: UIViewController,
         handleSuccessResponse()
     }
     
-    private func handleSuccessResponse() {
-        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = scene.windows.first,
-           let tabBarController = window.rootViewController as? TabBar {
-            
-            let myLogVC = MyLogVC()
-            let navC = UINavigationController(rootViewController: myLogVC)
-            navC.tabBarItem = UITabBarItem(title: "나의 기록",
-                                           image: UIImage(named: "My log"),
-                                           tag: 2)
-            navC.tabBarItem.badgeValue = "여행중"
-            
-            tabBarController.viewControllers?[1] = navC
-            tabBarController.selectedIndex = 1
-        } else {
-            print("TabBarController not found.")
+    private func handleSuccessResponse() {// 1) 본인을 dismiss
+        self.dismiss(animated: true) {
+            // 2) dismiss 완료 후, presentingViewController (혹은 Window rootVC)에 접근
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = scene.windows.first,
+               let tabBarController = window.rootViewController as? TabBar {
+                
+                // 3) 탭 인덱스 변경
+                tabBarController.selectedIndex = 1
+                
+                // 4) 선택된 탭의 내비게이션 컨트롤러 가져와서 push
+                if let navigationController = tabBarController.selectedViewController as? UINavigationController {
+                    let ongoingVC = OngoingLogVC()
+                    navigationController.pushViewController(ongoingVC, animated: true)
+                }
+            } else {
+                print("TabBarController not found.")
+            }
         }
     }
     
