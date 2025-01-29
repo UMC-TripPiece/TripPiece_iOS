@@ -115,8 +115,6 @@ class MemoLogViewController: UIViewController {
     //MARK: - Init
     override func viewDidLoad() {
         super.viewDidLoad()
-        // ID 반환
-        print("🚀 Travel ID: \(travelId)")
         navigationItem.hidesBackButton = true
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTap), name: .backButtonTapped, object: nil)
         self.view.backgroundColor = .white

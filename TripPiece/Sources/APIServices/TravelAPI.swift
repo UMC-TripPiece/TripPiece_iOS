@@ -112,7 +112,47 @@ extension TravelAPI: TargetType {
         case .postWherePiece(let param):
             return .requestJSONEncodable(param)
         case .postVideoPiece(let param):
-            return .requestJSONEncodable(param)
+            var formData = [MultipartFormData]()
+
+            // (1) `memo`는 `{ "description": "string" }` 형태의 JSON으로 보내기
+//            let memoString = "{ \"description\": \"\(param.memo.description)\" }"
+//            let memoPart = MultipartFormData(
+//                provider: .data(memoString.data(using: .utf8)!),
+//                name: "memo"
+//            )
+//            formData.append(memoPart)
+            let memoObject: [String: Any] = ["description": param.memo.description]  // 딕셔너리로 변환!
+            if let memoData = try? JSONSerialization.data(withJSONObject: memoObject, options: []) {
+                let memoPart = MultipartFormData(
+                    provider: .data(param.memo.description.data(using: .utf8)!),
+                    name: "memo"
+//                    fileName: "memo.json",   // JSON으로 보내니까 파일명 추가
+//                    mimeType: "application/json"
+                )
+                formData.append(memoPart)
+            }
+
+            // (2) `video`는 바이너리 파일로 전송
+//            let base64VideoString = param.video.base64EncodedString()
+//
+//            if let videoData = base64VideoString.data(using: .utf8) {
+//                let videoPart = MultipartFormData(
+//                    provider: .data(videoData),  // Base64 인코딩된 문자열을 Data로 변환하여 보냄
+//                    name: "video",
+//                    fileName: "video.mp4",
+//                    mimeType: "video/mp4"
+//                )
+//                formData.append(videoPart)
+//            }
+            let videoPart = MultipartFormData(
+                provider: .data(param.video),
+                name: "video",
+                fileName: "video.mp4",  // 확장자 맞추기
+                mimeType: "video/mp4"   // 비디오 MIME 타입 지정
+            )
+            formData.append(videoPart)
+
+            return .uploadMultipart(formData)
             
         case .postSelfiePiece(let param):
             return .requestJSONEncodable(param)

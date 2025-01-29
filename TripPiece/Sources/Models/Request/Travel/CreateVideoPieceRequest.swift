@@ -4,6 +4,7 @@ import Foundation
 
 struct CreateVideoPieceRequest : Codable {
     let travelId : Int
-    let description : String
+    let memo : MemoObject
     let video : Data
+//    let video: String
 }
