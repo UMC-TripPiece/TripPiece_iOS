@@ -8,7 +8,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public var searchResults: [SearchedCityResponse] = []
     public var coloredCountries: [ColorVisitRecord] = []
     public var statsCountries: StatsVisitRecord = StatsVisitRecord(countryCount: 0, cityCount: 0, countryCodes: [], cityIds: [])
-    public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
         let navBar = GradientNavigationBar(title: "여행자님의 세계지도")
@@ -43,8 +42,9 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         searchBarVC.searchBar.placeholder = "도시 및 국가를 검색해 보세요."
         searchBarVC.searchBar.searchTextField.delegate = self
             
-        searchBarVC.onTextDidChange = { [weak self] text in
-            self?.sendCitySearchRequest(keyword: text)
+        searchBarVC.onTextDidChange = { [weak self] textField in
+            guard let self = self else { return }
+            self.searchTextFieldDidChange(textField)
         }
         return searchBarVC
     }()
@@ -144,8 +144,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     
     // NotificationCenter에서 호출할 메서드
     @objc private func handleChangeMapColorNotification(_ notification: Notification) {
-        guard let userId = userId else { return }
-        getCountryColorsData(userId) { colorInfo in
+        getCountryColorsData { colorInfo in
             if let data = colorInfo {
                 DispatchQueue.main.async {
                     self.coloredCountries = data
@@ -179,17 +178,38 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         return true
     }
     
+    
+    /// 한글 자음/모음이 조합 중(markedTextRange != nil)이면 검색 안 하고, 조합이 끝난 순간에만 실행
+    private func searchTextFieldDidChange(_ textField: UITextField) {
+        // 아직 조합 중이면 return
+        if let _ = textField.markedTextRange {
+            return
+        }
+        
+        // 조합이 끝난 상태
+        guard let newText = textField.text, !newText.isEmpty else {
+            // 빈 문자열 → 결과 초기화
+            searchResults.removeAll()
+            searchTableView.reloadData()
+            searchTableView.isHidden = true
+            return
+        }
+        
+        // 완성된 문자열로 검색
+        sendCitySearchRequest(keyword: newText)
+    }
+    
+    
     func getUserData() {
         getUserId { userInfo in
             if let userInfo = userInfo {
-                self.userId = userInfo.userId
-                self.getCountryStatsData(userInfo.userId) { statsInfo in
+                self.getCountryStatsData { statsInfo in
                     if let data = statsInfo {
                         self.statsCountries = data
                         self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg, visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
                     }
                 }
-                self.getCountryColorsData(userInfo.userId) { colorInfo in
+                self.getCountryColorsData { colorInfo in
                     if let data = colorInfo {
                         self.coloredCountries = data
                         self.setUpCountryColor(data)
@@ -216,7 +236,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(42)
             make.leading.trailing.equalToSuperview().inset(21)
             make.height.equalTo(DynamicPadding.dynamicValue(120))
-//            make.height.equalToSuperview().multipliedBy(0.131516588)
             make.centerX.equalToSuperview()
         }
     }
@@ -261,8 +280,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
     
 
-    func getCountryColorsData(_ userId: Int, completion: @escaping ([ColorVisitRecord]?) -> Void) {
-        MapManager.getCountryColors(userId: userId) { result in
+    func getCountryColorsData(completion: @escaping ([ColorVisitRecord]?) -> Void) {
+        MapManager.getCountryColors { result in
             switch result {
             case .success(let colorInfo):
                 completion(colorInfo.result)
@@ -273,8 +292,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
-        MapManager.getCountryStats(userId: userId) { result in
+    func getCountryStatsData(completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats { result in
             switch result {
             case .success(let statsInfo):
                 completion(statsInfo.result)

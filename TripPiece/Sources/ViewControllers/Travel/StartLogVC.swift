@@ -8,10 +8,10 @@ final class StartLogVC: UIViewController,
                         UITextViewDelegate {
     
     // MARK: - UI (뷰 전담)
-    private let rootView = StartLogView()
+    public let rootView = StartLogView()
     
     // MARK: - 데이터 모델
-    private var travelRequest = CreateTravelRequest(cityName: "",
+    public var travelRequest = CreateTravelRequest(cityName: "",
                                                     countryName: "",
                                                     title: "",
                                                     startDate: "",
@@ -312,7 +312,7 @@ final class StartLogVC: UIViewController,
         travelRequest.startDate <= travelRequest.endDate
     }
     
-    private func updateStartLogButtonState() {
+    public func updateStartLogButtonState() {
         if validateTravelInfo() {
             rootView.startLogButton.isEnabled = true
             rootView.startLogButton.backgroundColor = Constants.Colors.mainPurple ?? .blue
@@ -475,7 +475,7 @@ extension StartLogVC: UIImagePickerControllerDelegate, UINavigationControllerDel
 
 // MARK: - 기타 (국가 선택 후 addPhotoButton 애니메이션)
 extension StartLogVC {
-    @objc private func showAddphotoBtnController() {
+    @objc func showAddphotoBtnController() {
         UIView.animate(withDuration: 0.3, animations: {
             self.rootView.addCountryButton.transform = CGAffineTransform(scaleX: 0.63, y: 0.63)
             self.rootView.addCountryButton.snp.updateConstraints { make in

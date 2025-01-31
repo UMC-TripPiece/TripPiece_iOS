@@ -4,15 +4,10 @@ import UIKit
 
 class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     
-    
-    var userId: Int?
     var colorRecords: [ColorVisitRecord] = []
     var cityIds: [Int] = []
     
-    
     // MARK: - UI Components
-    // 테이블 뷰 생성
-    private lazy var tableView = UITableView()
     
     // 기존 테이블 뷰를 컬렉션 뷰로 변경
     private lazy var collectionView: UICollectionView = {
@@ -33,8 +28,6 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         return collectionView
     }()
     
-    
-    
     private lazy var customNavBar = UIView()
     
     
@@ -48,12 +41,16 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         setupCollectionView()
         setupCustomNavigationBar()
         
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        // Interactive Pop Gesture 활성화
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
+        navigationController?.interactivePopGestureRecognizer?.delegate = self
+        
         NotificationCenter.default.addObserver(self, selector: #selector(handleCollectionViewUpdate), name: .updateCollectionView, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        navigationController?.setNavigationBarHidden(true, animated: false)
         updateColor()
     }
     
@@ -107,8 +104,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     }
     
     @objc private func handleCollectionViewUpdate() {
-        guard let userId = userId else { return }
-        getCountryColorsData(userId) { colorInfo in
+        getCountryColorsData { colorInfo in
             guard let colorInfo = colorInfo else { return }
             self.colorRecords = colorInfo
             DispatchQueue.main.async {
@@ -118,18 +114,17 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     }
         
     private func updateColor() {
-        guard let userId = userId else { return }
         let dispatchGroup = DispatchGroup()
         
         dispatchGroup.enter()
-        getCountryStatsData(userId) { data in
+        getCountryStatsData { data in
             if let data = data {
                 self.cityIds = data.cityIds
             }
             dispatchGroup.leave()
         }
         dispatchGroup.enter()
-        getCountryColorsData(userId) { data in
+        getCountryColorsData { data in
             if let data = data {
                 self.colorRecords = data
             }
@@ -172,13 +167,11 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         editColorVC.modalPresentationStyle = .overCurrentContext
         editColorVC.modalTransitionStyle = .crossDissolve
         editColorVC.cityData = SearchedCityResponse(cityName: cityName.rawValue, countryName: cityName.country.name, cityDescription: "", countryImage: cityName.country.emoji, logCount: 0, cityId: cityId)
-        editColorVC.userId = userId
         present(editColorVC, animated: true, completion: nil)
     }
     
     func didTapDeleteButton(at indexPath: IndexPath) {
         removeAllEditOptionsViews()
-        guard let userId = userId else { return }
         let cityId = cityIds[indexPath.row]
         guard let result = CityEnum.find(byId: cityId) else { return }
         let countryCode = result.country.rawValue
@@ -188,7 +181,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
             case .success(let message):
                 NotificationCenter.default.post(name: .deleteMapColor, object: nil, userInfo: ["deletedItem": countryCode])
                 self.cityIds.removeAll { $0 == cityId }
-                self.getCountryColorsData(userId) { colorInfo in
+                self.getCountryColorsData { colorInfo in
                     guard let colorInfo = colorInfo else { return }
                     self.colorRecords = colorInfo
                 }
@@ -215,10 +208,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     
     //MARK: API call
     func deleteColor(countryCode: String, cityId: Int, color: String, completion: @escaping (Result<Any, Error>) -> Void) {
-        guard let userId = userId else { return }
-
         let data = MapRequest(
-            userId: userId,
             countryCode: "\(countryCode)",
             color: color,
             cityId: cityId
@@ -239,8 +229,8 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         }
     }
     
-    func getCountryColorsData(_ userId: Int, completion: @escaping ([ColorVisitRecord]?) -> Void) {
-        MapManager.getCountryColors(userId: userId) { result in
+    func getCountryColorsData(completion: @escaping ([ColorVisitRecord]?) -> Void) {
+        MapManager.getCountryColors { result in
             switch result {
             case .success(let colorInfo):
                 completion(colorInfo.result)
@@ -251,8 +241,8 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         }
     }
     
-    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
-        MapManager.getCountryStats(userId: userId) { result in
+    func getCountryStatsData(completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats { result in
             switch result {
             case .success(let statsInfo):
                 completion(statsInfo.result)
@@ -311,5 +301,11 @@ extension VisitRecordsVC: UICollectionViewDataSource, UICollectionViewDelegateFl
     
 
     
+extension VisitRecordsVC: UIGestureRecognizerDelegate {
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 네비게이션 스택에 2개 이상의 뷰가 있는 경우에만 제스처 활성화
+        return navigationController?.viewControllers.count ?? 0 > 1
+    }
+}
 
 
