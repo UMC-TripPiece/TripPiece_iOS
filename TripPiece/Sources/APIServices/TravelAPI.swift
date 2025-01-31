@@ -113,42 +113,35 @@ extension TravelAPI: TargetType {
             return .requestJSONEncodable(param)
         case .postVideoPiece(let param):
             var formData = [MultipartFormData]()
-
-            // (1) `memo`는 `{ "description": "string" }` 형태의 JSON으로 보내기
-//            let memoString = "{ \"description\": \"\(param.memo.description)\" }"
-//            let memoPart = MultipartFormData(
-//                provider: .data(memoString.data(using: .utf8)!),
-//                name: "memo"
-//            )
-//            formData.append(memoPart)
+            
             let memoObject: [String: Any] = ["description": param.memo.description]  // 딕셔너리로 변환!
             if let memoData = try? JSONSerialization.data(withJSONObject: memoObject, options: []) {
                 let memoPart = MultipartFormData(
-                    provider: .data(param.memo.description.data(using: .utf8)!),
+                    provider: .data(memoData),
                     name: "memo"
-//                    fileName: "memo.json",   // JSON으로 보내니까 파일명 추가
-//                    mimeType: "application/json"
                 )
                 formData.append(memoPart)
             }
 
             // (2) `video`는 바이너리 파일로 전송
-//            let base64VideoString = param.video.base64EncodedString()
-//
-//            if let videoData = base64VideoString.data(using: .utf8) {
-//                let videoPart = MultipartFormData(
-//                    provider: .data(videoData),  // Base64 인코딩된 문자열을 Data로 변환하여 보냄
-//                    name: "video",
-//                    fileName: "video.mp4",
-//                    mimeType: "video/mp4"
-//                )
-//                formData.append(videoPart)
-//            }
+            let videoMimeType: String
+
+            // MOV 여부를 판별할 수 없으므로 기본적으로 "video/mp4" 사용
+            if param.video.count > 4 {
+                let header = param.video.prefix(4)  // 첫 4바이트 추출
+                if header == Data([0x00, 0x00, 0x00, 0x14]) { // MOV 파일 헤더 예시
+                    videoMimeType = "video/quicktime"
+                } else {
+                    videoMimeType = "video/mp4"
+                }
+            } else {
+                videoMimeType = "video/mp4"  // 기본값
+            }
             let videoPart = MultipartFormData(
                 provider: .data(param.video),
                 name: "video",
                 fileName: "video.mp4",  // 확장자 맞추기
-                mimeType: "video/mp4"   // 비디오 MIME 타입 지정
+                mimeType: videoMimeType   // 비디오 MIME 타입 지정
             )
             formData.append(videoPart)
 
