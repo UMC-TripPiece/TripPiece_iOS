@@ -11,4 +11,16 @@ extension Date {
     init(milliseconds: Int64) {
         self = Date(timeIntervalSince1970: TimeInterval(milliseconds) / 1000)
     }
+    
+    var toStringYMDHM: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yy.MM.dd HH:mm"
+        return dateFormatter.string(from: self)
+    }
+    
+    var toStringYMD: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yy.MM.dd"
+        return dateFormatter.string(from: self)
+    }
 }

@@ -4,7 +4,15 @@
 import UIKit
 import SnapKit
 
+enum MissionEnum: Int {
+    case selfie
+    case liveVideo
+    case emoji
+}
+
 class MissionCell: UIView {
+    
+    var onClickCell: ((MissionEnum) -> Void)?
 
     private lazy var collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -85,24 +93,28 @@ extension MissionCell: UICollectionViewDataSource, UICollectionViewDelegate {
         pageControl.currentPage = Int(currentIndex)
     }
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
-            guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
+        guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
 
-            let cellWidthIncludingSpacing = layout.itemSize.width + layout.minimumLineSpacing
+        let cellWidthIncludingSpacing = layout.itemSize.width + layout.minimumLineSpacing
 
-            // 현재 인덱스를 계산
-            let estimatedIndex = scrollView.contentOffset.x / cellWidthIncludingSpacing
-            let index: Int
-            if velocity.x > 0 {
-                index = Int(ceil(estimatedIndex)) // 오른쪽으로 스크롤
-            } else if velocity.x < 0 {
-                index = Int(floor(estimatedIndex)) // 왼쪽으로 스크롤
-            } else {
-                index = Int(round(estimatedIndex)) // 속도가 없으면 가까운 셀로
-            }
+        // 현재 인덱스를 계산
+        let estimatedIndex = scrollView.contentOffset.x / cellWidthIncludingSpacing
+        let index: Int
+        if velocity.x > 0 {
+            index = Int(ceil(estimatedIndex)) // 오른쪽으로 스크롤
+        } else if velocity.x < 0 {
+            index = Int(floor(estimatedIndex)) // 왼쪽으로 스크롤
+        } else {
+            index = Int(round(estimatedIndex)) // 속도가 없으면 가까운 셀로
+        }
 
-            // 타겟 오프셋을 설정
-            let horizontalInset = (collectionView.frame.width - layout.itemSize.width) / 2
-            targetContentOffset.pointee = CGPoint(x: CGFloat(index) * cellWidthIncludingSpacing, y: 0)
+        // 타겟 오프셋을 설정
+        let horizontalInset = (collectionView.frame.width - layout.itemSize.width) / 2
+        targetContentOffset.pointee = CGPoint(x: CGFloat(index) * cellWidthIncludingSpacing, y: 0)
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let missionEnum = MissionEnum(rawValue: indexPath.row) else { return }
+        onClickCell?(missionEnum)
     }
 }
 extension MissionCell: UICollectionViewDelegateFlowLayout {
