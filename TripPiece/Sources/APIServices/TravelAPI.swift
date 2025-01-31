@@ -75,16 +75,116 @@ extension TravelAPI: TargetType {
             return .requestPlain
             
         case .postCreateTravel(let param):
-            return .requestJSONEncodable(param)
+            var formData = [MultipartFormData]()
+            
+            // (1) data 파트: 여행 정보(도시, 날짜 등)를 JSON으로 만들어서 담기
+            let travelDict: [String: Any] = [
+                "cityName": param.cityName,
+                "countryName": param.countryName,
+                "title": param.title,
+                "startDate": param.startDate,
+                "endDate": param.endDate
+            ]
+            
+            if let jsonData = try? JSONSerialization.data(withJSONObject: travelDict, options: []) {
+                let multipartItem = MultipartFormData(
+                    provider: .data(jsonData),
+                    name: "data",                // 서버가 요구하는 파라미터 key (스웨거에서 'data'라고 표기)
+                    fileName: "data.json",       // 굳이 파일명은 아무거나, 없애도 상관없을 수 있음
+                    mimeType: "application/json" // JSON으로 전송
+                )
+                formData.append(multipartItem)
+            }
+            
+            // (2) thumbnail 파트: 실제 이미지 “바이너리”를 파일 형식으로 전송
+            if let thumbnailData = param.thumbnail {
+                let thumbnailPart = MultipartFormData(
+                    provider: .data(thumbnailData),
+                    name: "thumbnail",           // 스웨거에서 'thumbnail' 파라미터
+                    fileName: "thumbnail.jpg",   // 확장자 jpg/png 맞춰서
+                    mimeType: "image/jpeg"       // jpeg라면 "image/jpeg"
+                )
+                formData.append(thumbnailPart)
+            }
+            
+            return .uploadMultipart(formData)
             
         case .postWherePiece(let param):
             return .requestJSONEncodable(param)
         case .postVideoPiece(let param):
-            return .requestJSONEncodable(param)
+            var formData = [MultipartFormData]()
+
+            // (1) `memo`는 `{ "description": "string" }` 형태의 JSON으로 보내기
+//            let memoString = "{ \"description\": \"\(param.memo.description)\" }"
+//            let memoPart = MultipartFormData(
+//                provider: .data(memoString.data(using: .utf8)!),
+//                name: "memo"
+//            )
+//            formData.append(memoPart)
+            let memoObject: [String: Any] = ["description": param.memo.description]  // 딕셔너리로 변환!
+            if let memoData = try? JSONSerialization.data(withJSONObject: memoObject, options: []) {
+                let memoPart = MultipartFormData(
+                    provider: .data(param.memo.description.data(using: .utf8)!),
+                    name: "memo"
+//                    fileName: "memo.json",   // JSON으로 보내니까 파일명 추가
+//                    mimeType: "application/json"
+                )
+                formData.append(memoPart)
+            }
+
+            // (2) `video`는 바이너리 파일로 전송
+//            let base64VideoString = param.video.base64EncodedString()
+//
+//            if let videoData = base64VideoString.data(using: .utf8) {
+//                let videoPart = MultipartFormData(
+//                    provider: .data(videoData),  // Base64 인코딩된 문자열을 Data로 변환하여 보냄
+//                    name: "video",
+//                    fileName: "video.mp4",
+//                    mimeType: "video/mp4"
+//                )
+//                formData.append(videoPart)
+//            }
+            let videoPart = MultipartFormData(
+                provider: .data(param.video),
+                name: "video",
+                fileName: "video.mp4",  // 확장자 맞추기
+                mimeType: "video/mp4"   // 비디오 MIME 타입 지정
+            )
+            formData.append(videoPart)
+
+            return .uploadMultipart(formData)
+            
         case .postSelfiePiece(let param):
             return .requestJSONEncodable(param)
+            
         case .postPicturePiece(let param):
-            return .requestJSONEncodable(param)
+            var formData = [MultipartFormData]()
+            
+            // (A) memo: string
+            let memoObject: [String: Any] = ["description": param.memo.description]  // 딕셔너리로 변환!
+            if let memoData = try? JSONSerialization.data(withJSONObject: memoObject, options: []) {
+                let memoPart = MultipartFormData(
+                    provider: .data(memoData),
+                    name: "memo",
+                    fileName: "memo.json",   // JSON으로 보내니까 파일명 추가
+                    mimeType: "application/json"
+                )
+                formData.append(memoPart)
+            }
+            
+            // (B) photos: 여러 개의 바이너리
+            // swagger에 "photos"라 하면, name="photos"로 각 파일을 append
+            for (index, imageData) in param.photos.enumerated() {
+                let photoPart = MultipartFormData(
+                    provider: .data(imageData),
+                    name: "photos",
+                    fileName: "photo\(index).jpg",
+                    mimeType: "image/jpeg"
+                )
+                formData.append(photoPart)
+            }
+            return .uploadMultipart(formData)
+            
         case .postMemoPiece(let param):
             return .requestJSONEncodable(param)
         case .postEmojiPiece(let param):

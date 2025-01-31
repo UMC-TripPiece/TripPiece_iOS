@@ -30,7 +30,7 @@ final class StartLogView: UIView {
     
     lazy var grayBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "BgColor1") ?? .lightGray
+        view.backgroundColor = Constants.Colors.bg1 ?? .lightGray
         return view
     }()
     
@@ -67,11 +67,11 @@ final class StartLogView: UIView {
     lazy var startDateButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("시작 날짜", for: .normal)
-        button.setImage(UIImage(named: "Calendar2"), for: .normal)
+        button.setImage(UIImage(systemName: "calendar"), for: .normal)
         
-        button.tintColor = UIColor(named: "Black2") ?? .black
+        button.tintColor = Constants.Colors.black3 ?? .black
         button.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        button.setTitleColor(UIColor(named: "Black2") ?? .black, for: .normal)
+        button.setTitleColor(Constants.Colors.black2 ?? .black, for: .normal)
         
         button.backgroundColor = .white
         button.layer.cornerRadius = 5
@@ -86,11 +86,11 @@ final class StartLogView: UIView {
     lazy var endDateButton: UIButton = {
         let button = UIButton(type: .system)
         button.setTitle("끝난 날짜", for: .normal)
-        button.setImage(UIImage(named: "Calendar2"), for: .normal)
+        button.setImage(UIImage(systemName: "calendar"), for: .normal)
         
-        button.tintColor = UIColor(named: "Black2") ?? .black
+        button.tintColor = Constants.Colors.black3 ?? .black
         button.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        button.setTitleColor(UIColor(named: "Black2") ?? .black, for: .normal)
+        button.setTitleColor(Constants.Colors.black2 ?? .black, for: .normal)
         
         button.backgroundColor = .white
         button.layer.cornerRadius = 5
@@ -154,7 +154,7 @@ final class StartLogView: UIView {
         button.titleLabel?.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         button.setTitleColor(.white, for: .normal)
         
-        button.backgroundColor = UIColor(named: "Cancel") ?? .red
+        button.backgroundColor = Constants.Colors.bgGray ?? .red
         button.layer.cornerRadius = 5
         button.isEnabled = false
         return button
@@ -328,6 +328,7 @@ final class StartLogView: UIView {
         // "여행 기록 시작하기" 버튼
         startLogButton.snp.makeConstraints { make in
             make.height.equalTo(50)
+            make.bottom.equalTo(contentContainerView.safeAreaLayoutGuide.snp.bottom).offset(-UIScreen.main.bounds.height * 0.15)
         }
         
         // 만약 startLogButton을

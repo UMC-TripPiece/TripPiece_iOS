@@ -15,7 +15,8 @@ final class StartLogVC: UIViewController,
                                                     countryName: "",
                                                     title: "",
                                                     startDate: "",
-                                                    endDate: "")
+                                                    endDate: "",
+                                                    thumbnail: nil)
     
     // 검색 결과
     private var searchResults: [[String: String]] = []
@@ -90,7 +91,7 @@ final class StartLogVC: UIViewController,
         searchCities(keyword: newText)
     }
     
-    // MARK: - 실제 네트워크 요청 → `searchResults` 업데이트 (Moya 예시)
+    // MARK: - 실제 네트워크 요청 → `searchResults` 업데이트
     private func searchCities(keyword: String) {
         APIManager.MapProvider.request(.getMapSearch(keyword: keyword)) { [weak self] result in
             guard let self = self else { return }
@@ -193,12 +194,16 @@ final class StartLogVC: UIViewController,
         let selectedDate = formatter.string(from: sender.date)
         
         if sender == rootView.startDatePicker {
+            travelRequest.startDate = selectedDate
             rootView.startDateButton.setTitle(selectedDate, for: .normal)
-            travelRequest.updateInfo(startDate: selectedDate)
+            rootView.endDatePicker.minimumDate = sender.date
         } else {
+            travelRequest.endDate = selectedDate
             rootView.endDateButton.setTitle(selectedDate, for: .normal)
-            travelRequest.updateInfo(endDate: selectedDate)
         }
+        rootView.startDatePicker.isHidden = true
+        rootView.endDatePicker.isHidden = true
+
         updateStartLogButtonState()
     }
     
@@ -228,26 +233,72 @@ final class StartLogVC: UIViewController,
     
     private func startLog(with request: CreateTravelRequest) {
         print("Travel Info: \(request)")
-        // 네트워크 로직 (Moya/Alamofire 등)
+        func createTravelLog(_ request: CreateTravelRequest,
+                             completion: @escaping (Result<Any, Error>) -> Void) {
+            
+            // 1) 필수값 검사
+            guard !request.cityName.isEmpty,
+                  !request.countryName.isEmpty,
+                  !request.title.isEmpty,
+                  !request.startDate.isEmpty,
+                  !request.endDate.isEmpty
+            else {
+                let error = NSError(domain: "TravelRequest Error",
+                                    code: -1,
+                                    userInfo: [NSLocalizedDescriptionKey: "필수 입력값 누락"])
+                completion(.failure(error))
+                return
+            }
+            
+            // 2) 네트워크 호출
+            MyLogManager.startTravel(request) { isSuccess, response in
+                if isSuccess {
+                    // 성공
+                    completion(.success("여행 생성 성공!"))
+                } else {
+                    // 실패 시 서버에서 주는 에러 메시지 등 처리
+                    if let data = response?.data,
+                       let errorMessage = String(data: data, encoding: .utf8) {
+                        print("서버 에러 메시지: \(errorMessage)")
+                    }
+                    let error = NSError(domain: "TravelRequest Error",
+                                        code: -1,
+                                        userInfo: [NSLocalizedDescriptionKey: "여행 생성 실패"])
+                    completion(.failure(error))
+                }
+            }
+        }
+        createTravelLog(request) { [weak self] result in
+            switch result {
+            case .success(let message):
+                print(message)
+                self?.handleSuccessResponse()
+                
+            case .failure(let error):
+                print("Error: \(error)")
+            }
+        }
         handleSuccessResponse()
     }
     
-    private func handleSuccessResponse() {
-        if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = scene.windows.first,
-           let tabBarController = window.rootViewController as? TabBar {
-            
-            let myLogVC = MyLogVC()
-            let navC = UINavigationController(rootViewController: myLogVC)
-            navC.tabBarItem = UITabBarItem(title: "나의 기록",
-                                           image: UIImage(named: "My log"),
-                                           tag: 2)
-            navC.tabBarItem.badgeValue = "여행중"
-            
-            tabBarController.viewControllers?[1] = navC
-            tabBarController.selectedIndex = 1
-        } else {
-            print("TabBarController not found.")
+    private func handleSuccessResponse() {// 1) 본인을 dismiss
+        self.dismiss(animated: true) {
+            // 2) dismiss 완료 후, presentingViewController (혹은 Window rootVC)에 접근
+            if let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = scene.windows.first,
+               let tabBarController = window.rootViewController as? TabBar {
+                
+                // 3) 탭 인덱스 변경
+                tabBarController.selectedIndex = 1
+                
+                // 4) 선택된 탭의 내비게이션 컨트롤러 가져와서 push
+                if let navigationController = tabBarController.selectedViewController as? UINavigationController {
+                    let ongoingVC = OngoingLogVC()
+                    navigationController.pushViewController(ongoingVC, animated: true)
+                }
+            } else {
+                print("TabBarController not found.")
+            }
         }
     }
     
@@ -264,10 +315,10 @@ final class StartLogVC: UIViewController,
     public func updateStartLogButtonState() {
         if validateTravelInfo() {
             rootView.startLogButton.isEnabled = true
-            rootView.startLogButton.backgroundColor = UIColor(named: "Main") ?? .blue
+            rootView.startLogButton.backgroundColor = Constants.Colors.mainPurple ?? .blue
         } else {
             rootView.startLogButton.isEnabled = false
-            rootView.startLogButton.backgroundColor = UIColor(named: "Cancel") ?? .red
+            rootView.startLogButton.backgroundColor = Constants.Colors.bgGray ?? .red
         }
     }
 }
@@ -302,7 +353,8 @@ extension StartLogVC {
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: text)
         
-        travelRequest.updateInfo(title: updatedText)
+        travelRequest.title = updatedText
+        
         updateStartLogButtonState()
         
         centerTextVertically(textView)
@@ -359,11 +411,13 @@ extension StartLogVC: UITableViewDataSource, UITableViewDelegate {
         let countryName = cityData["countryName"] ?? ""
         let countryImage = cityData["countryImage"] ?? ""
         
+        travelRequest.cityName = cityName
+        travelRequest.countryName = countryName
+        
         // 타이틀 라벨
         rootView.titleLabel.text = "\(countryImage) \(cityName), \(countryName)"
         
         // travelRequest
-        travelRequest.updateInfo(cityName: cityName, countryName: countryName)
         updateStartLogButtonState()
         
         // 검색창 숨기기
@@ -388,13 +442,10 @@ extension StartLogVC: UIImagePickerControllerDelegate, UINavigationControllerDel
             return
         }
         
-        guard let imageData = selectedImage.jpegData(compressionQuality: 0.8) else {
-            print("이미지 데이터 변환 실패")
-            return
-        }
-        
         // 썸네일 업데이트
-        travelRequest.thumbnail = imageData
+        if let imageData = selectedImage.jpegData(compressionQuality: 0.8) {
+            travelRequest.thumbnail = imageData
+        }
         
         // 원형 이미지
         let circularImage = makeCircularImage(image: selectedImage, size: CGSize(width: 60, height: 60))

@@ -29,12 +29,15 @@ class OngoingLogManager {
     }
     
     //로그 버튼 post
-    static func postTravelPicture(_ CreatePhotosPieceRequest : CreatePhotosPieceRequest, completion: @escaping (Bool, Response?) -> Void) {
-        APIManager.TravelProvider.request(.postPicturePiece(param: CreatePhotosPieceRequest)) { result in
+    static func postTravelPicture(_ request: CreatePhotosPieceRequest,
+                                  completion: @escaping (Bool, Response?) -> Void) {
+        
+        APIManager.TravelProvider.request(.postPicturePiece(param: request)) { result in
             switch result {
             case .success(let response):
-                print(response)
-                if response.statusCode == 200 {
+                print("Moya response: \(response.statusCode)")
+                if (200...299).contains(response.statusCode) {
+                    // 서버가 200 or 201 반환 → 성공
                     completion(true, response)
                 } else {
                     completion(false, response)

@@ -11,7 +11,7 @@ public class NavigationBarManager {
     // MARK: - 왼쪽 커스텀 백버튼 생성
     public func addBackButton(to navigationItem: UINavigationItem, target: Any?, action: Selector) {
         let backButton = UIButton(type: .system)
-        backButton.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        backButton.setImage(UIImage(systemName: "arrow.left"), for: .normal)
         backButton.tintColor = Constants.Colors.black3!
         backButton.addTarget(target, action: action, for: .touchUpInside)
         
