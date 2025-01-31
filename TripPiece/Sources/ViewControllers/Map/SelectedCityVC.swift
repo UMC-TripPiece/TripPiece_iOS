@@ -222,9 +222,12 @@ class SelectedCityVC: UIViewController {
         let startLogVC = StartLogVC()
         if let cityData = cityData {
             startLogVC.rootView.titleLabel.text = "\(cityData.countryImage) \(cityData.cityName), \(cityData.countryName)"
-            startLogVC.travelRequest.updateInfo(cityName: cityData.cityName, countryName: cityData.countryName)
+            startLogVC.travelRequest.cityName = cityData.cityName
+            startLogVC.travelRequest.countryName = cityData.countryName
             startLogVC.updateStartLogButtonState()
-            startLogVC.showAddphotoBtnController()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startLogVC.showAddphotoBtnController()
+            }
         } else {
             startLogVC.rootView.titleLabel.text = "도시 추가"
         }
