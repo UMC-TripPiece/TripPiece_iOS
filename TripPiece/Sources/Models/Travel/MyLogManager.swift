@@ -13,12 +13,12 @@ class MyLogManager {
                     let data = try JSONDecoder().decode(DefaultMultiResponse<TravelsInfo>.self, from: response.data)
                     completion(.success(data))
                 } catch {
-                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
+//                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
                     completion(.failure(error))
                 }
             case .failure(let error):
                 if let response = error.response {
-                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
+//                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
                 }
                 completion(.failure(error))
             }
@@ -33,12 +33,12 @@ class MyLogManager {
                     let data = try JSONDecoder().decode(DefaultMultiResponse<TripPieceInfo>.self, from: response.data)
                     completion(.success(data))
                 } catch {
-                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
+//                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
                     completion(.failure(error))
                 }
             case .failure(let error):
                 if let response = error.response {
-                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
+//                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
                 }
                 completion(.failure(error))
             }

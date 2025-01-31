@@ -185,26 +185,26 @@ class EndTravelAlertVC: UIViewController {
             print("Travel ID가 없습니다.")
             return
         }
-        
         let endVC = UINavigationController(rootViewController: FinishPuzzleVC(travelId: travelId))
         endVC.modalPresentationStyle = .fullScreen
-        self.present(endVC, animated: true, completion: nil)
-        PuzzleLogManager.endTravel(travelId: travelId) { [weak self] result in
-            switch result {
-            case .success(let endTravelResponse):
-                if !endTravelResponse.isSuccess {
-                    return
-                }
-                DispatchQueue.main.async {
-                    let endVC = FinishPuzzleVC(travelId: travelId)
-                    endVC.modalPresentationStyle = .fullScreen
-                    self?.present(endVC, animated: true, completion: nil)
-                }
-            case .failure(let error):
-                print("Error occurred: \(error.localizedDescription)")
-            }
-            self?.dismiss(animated: false)
-        }
+        present(endVC, animated: true, completion: nil)
+        self.dismiss(animated: false)
+//        PuzzleLogManager.endTravel(travelId: travelId) { [weak self] result in
+//            switch result {
+//            case .success(let endTravelResponse):
+//                if !endTravelResponse.isSuccess {
+//                    return
+//                }
+//                DispatchQueue.main.async {
+//                    let endVC = UINavigationController(rootViewController: FinishPuzzleVC(travelId: travelId))
+//                    endVC.modalPresentationStyle = .fullScreen
+//                    self?.present(endVC, animated: true, completion: nil)
+//                }
+//            case .failure(let error):
+//                print("Error occurred: \(error.localizedDescription)")
+//            }
+//            self?.dismiss(animated: false)
+//        }
     }
 }
 

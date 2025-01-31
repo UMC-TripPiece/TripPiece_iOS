@@ -11,7 +11,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
-        return GradientNavigationBar(title: "여행자님의 세계지도")
+        let navBar = GradientNavigationBar(title: "여행자님의 세계지도")
+        return navBar
     }()
     
 
@@ -75,7 +76,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         getUserData()
         
         view.layoutIfNeeded()
-        // 이 부분 꼭 필요한가?
         scrollView.maximumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h * 3
         scrollView.minimumZoomScale = scrollView.bounds.height / mapView.map.bounds!.h
         scrollView.zoomScale = scrollView.minimumZoomScale
@@ -104,11 +104,16 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
 
     private func setupConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         // navigation bar
         navBar.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
             make.top.equalToSuperview()
-            make.height.equalTo(107)
+            if screenSize.height >= 812 {
+                make.height.equalTo(107)
+            } else {
+                make.height.equalTo(77)
+            }
         }
             
         // search bar
@@ -210,7 +215,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         floatingBadgeView.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(42)
             make.leading.trailing.equalToSuperview().inset(21)
-            make.height.equalToSuperview().multipliedBy(0.131516588)
+            make.height.equalTo(DynamicPadding.dynamicValue(120))
+//            make.height.equalToSuperview().multipliedBy(0.131516588)
             make.centerX.equalToSuperview()
         }
     }
@@ -271,7 +277,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
-                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")

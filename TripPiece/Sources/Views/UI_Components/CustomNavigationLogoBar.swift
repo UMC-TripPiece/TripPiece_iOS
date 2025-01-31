@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 class CustomNavigationLogoBar: UINavigationBar {
+
     private let logoImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "colorlogo")
@@ -18,7 +19,8 @@ class CustomNavigationLogoBar: UINavigationBar {
 
     private lazy var iconImageView: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(systemName: "arrow.left")?.withTintColor(Constants.Colors.black3 ?? .systemGray, renderingMode: .alwaysOriginal), for: .normal)
+        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.tintColor = .gray
         button.addTarget(self, action: #selector(back), for: .touchUpInside)
         return button
     }()

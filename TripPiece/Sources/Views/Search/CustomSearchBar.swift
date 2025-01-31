@@ -34,6 +34,15 @@ class CustomSearchBar: UIView {
         
         return searchBar
     }()
+    // `isActive` 상태를 직접 관리
+            var isActive: Bool = false {
+                didSet {
+                    searchBar.showsCancelButton = isActive
+                    if !isActive {
+                        searchBar.text = ""
+                    }
+                }
+            }
     
     // MARK: - Lifecycle
     override init(frame: CGRect) {

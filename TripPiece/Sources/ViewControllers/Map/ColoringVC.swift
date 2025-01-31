@@ -23,7 +23,8 @@ class ColoringVC: UIViewController {
     // 오른쪽 위 'X'자 버튼
     private let dismissButton: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "dismissButton"), for: .normal)
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.tintColor = UIColor(named: "Black3")
         button.isUserInteractionEnabled = true
         button.snp.makeConstraints { make in
             make.width.height.equalTo(14)
@@ -190,11 +191,16 @@ class ColoringVC: UIViewController {
     }
     
     private func setupConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         // Container view constraints
         containerView.snp.makeConstraints { make in
             make.center.equalToSuperview()
             make.width.equalToSuperview().multipliedBy(0.89230769)
-            make.height.equalToSuperview().multipliedBy(0.39454976)
+            if screenSize.height >= 812 {
+                make.height.equalToSuperview().multipliedBy(0.39454976)
+            } else {
+                make.height.equalToSuperview().multipliedBy(0.45)
+            }
         }
         //dismissButton constraints
         dismissButton.snp.makeConstraints { make in
@@ -217,7 +223,7 @@ class ColoringVC: UIViewController {
         }
         // 색깔 선택 뷰 (수정 필요)
         colorSelectBackgroundView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(20)
+            make.top.equalTo(titleLabel.snp.bottom).offset(17)
             make.bottom.equalTo(buttonsStackView.snp.top).offset(-13)
             make.horizontalEdges.equalToSuperview()
         }
@@ -228,7 +234,7 @@ class ColoringVC: UIViewController {
         // Color selection view constraints
         colorSelectionCollectionView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.bottom.equalTo(colorSelectBackgroundView.snp.bottom).offset(-20)
+            make.centerY.equalTo(colorSelectBackgroundView.snp.centerY).multipliedBy(1.1)
             make.horizontalEdges.equalToSuperview().inset(10)
             make.height.equalTo(60)
         }
@@ -244,7 +250,6 @@ class ColoringVC: UIViewController {
     
     
     //MARK: Setup Actions
-    
     private func setUpColorPicker() {
         // 저장된 색상 불러오기
         selectedColors = loadSelectedColors()
@@ -316,10 +321,10 @@ class ColoringVC: UIViewController {
                 editColor(selectedColor) { editResult in
                     switch editResult {
                     case .success(let message):
-                        print("색상 수정 성공: \(message)")
                         DispatchQueue.main.async {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
+                                NotificationCenter.default.post(name: .changeMapColor, object: nil)
                             }
                         }
                     case .failure(let error):
@@ -331,7 +336,6 @@ class ColoringVC: UIViewController {
                 colorCountry(selectedColor) { result in
                     switch result {
                     case .success(let message):
-                        print("업로드 성공: \(message)")
                         DispatchQueue.main.async {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
@@ -363,7 +367,6 @@ class ColoringVC: UIViewController {
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
         )
-        print("colorCountry - 처음 지도 색칠: \(data)")
 
         MapManager.postCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -395,7 +398,6 @@ class ColoringVC: UIViewController {
             color: color,  // 서버에서 수정 완료되면 color로 수정할 것
             cityId: cityData.cityId
         )
-        print("editColor - 지도 색깔 수정: \(data)")
         
         MapManager.changeCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -417,7 +419,6 @@ class ColoringVC: UIViewController {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
-                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")

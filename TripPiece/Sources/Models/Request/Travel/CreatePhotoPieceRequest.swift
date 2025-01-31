@@ -10,6 +10,9 @@ struct CreatePhotoPieceRequest : Codable { //사진 한 장
 
 struct CreatePhotosPieceRequest : Codable { //사진 여러 장
     let travelId : Int
-    let memo : String
+    let memo : MemoObject
     let photos : [Data]
+}
+struct MemoObject: Codable {
+    let description: String
 }

@@ -225,7 +225,7 @@ class LiveVideoLogVC: UIViewController {
     
     ///뒤로가기 버튼
     @objc private func handleBackButtonTap() {
-        self.dismiss(animated: true, completion: nil)
+        navigationController?.popViewController(animated: true)
     }
     
     ///비디오 추가 버튼 클릭
@@ -264,7 +264,7 @@ class LiveVideoLogVC: UIViewController {
             print("Failed to convert video to data")
             return
         }
-        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, description: self.memoTextView.text, video: videoData)) { [weak self] result in
+        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoTextView.text), video: videoData)) { [weak self] result in
             switch result {
             case .success(let value):
                 self?.navigateToVideoCompleteViewController()
@@ -291,8 +291,7 @@ class LiveVideoLogVC: UIViewController {
         
         let recordCompleteVC = LiveVideoCompleteVC()
         recordCompleteVC.setVideoComplete(with: thumbnail)
-        recordCompleteVC.modalPresentationStyle = .fullScreen
-        present(recordCompleteVC, animated: true, completion: nil)
+        navigationController?.replaceViewController(viewController: recordCompleteVC, animated: true)
     }
 }
 

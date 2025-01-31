@@ -267,6 +267,7 @@ class PuzzleLogVC: UIViewController {
             guard let self = self else { return }
             switch result {
             case .success(let value):
+                print(value)
                 for travelsDetailInfo in value.result {
                     guard let createdAt: Date = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(travelsDetailInfo.createdAt)Z") else { continue }
                     let dayIndex: Int = CalendarManager.shared.daysBetweenDates(from: self.dayRange?.start, to: createdAt)
@@ -348,6 +349,7 @@ extension PuzzleLogVC: UITableViewDataSource, UITableViewDelegate {
             return cell
         case "WHERE":
             guard let cell = tableView.dequeueReusableCell(withIdentifier: String(describing: WhereTableViewCell.self), for: indexPath) as? WhereTableViewCell else { return UITableViewCell() }
+            print(travelDetailInfo)
             cell.initializeCell(travelsDetailInfo: travelDetailInfo)
             return cell
         case "MEMO":

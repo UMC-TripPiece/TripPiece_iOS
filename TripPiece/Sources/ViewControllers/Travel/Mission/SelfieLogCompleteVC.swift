@@ -52,6 +52,7 @@ class SelfieLogCompleteVC: UIViewController {
     private lazy var previewImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "selfieEmoji")
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
@@ -164,20 +165,7 @@ class SelfieLogCompleteVC: UIViewController {
         thumbnailImageView.image = image
     }
     @objc private func doneButtonTapped() {
-        let puzzleIndex = 0
-        postPuzzleCompletion(index: puzzleIndex)
-        var targetViewController = presentingViewController
-         
-        while let presentingVC = targetViewController?.presentingViewController {
-            targetViewController = presentingVC
-        }
-         
-        targetViewController?.dismiss(animated: true) {
-            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-               let tabBarController = windowScene.windows.first?.rootViewController as? TabBar {
-                tabBarController.selectedIndex = 1 // "나의 기록" 탭으로 이동
-            }
-        }
+        navigationController?.popViewController(animated: true)
     }
 
 }

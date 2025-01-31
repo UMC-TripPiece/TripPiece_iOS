@@ -70,10 +70,11 @@ class EditPuzzleVC: UIViewController {
         print(pictureIdList)
         PuzzleLogManager.updateThumbnail(
             param: UpdateThumbnailRequest(travelId: travelId, pictureIdList: pictureIdList),
-            completion: { result in
+            completion: { [weak self] result in
                 switch result {
                 case .success(let value):
                     print(value)
+                    self?.navigationController?.popViewController(animated: true)
                 case .failure(let error):
                     print(error)
                 }
@@ -107,7 +108,6 @@ class EditPuzzleVC: UIViewController {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = true
         scrollView.showsHorizontalScrollIndicator = false
-        scrollView.bouncesVertically = true
 //        scrollView.contentSize =
         return scrollView
     }()
@@ -591,6 +591,11 @@ extension EditPuzzleVC: UICollectionViewDataSource, UICollectionViewDelegate {
         if allImages[indexPath.row].thumbnail_index != nil {
             return
         }
+        print("******")
+        print(thumbnails)
+        print("===========")
+        print(allImages)
+        print("******")
         var index: Int? = nil
         for (i, thumbnail) in thumbnails.enumerated() {
             guard let thumbnail = thumbnail else {
@@ -603,5 +608,11 @@ extension EditPuzzleVC: UICollectionViewDataSource, UICollectionViewDelegate {
         thumbnails[index] = allImages[indexPath.row]
         initializePuzzleImages()
         collectionView.reloadData()
+        
+        print("******")
+        print(thumbnails)
+        print("===========")
+        print(allImages)
+        print("******")
     }
 }

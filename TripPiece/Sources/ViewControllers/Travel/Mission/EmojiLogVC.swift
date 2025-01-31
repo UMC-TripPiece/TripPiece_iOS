@@ -246,7 +246,7 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     // MARK: - Actions
     
     @objc private func handleBackButtonTap() {
-        self.dismiss(animated: true, completion: nil)
+        navigationController?.popViewController(animated: true)
     }
     
     @objc private func selectEmoji(_ sender: UIButton) {
@@ -317,9 +317,8 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
             case .success(let response):
                 guard let self = self else { return }
                 let emojiCompleteVC = EmojiCompleteVC()
-                emojiCompleteVC.modalPresentationStyle = .fullScreen
                 emojiCompleteVC.setPreviewText(self.memoTextView.text, emojis: self.selectedEmojis)
-                present(emojiCompleteVC, animated: true, completion: nil)
+                navigationController?.replaceViewController(viewController: emojiCompleteVC, animated: true)
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
             }

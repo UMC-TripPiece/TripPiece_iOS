@@ -2,10 +2,12 @@
 
 import Foundation
 
-struct CreateTravelRequest : Codable {
-    let cityName : String
-    let countryName : String
-    let title : String
-    let startDate : String
-    let endDate : String
+struct CreateTravelRequest: Codable {
+    var cityName: String
+    var countryName: String
+    var title: String
+    var startDate: String
+    var endDate: String
+    // Base64
+    var thumbnail: Data?
 }

@@ -168,6 +168,8 @@ class Picture4TableViewCell: UITableViewCell {
     }()
     
     func initializeCell(travelsDetailInfo: TravelsDetailInfo) {
+        descriptionLabel.text = travelsDetailInfo.description
+        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(travelsDetailInfo.createdAt)Z")?.toStringYMDHM
         let imageViews: [UIImageView] = [imageView1, imageView2, imageView3, imageView4]
         for i in 0..<4 {
             guard let mediaUrl = travelsDetailInfo.mediaUrls?[i], let url = URL(string: mediaUrl) else { return }
@@ -175,7 +177,5 @@ class Picture4TableViewCell: UITableViewCell {
                 imageViews[i].image = image
             }
         }
-        descriptionLabel.text = travelsDetailInfo.description
-        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: travelsDetailInfo.createdAt)?.toStringYMDHM
     }
 }

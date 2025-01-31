@@ -72,9 +72,9 @@ class MyLogVC: UIViewController {
     
     private lazy var emptyStateLabel: UILabel = {
         let label = UILabel()
-        label.text = "아직 여행한 나라가 없어요"
+        label.text = "아직 여행한 나라가 없어요."
         label.textColor = Constants.Colors.black3
-        label.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
         label.textAlignment = .center
         label.isHidden = true // 초기에는 숨김 처리
         return label
@@ -95,7 +95,7 @@ class MyLogVC: UIViewController {
     
     private lazy var latestSortButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("완료", for: .normal)
+        button.setTitle("최신순", for: .normal)
         button.setTitleColor(Constants.Colors.black3, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         //        button.addTarget(self, action: #selector(updateSelectedFilterButton), for: .touchUpInside)
@@ -104,7 +104,7 @@ class MyLogVC: UIViewController {
     
     private lazy var oldestSortButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle("완료", for: .normal)
+        button.setTitle("오래된 순", for: .normal)
         button.setTitleColor(Constants.Colors.black3, for: .normal)
         button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
         //        button.addTarget(self, action: #selector(updateSelectedFilterButton), for: .touchUpInside)
@@ -128,6 +128,16 @@ class MyLogVC: UIViewController {
         stackView.distribution = .equalSpacing
         stackView.spacing = 10
         return stackView
+    }()
+    
+    private lazy var emptyPieceLabel: UILabel = {
+        let label = UILabel()
+        label.text = "아직 기록한 조각이 없어요."
+        label.textColor = Constants.Colors.black3
+        label.font = UIFont.systemFont(ofSize: 16, weight: .medium)
+        label.textAlignment = .center
+        label.isHidden = true // 초기에는 숨김 처리
+        return label
     }()
     
     let allButton = PieceSortButton(title: "전체", tag: 0, target: self, action: #selector(filterButtonTapped(_:)))
@@ -158,29 +168,27 @@ class MyLogVC: UIViewController {
         MyLogManager.fetchTravelsInfo { result in
             switch result {
             case .success(let TravelsInfo):
-                self.fetchedTravelsInfo = TravelsInfo.result // 데이터를 저장
-                self.updateTravelLogStackView()
-                self.updateGoogleMap()
-                print("데이터 불러오기")
+                    self.fetchedTravelsInfo = TravelsInfo.result // 데이터를 저장
+                print(self.fetchedTravelsInfo)
+                    self.updateTravelLogStackView()
+                    self.updateGoogleMap()
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
             }
-        }
-        MyLogManager.fetchTripPieceInfo { result in
-            switch result {
-            case .success(let TripPieceInfo):
-                self.allPiece = TripPieceInfo.result
-                self.updateTripPieceStackView(items: self.allPiece)
-                print("데이터 불러오기")
-            case .failure(let error):
-                print("Error occurred: \(error.localizedDescription)")
+            MyLogManager.fetchTripPieceInfo { result in
+                switch result {
+                case .success(let TripPieceInfo):
+                    self.allPiece = TripPieceInfo.result
+                    self.updateTripPieceStackView(items: self.allPiece)
+                case .failure(let error):
+                    print("Error occurred: \(error.localizedDescription)")
+                }
             }
         }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //        NotificationCenter.default.addObserver(self, selector: #selector(handleTravelLogStarted), name: .travelLogStarted, object: nil)
         setupView()
         setupConstraints()
         setupGestures()
@@ -202,6 +210,7 @@ class MyLogVC: UIViewController {
             sortStackView.addArrangedSubview($0)
         }
         sortScrollView.addSubview(sortStackView)
+        tripPieceStackView.addSubview(emptyPieceLabel)
         [mapView, progressTravelSectionTitle, progressTravelCard, tripSectionTitle, travelLogScrollView, historyTitle, sortScrollView, tripPieceStackView].forEach {
             contentView.addSubview($0)
         }
@@ -252,8 +261,7 @@ class MyLogVC: UIViewController {
             make.height.equalToSuperview()
         }
         emptyStateLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(mapView.snp.bottom).offset(20) // 지도 아래에 배치
+            make.centerX.centerY.equalToSuperview()
         }
         historyTitle.snp.makeConstraints { make in
             make.top.equalTo(travelLogScrollView.snp.bottom)
@@ -261,18 +269,22 @@ class MyLogVC: UIViewController {
         }
         sortScrollView.snp.makeConstraints { make in
             make.top.equalTo(historyTitle.snp.bottom)
-            make.leading.trailing.equalToSuperview().inset(16)
+            make.leading.trailing.equalToSuperview()
             make.height.equalTo(50)
         }
         sortStackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalToSuperview()
         }
         tripPieceStackView.snp.makeConstraints { make in
             make.top.equalTo(sortScrollView.snp.bottom).offset(8)
             make.leading.trailing.equalToSuperview().inset(16)
             make.bottom.equalToSuperview().offset(-40)  // 마지막 요소이므로 아래 여백 설정
+        }
+        emptyPieceLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(24)
+            make.centerX.equalToSuperview()
         }
         addButton.snp.makeConstraints { make in
             make.width.height.equalTo(63)
@@ -290,7 +302,7 @@ class MyLogVC: UIViewController {
     // MARK: func 세팅
     @objc private func startTravel() {
         //TODO: 여행기 생성 클릭 시 넘어가는 뷰
-        let viewController = TestVC()
+        let viewController = StartLogVC()
         viewController.modalPresentationStyle = .fullScreen
         self.present(viewController, animated: true, completion: nil)
     }
@@ -313,33 +325,8 @@ class MyLogVC: UIViewController {
 //        self.present(viewController, animated: true, completion: nil)
     }
     
-//    func updateTravelLogStackView() { //여행기 cell 추가
-//        travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-//        
-//        for TravelsInfo in fetchedTravelsInfo.reversed() {
-//            let cell = TravelLogCardCell()
-//            let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
-//            let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
-//            let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
-//            cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
-//            travelLogStackView.addArrangedSubview(cell)
-//            
-//            if TravelsInfo.status == "ONGOING" {
-//                progressTravelSectionTitle.isHidden = false
-//                progressTravelCard.isHidden = false
-//                let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
-//                let subtitle = "Day \(daysElapsed)"
-//                let title = "[\(TravelsInfo.cityName)] \(TravelsInfo.title)"
-//                self.progressTravelCard.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: subtitle)
-//                
-//            }
-//        }
-//        updateLayoutForProgressTravelCardVisibility()
-//    }
-    
     func updateTravelLogStackView() {
         travelLogStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        
         if fetchedTravelsInfo.isEmpty {
             // 데이터가 없을 때
             emptyStateLabel.isHidden = false
@@ -367,9 +354,8 @@ class MyLogVC: UIViewController {
                     
                 }
             }
-            updateLayoutForProgressTravelCardVisibility()
         }
-        
+        updateLayoutForProgressTravelCardVisibility()
         travelLogScrollView.setNeedsLayout()
         travelLogScrollView.layoutIfNeeded()
     }
@@ -381,7 +367,7 @@ class MyLogVC: UIViewController {
             MyLogManager.fetchGeocoding(country: travelsInfo.countryName, city: travelsInfo.cityName) { [weak self] result in
                 switch result {
                 case .success(let geocodingResponse):
-                    print(geocodingResponse)
+//                    print(geocodingResponse)
                     if let result = geocodingResponse.results.first {
                         self?.appendMarker(position: CLLocationCoordinate2D(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng), imageURL: travelsInfo.thumbnail, zIndex: index)
                     }
@@ -422,14 +408,23 @@ class MyLogVC: UIViewController {
     func updateTripPieceStackView(items: [TripPieceInfo]) { //여행 조각 관련 함수
         tripPieceStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        for item in items.reversed() {
-            let cell = PieceCell()
-            let formattedDate = formatDate(from: item.createdAt)!
-            let location = "\(item.cityName), \(item.countryName)"
-            cell.configure(type: item.category, mediaURL: item.mediaUrl ?? "", memo: item.memo ?? "", createdAt: formattedDate, location: location)
-            tripPieceStackView.addArrangedSubview(cell)
+        if allPiece.isEmpty {
+            // 데이터가 없을 때
+            emptyPieceLabel.isHidden = false
+        } else {
+            // 데이터가 있을 때
+            emptyPieceLabel.isHidden = true
+            
+            for item in items.reversed() {
+                let cell = PieceCell()
+                let formattedDate = formatDate(from: item.createdAt)!
+                let location = "\(item.cityName), \(item.countryName)"
+                cell.configure(type: item.category, mediaURL: item.mediaUrl ?? "", memo: item.memo ?? "", createdAt: formattedDate, location: location)
+                tripPieceStackView.addArrangedSubview(cell)
+            }
         }
     }
+    
     //TODO: 최신순 sorting 추가
     func updateSelectedFilterButton(selectedButton: PieceSortButton) {
         let buttons = [allButton, photoButton, videoButton, /*musicButton,*/ memoButton]

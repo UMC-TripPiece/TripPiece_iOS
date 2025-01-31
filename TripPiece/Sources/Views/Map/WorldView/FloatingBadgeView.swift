@@ -34,6 +34,7 @@ class FloatingBadgeView: UIView {
         label.numberOfLines = 0
         label.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         label.textAlignment = .left
+        label.numberOfLines = 2
         return label
     }()
     
@@ -74,14 +75,20 @@ class FloatingBadgeView: UIView {
     
     
     func setUpConstraints() {
+        let screenSize = UIScreen.main.bounds.size
         userProfileStackView.snp.makeConstraints { make in
             make.horizontalEdges.equalToSuperview().inset(15)
-            make.top.equalToSuperview().inset(15)
+            if screenSize.height >= 812 {
+                make.top.equalToSuperview().inset(15)
+            } else {
+                make.top.equalToSuperview().inset(9)
+            }
+            
         }
         
         subtitleLabel.snp.makeConstraints { make in
             make.leading.equalTo(userProfileStackView.snp.leading)
-            make.bottom.equalToSuperview().inset(20)
+            make.centerY.equalToSuperview().multipliedBy(1.3)
             make.trailing.equalTo(globeImageView.snp.leading).offset(-15)
         }
         
@@ -91,9 +98,10 @@ class FloatingBadgeView: UIView {
         }
         
         globeImageView.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-25)
+            make.centerX.equalToSuperview().multipliedBy(1.65)
             make.centerY.equalToSuperview()
-            make.height.width.equalTo(85)
+            make.height.equalToSuperview().multipliedBy(0.8)
+            make.width.equalTo(globeImageView.snp.height)
         }
     }
     

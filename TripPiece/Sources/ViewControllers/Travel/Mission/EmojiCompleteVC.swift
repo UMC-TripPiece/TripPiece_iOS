@@ -7,10 +7,6 @@
 
 import UIKit
 
-extension Notification.Name {
-    static let puzzlePieceCompleted = Notification.Name("puzzlePieceCompleted")
-}
-
 class EmojiCompleteVC: UIViewController {
     // 기록 추가 완료를 나타내는 이미지뷰
     private lazy var checkImageView: UIImageView = {
@@ -170,19 +166,6 @@ class EmojiCompleteVC: UIViewController {
     
     // 완료 버튼 클릭 시 호출되는 메서드
     @objc private func doneButtonTapped() {
-        let puzzleIndex = 3
-        postPuzzleCompletion(index: puzzleIndex)
-        var targetViewController = presentingViewController
-         
-        while let presentingVC = targetViewController?.presentingViewController {
-            targetViewController = presentingVC
-        }
-         
-        targetViewController?.dismiss(animated: true) {
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let tabBarController = windowScene.windows.first?.rootViewController as? TabBar {
-                    tabBarController.selectedIndex = 1 // "나의 기록" 탭으로 이동
-                }
-            }
+        navigationController?.popViewController(animated: true)
     }
 }

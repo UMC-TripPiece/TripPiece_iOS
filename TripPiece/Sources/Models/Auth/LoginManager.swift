@@ -11,7 +11,7 @@ extension SignUpVC {
         APIManager.AuthProvider.request(.postEmailSend(email: email)) { result in
             switch result {
             case .success(let response):
-                print(response)
+                print("response ==== \(response)")
                 if response.statusCode == 200 {
                     completion(true)
                 } else {
@@ -172,7 +172,7 @@ extension LoginVC {
                 }
             case .failure(let error):
                 if let response = error.response {
-                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
+//                    Toaster.shared.makeToast("\(response.statusCode) : \(error.localizedDescription)")
                     completion(false, response.statusCode) // 실패와 상태 코드 반환
                 } else {
                     completion(false, nil) // 네트워크 문제로 상태 코드 없음
@@ -200,7 +200,7 @@ extension SelectLoginTypeVC {
                     SelectLoginTypeVC.keychain.set(String(currentTimeInMilliseconds), forKey: "accessTokenCreatedAt")
                     completion(true)
                 } catch {
-                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
+//                    Toaster.shared.makeToast("\(response.statusCode) : 데이터를 불러오는데 실패했습니다.")
                 }
             case .failure(let error) :
                 if let response = error.response {

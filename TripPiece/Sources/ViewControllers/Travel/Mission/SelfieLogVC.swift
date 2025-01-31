@@ -211,7 +211,7 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
     
     ///뒤로가기 버튼
     @objc private func handleBackButtonTap() {
-        self.dismiss(animated: true, completion: nil)
+        navigationController?.popViewController(animated: true)
     }
     
     private func setupDismissKeyboardGesture() {
@@ -292,9 +292,8 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
             switch result {
             case .success(let response):
                 let selfieLogCompleteVC = SelfieLogCompleteVC()
-                selfieLogCompleteVC.modalPresentationStyle = .fullScreen
                 selfieLogCompleteVC.setVideoComplete(with: self?.mySelfie ?? UIImage())
-                self?.present(selfieLogCompleteVC, animated: true, completion: nil)
+                self?.navigationController?.replaceViewController(viewController: selfieLogCompleteVC, animated: true)
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
             }

@@ -86,8 +86,6 @@ class SignUpVC: UIViewController {
         setupActions()
         validateInputs()
         
-        //TODO: 테스트용, 지워야 함
-        signUpButton.isEnabled = true
     }
     
     // MARK: - Setup Methods
@@ -180,10 +178,10 @@ class SignUpVC: UIViewController {
             emailField.textField.layer.borderColor = Constants.Colors.mainPurple?.cgColor
             confirmCodeButton.isEnabled = true
             confirmCodeButton.backgroundColor = Constants.Colors.mainPurple
-            
             if confirmCodeButton.title(for: .normal) == "인증번호 전송" {
                 callSendCodeAPI(email: email) { isSuccess in
                     if isSuccess {
+                        //TODO: 이메일 중복 경우 분기처리 필요
                         self.confirmCodeButton.setTitle("인증번호 확인", for: .normal)
                         self.confirmCodeButton.isEnabled = true
                         self.codeValidationLabel.isHidden = false

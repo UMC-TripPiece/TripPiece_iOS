@@ -52,12 +52,7 @@ class MapView: MacawView {
     }
     
     override func touchesBegan(_ touches: Set<MTouch>, with event: MEvent?) {
-        print("🔥 touchesBegan 호출")
         super.touchesBegan(touches, with: event)
-        
-        if map.contents.count == 1 {
-            print("🌊 바다가 클릭되었습니다!")
-        }
     }
     
     func colorMap(countryEnum: CountryEnum, color: UIColor) {

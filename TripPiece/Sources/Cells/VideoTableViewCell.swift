@@ -88,11 +88,11 @@ class VideoTableViewCell: UITableViewCell {
     }()
     
     func initializeCell(travelsDetailInfo: TravelsDetailInfo) {
+        descriptionLabel.text = travelsDetailInfo.description
+        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(travelsDetailInfo.createdAt)Z")?.toStringYMDHM
         guard let mediaUrl = travelsDetailInfo.mediaUrls?.first, let url = URL(string: mediaUrl) else { return }
         videoImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "placeholder")) { [weak self] (image, error, cacheType, imageURL) in
             self?.videoImageView.image = image
         }
-        descriptionLabel.text = travelsDetailInfo.description
-        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: travelsDetailInfo.createdAt)?.toStringYMDHM
     }
 }

@@ -578,6 +578,7 @@ class FinishPuzzleVC: UIViewController {
         PuzzleLogManager.fetchThumbnail(travelId: travelId) { result in
             switch result {
             case .success(let value):
+                print(value)
                 self.updateThumbnail(thumbnailInfos: value.result)
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
@@ -594,6 +595,7 @@ class FinishPuzzleVC: UIViewController {
         PuzzleLogManager.fetchTravelsInfo(travelId: travelId) { result in
             switch result {
             case .success(let value):
+                print(value)
                 self.updateThumbnailForInitial(endTravelInfo: value.result)
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
@@ -651,10 +653,11 @@ class FinishPuzzleVC: UIViewController {
         }
         
         if let countLabel = self.musicCountStack.arrangedSubviews.first as? UILabel {
-            let fullText = "\(endTravelInfo.videoCount)개"
+            let musicCount = 0
+            let fullText = "\(musicCount)개"
             
             let attributedString = NSMutableAttributedString(string: fullText)
-            let numberRange = (fullText as NSString).range(of: "\(endTravelInfo.videoCount)")
+            let numberRange = (fullText as NSString).range(of: "\(musicCount)")
             attributedString.addAttribute(.font, value: UIFont.systemFont(ofSize: 20, weight: .bold), range: numberRange)
             
             countLabel.attributedText = attributedString

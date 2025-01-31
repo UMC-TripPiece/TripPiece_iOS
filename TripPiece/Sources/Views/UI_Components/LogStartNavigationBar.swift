@@ -2,6 +2,7 @@
 
 import UIKit
 import SnapKit
+import SnapKit
 
 extension Notification.Name {
     static let backButtonTapped = Notification.Name("backButtonTapped")
@@ -16,7 +17,8 @@ class LogStartNavigationBar: UINavigationBar {
 
     private lazy var iconImageView: UIButton = {
         let button = UIButton()
-        button.setImage(UIImage(named: "back"), for: .normal)
+        button.setImage(UIImage(systemName: "arrow.left"), for: .normal)
+        button.tintColor = Constants.Colors.black3 ?? .systemGray
         button.addTarget(self, action: #selector(back), for: .touchUpInside)
         return button
     }()

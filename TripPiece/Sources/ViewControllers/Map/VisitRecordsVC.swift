@@ -22,6 +22,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         layout.minimumInteritemSpacing = 0 // 아이템 간 간격
         
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: tabBarController?.tabBar.frame.height ?? 0, right: 0)
         collectionView.backgroundColor = UIColor(hex: "#F9F9F9")
         collectionView.showsVerticalScrollIndicator = false
         collectionView.isScrollEnabled = true
@@ -83,8 +84,8 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         
         // Back 버튼 추가
         let backButton = UIButton(type: .custom)
-        backButton.setImage(UIImage(named: "backButton"), for: .normal)
-        backButton.setTitleColor(UIColor(hex: "#A7A7A7)"), for: .normal)
+        backButton.setImage(UIImage(systemName: "arrow.backward"), for: .normal)
+        backButton.tintColor = UIColor(named: "Black3")
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
         customNavBar.addSubview(backButton)
         
@@ -161,6 +162,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     
     // 색깔 수정/삭제
     func didTapEditButton(at indexPath: IndexPath) {
+        removeAllEditOptionsViews()
         let cityId = cityIds[indexPath.row]
         guard let cityName = CityEnum.find(byId: cityId) else { return }
         let countryCode = cityName.country.rawValue
@@ -175,6 +177,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     }
     
     func didTapDeleteButton(at indexPath: IndexPath) {
+        removeAllEditOptionsViews()
         guard let userId = userId else { return }
         let cityId = cityIds[indexPath.row]
         guard let result = CityEnum.find(byId: cityId) else { return }
@@ -183,7 +186,6 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         deleteColor(countryCode: countryCode, cityId: cityId, color: countryColor) { result in
             switch result {
             case .success(let message):
-                print("삭제 성공: \(message)")
                 NotificationCenter.default.post(name: .deleteMapColor, object: nil, userInfo: ["deletedItem": countryCode])
                 self.cityIds.removeAll { $0 == cityId }
                 self.getCountryColorsData(userId) { colorInfo in
@@ -199,6 +201,15 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         }
     }
     
+    private func removeAllEditOptionsViews() {
+        // CollectionView의 모든 subviews 중 EditOptionsView를 제거
+        for subview in collectionView.subviews {
+            if let optionsView = subview as? EditOptionsView {
+                optionsView.removeFromSuperview()
+            }
+        }
+    }
+
     
     
     
@@ -212,7 +223,6 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
             color: color,
             cityId: cityId
         )
-        print("deleteColor - 보내는 정보: \(data)")
         
         MapManager.deleteCountryColor(data) { isSuccess, response in
             if isSuccess {
@@ -245,7 +255,6 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
         MapManager.getCountryStats(userId: userId) { result in
             switch result {
             case .success(let statsInfo):
-                print("나라 stats data: \(statsInfo.result)")
                 completion(statsInfo.result)
             case .failure(let error):
                 print("오류 발생: \(error.localizedDescription)")
