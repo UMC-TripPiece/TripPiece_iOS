@@ -264,7 +264,8 @@ class LiveVideoLogVC: UIViewController {
             print("Failed to convert video to data")
             return
         }
-        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoTextView.text), video: videoData)) { [weak self] result in
+        print(videoURL.lastPathComponent)
+        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoTextView.text), video: videoData, videoName: videoURL.lastPathComponent)) { [weak self] result in
             switch result {
             case .success(let value):
                 self?.navigateToVideoCompleteViewController()

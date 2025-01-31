@@ -126,7 +126,7 @@ extension TravelAPI: TargetType {
                let memoJSONString = String(data: memoData, encoding: .utf8) {
                 multipartFormDatas.append(MultipartFormData(provider: .data(memoJSONString.data(using: .utf8)!), name: "memo"))
             }
-            multipartFormDatas.append(MultipartFormData(provider: .data(param.video), name: "video", fileName: "\(UUID().uuidString).mp4", mimeType: "video/mp4"))
+            multipartFormDatas.append(MultipartFormData(provider: .data(param.video), name: "video", fileName: param.videoName ?? "\(UUID().uuidString).mp4", mimeType: "video/mp4"))
             return .uploadMultipart(multipartFormDatas)
         case .postVideoPiece(let param):
             var formData = [MultipartFormData]()
