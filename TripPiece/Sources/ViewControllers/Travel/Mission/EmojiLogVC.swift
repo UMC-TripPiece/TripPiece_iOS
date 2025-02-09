@@ -16,7 +16,12 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     
     // MARK: - Properties
     
-    private var selectedEmojis: [String?] = [nil, nil, nil, nil]
+    private var selectedEmojis: [String?] = [nil, nil, nil, nil] {
+        didSet {
+            addButton.backgroundColor = !selectedEmojis.contains(nil) ? UIColor.systemPink : UIColor(hex: "D3D3D3")
+            addButton.isEnabled = !selectedEmojis.contains(nil)
+        }
+    }
     private var emojiButtons: [UIButton] = []
     private var underlineViews: [UIView] = []
     
@@ -271,7 +276,6 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
             underlineViews[buttonTag].backgroundColor = .systemRed
             
             hiddenTextField.resignFirstResponder()
-            validateInput() // 이모지 입력 상태 검증
             return false
         }
         
@@ -291,24 +295,17 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
             textView.text = "| 감정을 글로 표현해보세요 (100자 이내)"
             textView.textColor = .lightGray
         }
-        validateInput() // 메모 입력 상태 검증
-    }
-    
-    private func validateInput() {
-        let isMemoValid = !(memoTextView.text.isEmpty || memoTextView.text == "| 감정을 글로 표현해보세요 (100자 이내)")
-        let isEmojiSelected = !selectedEmojis.contains(nil)
-        
-        addButton.isEnabled = isMemoValid && isEmojiSelected
-        addButton.backgroundColor = addButton.isEnabled ? UIColor.systemPink : UIColor(hex: "D3D3D3")
     }
     
     // MARK: - 기록 추가
 
     @objc private func addRecord() {
-        guard let memoText = memoTextView.text, memoText != "| 감정을 글로 표현해보세요 (100자 이내)", !memoText.isEmpty else {
-            print("메모를 입력하세요.")
-            return
-        }
+        let memoText: String = {
+            if memoTextView.text == "| 감정을 글로 표현해보세요 (100자 이내)" {
+                return ""
+            }
+            return memoTextView.text
+        }()
         
         let nonNilEmojis = selectedEmojis.compactMap { $0 }
         

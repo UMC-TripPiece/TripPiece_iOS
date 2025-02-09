@@ -341,7 +341,8 @@ class MyLogVC: UIViewController {
                 let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
                 let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
                 let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
-                cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+                cell.configure(id: TravelsInfo.id, imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+                cell.mainButton.addTarget(self, action: #selector(onClickCell(sender: )), for: .touchUpInside)
                 travelLogStackView.addArrangedSubview(cell)
                 
                 if TravelsInfo.status == "ONGOING" {
@@ -358,6 +359,12 @@ class MyLogVC: UIViewController {
         updateLayoutForProgressTravelCardVisibility()
         travelLogScrollView.setNeedsLayout()
         travelLogScrollView.layoutIfNeeded()
+    }
+    
+    @objc private func onClickCell(sender: UIButton) {
+        let vc = UINavigationController(rootViewController: FinishPuzzleVC(travelId: sender.tag))
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
     
     private func updateGoogleMap() {

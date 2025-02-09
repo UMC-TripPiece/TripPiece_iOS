@@ -271,6 +271,7 @@ class OngoingLogVC: UIViewController {
             calendarImage: UIImage(named: "calendar"),
             calendarText: calendarText
         )
+        travelSummary.editButton.addTarget(self, action: #selector(editTravelButtonTapped), for: .touchUpInside)
         travelSummary.isHidden = false
     }
 
@@ -340,5 +341,10 @@ class OngoingLogVC: UIViewController {
         endTravelAlertVC.modalTransitionStyle = .crossDissolve // 부드러운 전환을 위해
         // 화면 이동
         self.present(endTravelAlertVC, animated: true, completion: nil)
+    }
+    
+    @objc private func editTravelButtonTapped() {
+        let editLogVC = EditLogVC()
+        navigationController?.pushViewController(editLogVC, animated: true)
     }
 }

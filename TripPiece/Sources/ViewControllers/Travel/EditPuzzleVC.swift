@@ -461,7 +461,7 @@ class EditPuzzleVC: UIViewController {
     }()
     
     private lazy var imageCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
+        let layout = LeftAlignedCollectionViewFlowLayout()
         layout.minimumLineSpacing = 4
         layout.minimumInteritemSpacing = 2
         layout.itemSize = CGSize(width: 115, height: 115)
@@ -591,11 +591,6 @@ extension EditPuzzleVC: UICollectionViewDataSource, UICollectionViewDelegate {
         if allImages[indexPath.row].thumbnail_index != nil {
             return
         }
-        print("******")
-        print(thumbnails)
-        print("===========")
-        print(allImages)
-        print("******")
         var index: Int? = nil
         for (i, thumbnail) in thumbnails.enumerated() {
             guard let thumbnail = thumbnail else {
@@ -608,11 +603,5 @@ extension EditPuzzleVC: UICollectionViewDataSource, UICollectionViewDelegate {
         thumbnails[index] = allImages[indexPath.row]
         initializePuzzleImages()
         collectionView.reloadData()
-        
-        print("******")
-        print(thumbnails)
-        print("===========")
-        print(allImages)
-        print("******")
     }
 }

@@ -24,7 +24,13 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
     func getRefreshToken() -> String? {
         return UserDefaults.standard.string(forKey: "refreshToken")
     }
-    var selectedImageData: Data?
+    var selectedImageData: Data? {
+        didSet {
+            let isImageSelected = selectedImageData != nil
+            addButton.isEnabled = isImageSelected
+            addButton.backgroundColor = addButton.isEnabled ? UIColor(hex: "6644FF") : UIColor(hex: "D3D3D3")
+        }
+    }
     var mySelfie: UIImage?
     
     //MARK: - UI
@@ -106,7 +112,6 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         textField.placeholder = "| 설명을 적어주세요"
         textField.borderStyle = .none
         textField.delegate = self
-        textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged) // Add this line
         return textField
     }()
     
@@ -260,7 +265,6 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
             mySelfie = selectedImage
             selectedImageData = selectedImage.jpegData(compressionQuality: 0.2)
             addPhotoLabel.isHidden = true
-            validateInput()  // Call validation after selecting an image
         }
         picker.dismiss(animated: true, completion: nil)
     }
@@ -269,25 +273,16 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         picker.dismiss(animated: true, completion: nil)
     }
     
-    private func validateInput() {
-        let isDescriptionValid = !(descriptionTextField.text?.isEmpty ?? true)
-        let isImageSelected = selectedImageData != nil
-        addButton.isEnabled = isDescriptionValid && isImageSelected
-        addButton.backgroundColor = addButton.isEnabled ? UIColor(hex: "6644FF") : UIColor(hex: "D3D3D3")
-    }
-    
-    @objc func textFieldDidChange(_ textField: UITextField) {
-        validateInput()  // Call validation when the text changes
-    }
     
     @objc private func addRecord() {
-        guard let selectedImageData = selectedImageData, let text = descriptionTextField.text else {
+        guard let selectedImageData = selectedImageData else {
             // 에러 처리: 텍스트나 썸네일이 없을 때
             let alert = UIAlertController(title: "경고", message: "썸네일 또는 텍스트가 없습니다.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             present(alert, animated: true)
             return
         }
+        let text: String = descriptionTextField.text ?? ""
         MissionLogManager.postSelfiePiece(createPhotoPieceRequest: CreatePhotoPieceRequest(travelId: travelId, memo: text, photo: selectedImageData)) { [weak self] result in
             switch result {
             case .success(let response):

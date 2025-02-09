@@ -217,9 +217,8 @@ class LiveVideoLogVC: UIViewController {
         // 두 변수의 상태를 프린트하여 확인
         print("Selected video URL: \(selectedVideoURL?.absoluteString ?? "nil")")
         
-        let isMemoValid = !memoTextView.text.isEmpty && memoTextView.text != "| 영상에 대해 설명해주세요 (100자 이내)"
-        addButton.isEnabled = selectedVideo != nil && isMemoValid
-        addButton.backgroundColor = (selectedVideo == nil || !isMemoValid) ? UIColor(named: "Cancel") : UIColor(named: "Main2")
+        addButton.isEnabled = selectedVideo != nil
+        addButton.backgroundColor = selectedVideo == nil ? UIColor(named: "Cancel") : UIColor(named: "Main2")
     }
 
     
@@ -264,8 +263,14 @@ class LiveVideoLogVC: UIViewController {
             print("Failed to convert video to data")
             return
         }
+        let memoText: String = {
+            if memoTextView.text == "| 감정을 글로 표현해보세요 (100자 이내)" {
+                return ""
+            }
+            return memoTextView.text
+        }()
         print(videoURL.lastPathComponent)
-        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoTextView.text), video: videoData, videoName: videoURL.lastPathComponent)) { [weak self] result in
+        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoText), video: videoData, videoName: videoURL.lastPathComponent)) { [weak self] result in
             switch result {
             case .success(let value):
                 self?.navigateToVideoCompleteViewController()
@@ -368,8 +373,5 @@ extension LiveVideoLogVC: UITextViewDelegate {
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: text)
         return updatedText.count <= 100 // 글자 수 제한 100자
-    }
-    func textViewDidChange(_ textView: UITextView) {
-        updateAddButtonState()
     }
 }
