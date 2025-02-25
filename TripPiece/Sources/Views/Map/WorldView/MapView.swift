@@ -10,7 +10,7 @@ class MapView: MacawView {
     }
     
     public var map: Group
-    weak var delegate: MapDelegate?
+    //weak var delegate: MapDelegate?
     
     
     
@@ -33,7 +33,7 @@ class MapView: MacawView {
         for countryEnum in CountryEnum.allCases {
             map.nodeBy(tag: countryEnum.rawValue)?.onTouchPressed({ [weak self] touch in
                 print("🔥 onTouchPressed 호출")
-                self?.delegate?.didSelectCountry(countryEnum)
+                //self?.delegate?.didSelectCountry(countryEnum)
             })
         }
 
