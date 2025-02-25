@@ -484,6 +484,7 @@ extension StartLogVC {
             self.view.layoutIfNeeded()
         }, completion: { _ in
             self.rootView.addPhotoButton.isHidden = false
+            self.rootView.addCountryButton.isEnabled = false
             UIView.animate(withDuration: 0.3) {
                 self.rootView.addPhotoButton.alpha = 1.0
             }
