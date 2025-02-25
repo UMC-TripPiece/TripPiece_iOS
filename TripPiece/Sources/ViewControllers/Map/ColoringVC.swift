@@ -328,7 +328,7 @@ class ColoringVC: UIViewController {
                 editColor(selectedColor) { editResult in
                     switch editResult {
                     case .success(let message):
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
@@ -343,7 +343,7 @@ class ColoringVC: UIViewController {
                 colorCountry(selectedColor) { result in
                     switch result {
                     case .success(let message):
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             // 무조건 2번 dismiss
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
