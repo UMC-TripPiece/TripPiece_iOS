@@ -12,22 +12,20 @@ import SDWebImage
 class MarkerView: UIView {
 
     // MARK: - Lifecycle
-    init(frame: CGRect, color: UIColor, image: UIImage) {
+    init(frame: CGRect, image: UIImage) {
         super.init(frame: frame)
         self.setupUI()
         imageView.layer.cornerRadius = frame.width / 2
         imageView.image = image
-        imageView.layer.borderColor = color.cgColor
     }
     
-    init(frame: CGRect, color: UIColor, imageURL: String) {
+    init(frame: CGRect, imageURL: String) {
         super.init(frame: frame)
         self.setupUI()
-        imageView.layer.cornerRadius = frame.width / 2
         if let imageUrl = URL(string: imageURL) {
             imageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder"))
         }
-        imageView.layer.borderColor = color.cgColor
+        imageView.layer.cornerRadius = frame.width / 2
     }
     
     required init?(coder: NSCoder) {
@@ -38,6 +36,7 @@ class MarkerView: UIView {
         let imageView = UIImageView()
         imageView.clipsToBounds = true
         imageView.layer.borderWidth = 2
+        imageView.layer.borderColor = [Constants.Colors.mainPurple, Constants.Colors.mainPink, Constants.Colors.mainYellow, Constants.Colors.mint].randomElement()??.cgColor
         imageView.contentMode = .scaleAspectFill
         return imageView
     }()

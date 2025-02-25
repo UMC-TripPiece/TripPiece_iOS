@@ -12,7 +12,7 @@ class CustomNavigationLogoBar: UINavigationBar {
 
     private let logoImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "logo")
+        imageView.image = UIImage(named: "colorlogo")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()

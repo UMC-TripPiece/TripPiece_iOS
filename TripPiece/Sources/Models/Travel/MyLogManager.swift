@@ -49,9 +49,6 @@ class MyLogManager {
         APIManager.GeoCodingProvider.request(.getCoordinate(country: country, city: city)) { result in
             switch result {
             case .success(let response):
-                if let decodedString = String(data: response.data, encoding: .utf8) {
-//                    print("Decoded String: \(decodedString)")
-                }
                 do {
                     let data = try JSONDecoder().decode(GeocodingResponse.self, from: response.data)
                     completion(.success(data))

@@ -369,7 +369,7 @@ class MyLogVC: UIViewController {
                 case .success(let geocodingResponse):
 //                    print(geocodingResponse)
                     if let result = geocodingResponse.results.first {
-                        self?.appendMarker(position: CLLocationCoordinate2D(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng), color: UIColor.red, imageURL: travelsInfo.thumbnail, zIndex: index)
+                        self?.appendMarker(position: CLLocationCoordinate2D(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng), imageURL: travelsInfo.thumbnail, zIndex: index)
                     }
                 case .failure(let error):
                     print("Not Found: \(travelsInfo.countryName), \(travelsInfo.cityName)")
@@ -380,11 +380,11 @@ class MyLogVC: UIViewController {
         }
     }
     
-    private func appendMarker(position: CLLocationCoordinate2D, color: UIColor, imageURL: String, zIndex: Int) {
+    private func appendMarker(position: CLLocationCoordinate2D, imageURL: String, zIndex: Int) {
         let marker = GMSMarker(position: position)
         marker.map = mapView
         marker.zIndex = Int32(zIndex)
-        marker.iconView = MarkerView(frame: CGRect(x: 0, y: 0, width: 32, height: 32), color: color, imageURL: imageURL)
+        marker.iconView = MarkerView(frame: CGRect(x: 0, y: 0, width: 32, height: 32), imageURL: imageURL)
     }
     
     func updateLayoutForProgressTravelCardVisibility() {
