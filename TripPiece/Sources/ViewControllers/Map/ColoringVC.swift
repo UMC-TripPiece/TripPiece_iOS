@@ -323,13 +323,12 @@ class ColoringVC: UIViewController {
             guard let data = result else { return }
             guard let cityData = self.cityData else { return }
             
-            //수정
             if data.cityIds.contains(cityData.cityId) {
                 Toaster.shared.makeToast("색칠되었던 색상을 수정합니다.")
                 editColor(selectedColor) { editResult in
                     switch editResult {
                     case .success(let message):
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .updateCollectionView, object: nil)
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
@@ -344,10 +343,11 @@ class ColoringVC: UIViewController {
                 colorCountry(selectedColor) { result in
                     switch result {
                     case .success(let message):
-                        DispatchQueue.main.async {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             // 무조건 2번 dismiss
                             self.dismissMultipleTimes(from: self) {
                                 NotificationCenter.default.post(name: .changeMapColor, object: nil)
+                                NotificationCenter.default.post(name: .updateFloatingView, object: nil)
                             }
                         }
                     case .failure(let error):
@@ -371,7 +371,7 @@ class ColoringVC: UIViewController {
 
         let data = MapRequest(
             countryCode: "\(countryCode)",
-            color: color,  // 서버에서 수정 완료되면 color로 수정할 것
+            color: color,
             cityId: cityData.cityId
         )
 
@@ -400,7 +400,7 @@ class ColoringVC: UIViewController {
 
         let data = MapRequest(
             countryCode: "\(countryCode)",
-            color: color,  // 서버에서 수정 완료되면 color로 수정할 것
+            color: color,
             cityId: cityData.cityId
         )
         
