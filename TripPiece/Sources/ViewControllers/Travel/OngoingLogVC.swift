@@ -5,6 +5,8 @@ import SnapKit
 
 class OngoingLogVC: UIViewController {
 
+    var travelsInfo: TravelsInfo?
+    
     // MARK: - 상단(비스크롤 영역)에 들어갈 UI
 
     // 1) 배경 이미지
@@ -246,6 +248,8 @@ class OngoingLogVC: UIViewController {
                 self.progressTravelsInfo = ProgressTravelsInfo.result
                 self.updateTravelSummary()
                 self.updatePuzzleCount()
+                self.travelsInfo?.startDate = ProgressTravelsInfo.result.startDate
+                self.travelsInfo?.endDate = ProgressTravelsInfo.result.endDate
                 print("데이터 불러오기")
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
@@ -345,6 +349,7 @@ class OngoingLogVC: UIViewController {
     
     @objc private func editTravelButtonTapped() {
         let editLogVC = EditLogVC()
+        editLogVC.travelsInfo = travelsInfo
         navigationController?.pushViewController(editLogVC, animated: true)
     }
 }

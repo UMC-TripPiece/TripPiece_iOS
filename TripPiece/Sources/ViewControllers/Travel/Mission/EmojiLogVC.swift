@@ -15,7 +15,10 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
     }
     
     // MARK: - Properties
-    
+    private lazy var baseView: UIView = {
+        let view = UIView()
+        return view
+    }()
     private var selectedEmojis: [String?] = [nil, nil, nil, nil] {
         didSet {
             addButton.backgroundColor = !selectedEmojis.contains(nil) ? UIColor.systemPink : UIColor(hex: "D3D3D3")
@@ -147,13 +150,45 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
         navigationController?.navigationBar.isHidden = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification: )), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification: )), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo, let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            return
+        }
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom).inset(keyboardFrame.height/2)
+            make.bottom.equalToSuperview().inset(keyboardFrame.height/2)
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
+    @objc func keyboardWillHide(notification: NSNotification) {
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.bottom.equalToSuperview()
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
+    
     private func setupUI() {
         view.addSubview(customNavBar)
-        view.addSubview(titleLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(titleImageView)
+        view.addSubview(baseView)
+        baseView.addSubview(titleLabel)
+        baseView.addSubview(subtitleLabel)
+        baseView.addSubview(titleImageView)
         
-        view.addSubview(grayBackgroundView)
+        baseView.addSubview(grayBackgroundView)
         grayBackgroundView.addSubview(contentStackView)
         contentStackView.addArrangedSubview(emojiLabel)
         contentStackView.addArrangedSubview(emojiStackView)
@@ -200,20 +235,23 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.height.equalTo(48)
         }
-        
+        baseView.snp.makeConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
+        })
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(41)
+            make.top.equalToSuperview().inset(41)
             make.leading.equalToSuperview().offset(21)
         }
         
         subtitleLabel.snp.makeConstraints { make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(84)
+            make.top.equalToSuperview().inset(84)
             make.leading.equalToSuperview().offset(21)
             make.height.greaterThanOrEqualTo(42)
         }
         
         titleImageView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(129)
+            make.top.equalToSuperview().offset(40)
             make.width.height.equalTo(85)
             make.trailing.equalToSuperview().inset(21.18)
         }

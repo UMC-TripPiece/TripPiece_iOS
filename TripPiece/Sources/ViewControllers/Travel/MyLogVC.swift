@@ -161,6 +161,7 @@ class MyLogVC: UIViewController {
     }()
     
     var fetchedTravelsInfo: [TravelsInfo] = []
+    var onGoingTravelsInfo: TravelsInfo?
     var allPiece: [TripPieceInfo] = []
     
     override func viewWillAppear(_ animated: Bool) {
@@ -318,6 +319,7 @@ class MyLogVC: UIViewController {
         // 선택된 탭의 네비게이션 컨트롤러 가져오기
         if let navigationController = tabBarController.selectedViewController as? UINavigationController {
             let viewController = OngoingLogVC()
+            viewController.travelsInfo = onGoingTravelsInfo
             navigationController.pushViewController(viewController, animated: true)
         }
 //        let viewController = OngoingLogVC()
@@ -346,6 +348,7 @@ class MyLogVC: UIViewController {
                 travelLogStackView.addArrangedSubview(cell)
                 
                 if TravelsInfo.status == "ONGOING" {
+                    self.onGoingTravelsInfo = TravelsInfo
                     progressTravelSectionTitle.isHidden = false
                     progressTravelCard.isHidden = false
                     let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)

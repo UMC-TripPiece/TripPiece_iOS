@@ -6,8 +6,8 @@ struct TravelsInfo: Codable { //multi Response
     let id: Int
     let title: String
     let thumbnail: String
-    let startDate: String
-    let endDate: String
+    var startDate: String
+    var endDate: String
     let cityName: String
     let countryName: String
     let status: String

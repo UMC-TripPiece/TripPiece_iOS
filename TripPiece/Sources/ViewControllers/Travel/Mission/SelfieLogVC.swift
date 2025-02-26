@@ -34,6 +34,11 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
     var mySelfie: UIImage?
     
     //MARK: - UI
+    private lazy var baseView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
     private lazy var customNavBar: CustomNavigationLogoBar = {
         let nav = CustomNavigationLogoBar()
         nav.translatesAutoresizingMaskIntoConstraints = false
@@ -130,7 +135,6 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         setupDismissKeyboardGesture()
         super.viewDidLoad()
         self.view.backgroundColor = .white
-        self.view.addSubview(customNavBar)
         setupUI()
         
         // NotificationCenter 관찰자 추가
@@ -140,14 +144,48 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         navigationController?.navigationBar.isHidden = true
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification: )), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification: )), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo, let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            return
+        }
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom).inset(keyboardFrame.height)
+            make.bottom.equalToSuperview().inset(keyboardFrame.height)
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
+    @objc func keyboardWillHide(notification: NSNotification) {
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.bottom.equalToSuperview()
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
+    
     //MARK: - Setup UI
     private func setupUI() {
-        view.addSubview(titleLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(titleImageView)
-        view.addSubview(addButton)
+        view.addSubview(customNavBar)
+        view.addSubview(baseView)
         
-        view.addSubview(grayBackgroundView)
+        baseView.addSubview(titleLabel)
+        baseView.addSubview(subtitleLabel)
+        baseView.addSubview(titleImageView)
+        baseView.addSubview(addButton)
+        
+        baseView.addSubview(grayBackgroundView)
         
         grayBackgroundView.addSubview(contentStackView)
         
@@ -165,12 +203,16 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.height.equalTo(48)
         }
+        baseView.snp.makeConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
+        })
         titleLabel.snp.makeConstraints{ make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(41)
+            make.top.equalToSuperview().inset(41)
             make.leading.equalToSuperview().offset(21)
         }
         subtitleLabel.snp.makeConstraints{ make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(84)
+            make.top.equalToSuperview().inset(84)
             make.leading.equalToSuperview().offset(21)
             make.height.greaterThanOrEqualTo(42)
         }
@@ -237,6 +279,10 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
                 let imagePickerController = UIImagePickerController()
                 imagePickerController.delegate = self
                 imagePickerController.sourceType = .camera
+                imagePickerController.allowsEditing = true
+                imagePickerController.cameraDevice = .front
+                imagePickerController.cameraCaptureMode = .photo
+                imagePickerController.mediaTypes = ["public.image"]
                 self.present(imagePickerController, animated: true, completion: nil)
             } else {
                 // 카메라 사용 불가 처리
@@ -246,17 +292,11 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
                 self.present(alert, animated: true, completion: nil)
             }
         }
-        let libraryAction = UIAlertAction(title: "라이브러리에서 사진 선택", style: .default) { _ in
-            let imagePickerController = UIImagePickerController()
-            imagePickerController.delegate = self
-            imagePickerController.sourceType = .photoLibrary
-            self.present(imagePickerController, animated: true, completion: nil)
-        }
         let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
-            alert.addAction(cameraAction)
-            alert.addAction(libraryAction)
-            alert.addAction(cancelAction)
-            present(alert, animated: true, completion: nil)
+        
+        alert.addAction(cameraAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true, completion: nil)
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -293,5 +333,12 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
                 print("Error occurred: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else { return false }
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        return updatedText.count <= 30
     }
 }

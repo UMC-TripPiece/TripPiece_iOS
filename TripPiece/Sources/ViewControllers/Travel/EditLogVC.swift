@@ -2,21 +2,25 @@
 
 import UIKit
 import SnapKit
+import SDWebImage
 
 final class EditLogVC: UIViewController,
                         UITextFieldDelegate,
                         UITextViewDelegate {
     
+    var travelsInfo: TravelsInfo?
+    
     // MARK: - UI (뷰 전담)
-    private let rootView = StartLogView()
+    private let rootView = EditLogView()
     
     // MARK: - 데이터 모델
-    private var travelRequest = CreateTravelRequest(cityName: "",
-                                                    countryName: "",
-                                                    title: "",
-                                                    startDate: "",
-                                                    endDate: "",
-                                                    thumbnail: nil)
+    private var travelRequest = PatchTravelRequest(
+        travelId: 0,
+        thumbnail: nil,
+        title: "",
+        startDate: "",
+        endDate: ""
+    )
     
     // 검색 결과
     private var searchResults: [[String: String]] = []
@@ -28,6 +32,7 @@ final class EditLogVC: UIViewController,
         // 1) rootView 붙이기
         view.backgroundColor = .white
         view.addSubview(rootView)
+        navigationController?.navigationBar.isHidden = true
         rootView.snp.makeConstraints { $0.edges.equalToSuperview() }
         
         // 2) 델리게이트/데이터소스
@@ -50,7 +55,7 @@ final class EditLogVC: UIViewController,
         rootView.startDateButton.addTarget(self, action: #selector(showStartDatePicker), for: .touchUpInside)
         rootView.endDateButton.addTarget(self, action: #selector(showEndDatePicker), for: .touchUpInside)
         rootView.addPhotoButton.addTarget(self, action: #selector(addPhoto), for: .touchUpInside)
-        rootView.startLogButton.addTarget(self, action: #selector(tapStartLogButton), for: .touchUpInside)
+        rootView.startLogButton.addTarget(self, action: #selector(tapEditLogButton), for: .touchUpInside)
         
         // 4) DatePicker 값 변경
         rootView.startDatePicker.addTarget(self, action: #selector(dateChanged(_:)), for: .valueChanged)
@@ -64,6 +69,41 @@ final class EditLogVC: UIViewController,
                                                selector: #selector(handleBackButtonTap),
                                                name: .backButtonTapped,
                                                object: nil)
+        
+        let cityName = travelsInfo?.cityName ?? ""
+        let countryName = travelsInfo?.countryName ?? ""
+        let countryImage = travelsInfo?.countryImage ?? ""
+        
+        // 타이틀 라벨
+        rootView.titleLabel.text = "\(countryImage) \(cityName), \(countryName)"
+        
+        // travelRequest
+        updateStartLogButtonState()
+        
+        // 검색창 숨기기
+        rootView.searchTableView.isHidden = true
+        hideSearchController()
+        
+        // addPhotoButton 등장
+        showAddphotoBtnController()
+        
+        SDWebImageManager.shared.loadImage(with: URL(string: travelsInfo?.thumbnail ?? ""), progress: nil) { [weak self] (image, data, error, cacheType, finished, imageURL) in
+            if let image = image {
+                self?.updateImage(selectedImage: image)
+                self?.travelRequest.thumbnail = image.pngData()
+                self?.updateStartLogButtonState()
+            }
+        }
+        travelRequest.travelId = travelsInfo?.id ?? 0
+        travelRequest.title = travelsInfo?.title ?? ""
+        rootView.travelTextView.text = travelRequest.title
+        centerTextVertically(rootView.travelTextView)
+        rootView.travelTextView.textColor = .darkText
+        travelRequest.startDate = travelsInfo?.startDate ?? ""
+        rootView.startDateButton.setTitle(travelRequest.startDate, for: .normal)
+        travelRequest.endDate = travelsInfo?.endDate ?? ""
+        rootView.endDateButton.setTitle(travelRequest.endDate, for: .normal)
+        updateStartLogButtonState()
     }
     
     deinit {
@@ -227,18 +267,18 @@ final class EditLogVC: UIViewController,
     }
     
     // MARK: - "여행 기록 시작하기" 버튼
-    @objc private func tapStartLogButton() {
-        startLog(with: travelRequest)
+    @objc private func tapEditLogButton() {
+        editLog(with: travelRequest)
     }
     
-    private func startLog(with request: CreateTravelRequest) {
+    private func editLog(with request: PatchTravelRequest) {
         print("Travel Info: \(request)")
-        func createTravelLog(_ request: CreateTravelRequest,
+        func patchTravelLog(_ request: PatchTravelRequest,
                              completion: @escaping (Result<Any, Error>) -> Void) {
             
             // 1) 필수값 검사
-            guard !request.cityName.isEmpty,
-                  !request.countryName.isEmpty,
+            guard request.travelId != 0,
+                  request.thumbnail != nil,
                   !request.title.isEmpty,
                   !request.startDate.isEmpty,
                   !request.endDate.isEmpty
@@ -251,10 +291,10 @@ final class EditLogVC: UIViewController,
             }
             
             // 2) 네트워크 호출
-            MyLogManager.startTravel(request) { isSuccess, response in
+            MyLogManager.patchTravel(request) { isSuccess, response in
                 if isSuccess {
                     // 성공
-                    completion(.success("여행 생성 성공!"))
+                    completion(.success("여행 편집 성공!"))
                 } else {
                     // 실패 시 서버에서 주는 에러 메시지 등 처리
                     if let data = response?.data,
@@ -268,17 +308,16 @@ final class EditLogVC: UIViewController,
                 }
             }
         }
-        createTravelLog(request) { [weak self] result in
+        patchTravelLog(request) { [weak self] result in
             switch result {
             case .success(let message):
                 print(message)
-                self?.handleSuccessResponse()
                 
             case .failure(let error):
                 print("Error: \(error)")
             }
         }
-        handleSuccessResponse()
+        
     }
     
     private func handleSuccessResponse() {// 1) 본인을 dismiss
@@ -304,12 +343,12 @@ final class EditLogVC: UIViewController,
     
     // MARK: - 유효성 검사
     private func validateTravelInfo() -> Bool {
-        !travelRequest.cityName.isEmpty &&
-        !travelRequest.countryName.isEmpty &&
+        print(travelRequest)
+        return travelRequest.travelId != 0 &&
+        travelRequest.thumbnail != nil &&
         !travelRequest.title.isEmpty &&
         !travelRequest.startDate.isEmpty &&
-        !travelRequest.endDate.isEmpty &&
-        travelRequest.startDate <= travelRequest.endDate
+        !travelRequest.endDate.isEmpty
     }
     
     private func updateStartLogButtonState() {
@@ -411,9 +450,6 @@ extension EditLogVC: UITableViewDataSource, UITableViewDelegate {
         let countryName = cityData["countryName"] ?? ""
         let countryImage = cityData["countryImage"] ?? ""
         
-        travelRequest.cityName = cityName
-        travelRequest.countryName = countryName
-        
         // 타이틀 라벨
         rootView.titleLabel.text = "\(countryImage) \(cityName), \(countryName)"
         
@@ -447,6 +483,10 @@ extension EditLogVC: UIImagePickerControllerDelegate, UINavigationControllerDele
             travelRequest.thumbnail = imageData
         }
         
+        updateImage(selectedImage: selectedImage)
+    }
+    
+    private func updateImage(selectedImage: UIImage) {
         // 원형 이미지
         let circularImage = makeCircularImage(image: selectedImage, size: CGSize(width: 60, height: 60))
         rootView.addPhotoButton.setImage(circularImage, for: .normal)
