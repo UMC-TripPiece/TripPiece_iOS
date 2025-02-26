@@ -55,6 +55,26 @@ class TravelSummaryView: UIView {
         return label
     }()
     
+//    private let editButton: UIButton = {
+//        let button = UIButton(type: .system)
+//        button.setTitle("편집", for: .normal)
+//        button.titleLabel?.font = UIFont.systemFont(ofSize: 11)
+//        button.titleLabel?.textColor = .white
+//        
+//        // 밑줄 스타일 추가
+//        let attributedString = NSAttributedString(
+//            string: "편집",
+//            attributes: [
+//                .underlineStyle: NSUnderlineStyle.single.rawValue,
+//                .foregroundColor: UIColor.white
+//            ]
+//        )
+//        button.setAttributedTitle(attributedString, for: .normal)
+//        button.addTarget(self, action: #selector(openEditView), for: .touchUpInside)
+//        
+//        return button
+//    }()
+    
     private let stackView = UIStackView()
     private let userStack = UIStackView()
     private let calendarStack = UIStackView()
@@ -124,4 +144,10 @@ class TravelSummaryView: UIView {
         calendarImageView.image = calendarImage
         calendarLabel.text = calendarText
     }
+//    @objc private func openEditView() {
+//        guard let parentViewController = self.parentViewController else { return }
+//        let editVC = StartLogVC() // EditViewVC를 호출
+//        editVC.modalPresentationStyle = .fullScreen
+//        parentViewController.present(editVC, animated: true, completion: nil)
+//    }
 }
