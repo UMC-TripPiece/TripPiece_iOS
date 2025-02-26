@@ -46,9 +46,9 @@ class ExploreVC: UIViewController, UITextFieldDelegate {
         searchBarVC.searchBar.placeholder = "도시 및 국가를 검색해 보세요."
         searchBarVC.searchBar.searchTextField.delegate = self
             
-        searchBarVC.onTextDidChange = { [weak self] text in
+        /*searchBarVC.onTextDidChange = { [weak self] text in
             self?.sendCitySearchRequest(keyword: text)
-        }
+        }*/
         
         return searchBarVC
     }()

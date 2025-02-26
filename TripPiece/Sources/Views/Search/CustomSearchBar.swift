@@ -6,7 +6,7 @@ class CustomSearchBar: UIView {
     
     // MARK: - Properties
     
-    var onTextDidChange: ((String) -> Void)? // 텍스트 변경 시 호출될 클로저
+    var onTextDidChange: ((UITextField) -> Void)? // 텍스트 변경 시 호출될 클로저
     
     lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -76,6 +76,7 @@ extension CustomSearchBar: UISearchBarDelegate {
         searchBar.layer.borderWidth = searchBar.text == "" ? 0 : 1
         // 테두리 추가
         searchBar.layer.borderColor = Constants.Colors.mainPurple?.cgColor
-        onTextDidChange?(searchText) // 텍스트가 변경될 때 클로저 호출
+        onTextDidChange?(searchBar.searchTextField) // 텍스트가 변경될 때 클로저 호출
+        
     }
 }

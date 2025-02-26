@@ -5,7 +5,6 @@ import UIKit
 class SelectedCityVC: UIViewController {
     
     var cityData: SearchedCityResponse? // 받아올 도시 정보
-    var userId: Int?
 
     
     // MARK: - UI Components
@@ -220,7 +219,22 @@ class SelectedCityVC: UIViewController {
     
     // 여행 기록 시작
     @objc func logStartButtonTapped(_ sender: UIButton) {
-        print("여행 기록 시작 뷰")
+        let startLogVC = StartLogVC()
+        if let cityData = cityData {
+            startLogVC.rootView.titleLabel.text = "\(cityData.countryImage) \(cityData.cityName), \(cityData.countryName)"
+            startLogVC.travelRequest.cityName = cityData.cityName
+            startLogVC.travelRequest.countryName = cityData.countryName
+            startLogVC.updateStartLogButtonState()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startLogVC.showAddphotoBtnController()
+            }
+        } else {
+            startLogVC.rootView.titleLabel.text = "도시 추가"
+        }
+
+        
+        startLogVC.modalPresentationStyle = .fullScreen
+        self.present(startLogVC, animated: true, completion: nil)
     }
     
     
@@ -231,7 +245,6 @@ class SelectedCityVC: UIViewController {
         coloringVC.modalPresentationStyle = .overCurrentContext
         coloringVC.modalTransitionStyle = .crossDissolve
         coloringVC.cityData = cityData
-        coloringVC.userId = userId
         present(coloringVC, animated: true, completion: nil)
     }
     

@@ -217,7 +217,7 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
             make.height.greaterThanOrEqualTo(42)
         }
         titleImageView.snp.makeConstraints{ make in
-            make.top.equalToSuperview().offset(129)
+            make.top.equalToSuperview().inset(40)
             make.width.height.equalTo(85)
             make.trailing.equalToSuperview().inset(21.18)
         }

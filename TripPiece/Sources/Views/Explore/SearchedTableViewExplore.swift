@@ -42,6 +42,7 @@ extension ExploreVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard indexPath.row != 0 else { return }
         let cityData = searchResults[indexPath.row - 1]
         
         self.searchBar.searchBar.text = cityData.cityName

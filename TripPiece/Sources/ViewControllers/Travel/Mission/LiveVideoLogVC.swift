@@ -212,7 +212,7 @@ class LiveVideoLogVC: UIViewController {
             make.height.greaterThanOrEqualTo(42)
         }
         titleImageView.snp.makeConstraints{ make in
-            make.top.equalToSuperview().offset(129)
+            make.top.equalToSuperview().inset(40)
             make.trailing.equalToSuperview().inset(21.18)
         }
         grayBackgroundView.snp.makeConstraints { make in

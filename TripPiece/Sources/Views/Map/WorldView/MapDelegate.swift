@@ -2,13 +2,13 @@
 
 import UIKit
 
-protocol MapDelegate: AnyObject {
+/*protocol MapDelegate: AnyObject {
     func didSelectCountry(_ country: CountryEnum?)
-}
+}*/
 
 
 
-extension WorldVC: MapDelegate {
+/*extension WorldVC: MapDelegate {
     
     func didSelectCountry(_ country: CountryEnum?) {
         // 바다 클릭 시 처리
@@ -20,7 +20,6 @@ extension WorldVC: MapDelegate {
 
             // VisitRecordsVC로 이동
             let visitRecordsVC = VisitRecordsVC()
-            visitRecordsVC.userId = userId
             visitRecordsVC.colorRecords = coloredCountries
             visitRecordsVC.cityIds = statsCountries.cityIds
             navigationController?.pushViewController(visitRecordsVC, animated: true)
@@ -29,4 +28,4 @@ extension WorldVC: MapDelegate {
             return
         }
     }
-}
+}*/

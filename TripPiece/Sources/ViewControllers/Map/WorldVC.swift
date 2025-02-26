@@ -8,7 +8,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     public var searchResults: [SearchedCityResponse] = []
     public var coloredCountries: [ColorVisitRecord] = []
     public var statsCountries: StatsVisitRecord = StatsVisitRecord(countryCount: 0, cityCount: 0, countryCodes: [], cityIds: [])
-    public var userId: Int?
     
     private lazy var navBar: GradientNavigationBar = {
         let navBar = GradientNavigationBar(title: "여행자님의 세계지도")
@@ -43,8 +42,9 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         searchBarVC.searchBar.placeholder = "도시 및 국가를 검색해 보세요."
         searchBarVC.searchBar.searchTextField.delegate = self
             
-        searchBarVC.onTextDidChange = { [weak self] text in
-            self?.sendCitySearchRequest(keyword: text)
+        searchBarVC.onTextDidChange = { [weak self] textField in
+            guard let self = self else { return }
+            self.searchTextFieldDidChange(textField)
         }
         return searchBarVC
     }()
@@ -56,6 +56,15 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         return tableView
     }()
     
+    private lazy var floatingBadgeView = FloatingBadgeView()
+    
+    private lazy var hamburgerButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(named: "hamburger"), for: .normal)
+        button.addTarget(self, action: #selector(handleHamburgerButtonTapped), for: .touchUpInside)
+        return button
+    }()
+    
     
 
     // MARK: - Life Cycle
@@ -64,11 +73,12 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 
         self.view.backgroundColor = .white
         setupUI()
-        mapView.delegate = self
+        //mapView.delegate = self
         
-        NotificationCenter.default.addObserver(self, selector: #selector(handleChangeMapColorNotification), name: .changeMapColor, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteMapColorNotification), name: .deleteMapColor, object: nil)
+        configureTapGestureForDismissingKeyboard()
+        addObserver()
     }
+
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -81,11 +91,18 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         scrollView.zoomScale = scrollView.minimumZoomScale
     }
     
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self, name: .changeMapColor, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .deleteMapColor, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .updateFloatingView, object: nil)
+    }
+    
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         // searchBar를 항상 최상위로 유지
         view.bringSubviewToFront(searchBar)
+        view.bringSubviewToFront(hamburgerButton)
         view.bringSubviewToFront(searchTableView)
     }
 
@@ -96,6 +113,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
             
         view.addSubview(searchBar)
         view.addSubview(searchTableView)
+        view.addSubview(hamburgerButton)
         
         view.addSubview(scrollView)
         scrollView.addSubview(mapView)
@@ -127,6 +145,11 @@ class WorldVC: UIViewController, UITextFieldDelegate {
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(searchTableView.heightConstraint)
         }
+        hamburgerButton.snp.makeConstraints { make in
+            make.width.height.equalTo(60)
+            make.top.equalTo(searchBar.snp.bottom).offset(10)
+            make.trailing.equalToSuperview().offset(-10)
+        }
         
         // mapview
         scrollView.snp.makeConstraints { make in
@@ -142,19 +165,22 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         }
     }
     
+    private func addObserver() {
+        NotificationCenter.default.addObserver(self, selector: #selector(handleChangeMapColorNotification), name: .changeMapColor, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleDeleteMapColorNotification), name: .deleteMapColor, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updateFloatingView), name: .updateFloatingView, object: nil)
+    }
+    
     // NotificationCenter에서 호출할 메서드
     @objc private func handleChangeMapColorNotification(_ notification: Notification) {
-        guard let userId = userId else { return }
-        getCountryColorsData(userId) { colorInfo in
+        getCountryColorsData { colorInfo in
             if let data = colorInfo {
                 DispatchQueue.main.async {
                     self.coloredCountries = data
                     self.setUpCountryColor(data)
                 }
-                
             }
         }
-
     }
     
     @objc private func handleDeleteMapColorNotification(_ notification: Notification) {
@@ -169,8 +195,36 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
     
     
+    @objc private func updateFloatingView() {
+        self.getCountryStatsData { statsInfo in
+            if let data = statsInfo {
+                self.statsCountries = data
+                self.floatingBadgeView.updateSubtitleLabel(countryNum: data.countryCount, cityNum: data.cityCount)
+            }
+        }
+    }
+    
+    @objc private func handleHamburgerButtonTapped() {
+        // VisitRecordsVC로 이동
+        let visitRecordsVC = VisitRecordsVC()
+        visitRecordsVC.colorRecords = coloredCountries
+        visitRecordsVC.cityIds = statsCountries.cityIds
+        navigationController?.pushViewController(visitRecordsVC, animated: true)
+    }
+    
+    
     
     //MARK: Setup Actions
+    func configureTapGestureForDismissingKeyboard() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
     // x 버튼 눌렀을 때 호출되는 UITextFieldDelegate 메서드
     func textFieldShouldClear(_ textField: UITextField) -> Bool {
         // 테이블뷰 숨김 처리
@@ -179,17 +233,38 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         return true
     }
     
+    
+    /// 한글 자음/모음이 조합 중(markedTextRange != nil)이면 검색 안 하고, 조합이 끝난 순간에만 실행
+    private func searchTextFieldDidChange(_ textField: UITextField) {
+        // 아직 조합 중이면 return
+        if let _ = textField.markedTextRange {
+            return
+        }
+        
+        // 조합이 끝난 상태
+        guard let newText = textField.text, !newText.isEmpty else {
+            // 빈 문자열 → 결과 초기화
+            searchResults.removeAll()
+            searchTableView.reloadData()
+            searchTableView.isHidden = true
+            return
+        }
+        
+        // 완성된 문자열로 검색
+        sendCitySearchRequest(keyword: newText)
+    }
+    
+    
     func getUserData() {
         getUserId { userInfo in
             if let userInfo = userInfo {
-                self.userId = userInfo.userId
-                self.getCountryStatsData(userInfo.userId) { statsInfo in
+                self.getCountryStatsData { statsInfo in
                     if let data = statsInfo {
                         self.statsCountries = data
                         self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg, visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
                     }
                 }
-                self.getCountryColorsData(userInfo.userId) { colorInfo in
+                self.getCountryColorsData { colorInfo in
                     if let data = colorInfo {
                         self.coloredCountries = data
                         self.setUpCountryColor(data)
@@ -205,7 +280,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     
     private func setUpBadgeView(nickname: String, profileImage: String, visitedCountryNum: Int, visitedCityNum: Int) {
         // 기존의 지도 및 UI 요소가 추가된 후 아래에 배지 뷰를 추가합니다.
-        let floatingBadgeView = FloatingBadgeView()
         floatingBadgeView.updateProfile(with: nickname)
         guard let urlImage = URL(string: profileImage) else { return }
         floatingBadgeView.updateProfileImage(with: urlImage)
@@ -216,7 +290,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(42)
             make.leading.trailing.equalToSuperview().inset(21)
             make.height.equalTo(DynamicPadding.dynamicValue(120))
-//            make.height.equalToSuperview().multipliedBy(0.131516588)
             make.centerX.equalToSuperview()
         }
     }
@@ -229,15 +302,17 @@ class WorldVC: UIViewController, UITextFieldDelegate {
             "CYAN": "#25CEC1",
             "YELLOW": "#FFB40F"
         ]
+        var processedCountries = Set<String>()
         // 데이터 반복 처리
         for data in colorData {
-            // 매핑된 색상 값을 가져오고, 없으면 기존 값을 사용
+            if processedCountries.contains(data.countryCode) { continue }
             let countryColor = colorMapping[data.color] ?? data.color
             // 색상을 변경
             self.mapView.colorMap(
                 countryEnum: CountryEnum(rawValue: data.countryCode) ?? .southKorea,
                 color: UIColor(hex: countryColor) ?? .gray
             )
+            processedCountries.insert(data.countryCode)
         }
     }
     
@@ -261,8 +336,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
     
 
-    func getCountryColorsData(_ userId: Int, completion: @escaping ([ColorVisitRecord]?) -> Void) {
-        MapManager.getCountryColors(userId: userId) { result in
+    func getCountryColorsData(completion: @escaping ([ColorVisitRecord]?) -> Void) {
+        MapManager.getCountryColors { result in
             switch result {
             case .success(let colorInfo):
                 completion(colorInfo.result)
@@ -273,8 +348,8 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         }
     }
     
-    func getCountryStatsData(_ userId: Int, completion: @escaping (StatsVisitRecord?) -> Void) {
-        MapManager.getCountryStats(userId: userId) { result in
+    func getCountryStatsData(completion: @escaping (StatsVisitRecord?) -> Void) {
+        MapManager.getCountryStats { result in
             switch result {
             case .success(let statsInfo):
                 completion(statsInfo.result)
@@ -300,11 +375,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     }
     
     
-    // 옵저버 제거 (deinit에서 옵저버 해제)
-    deinit {
-        NotificationCenter.default.removeObserver(self, name: .changeMapColor, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .deleteMapColor, object: nil)
-    }
+
 
 
 }

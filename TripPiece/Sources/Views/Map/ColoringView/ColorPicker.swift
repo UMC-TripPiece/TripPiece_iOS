@@ -41,15 +41,16 @@ extension ColoringVC {
     
     // 퍼즐 버튼 체크 표시 추가 함수
     private func addCheckmark(to button: UIButton) {
-        let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark"))
+        let config = UIImage.SymbolConfiguration(weight: .bold)
+        let checkmarkImageView = UIImageView(image: UIImage(systemName: "checkmark", withConfiguration: config))
         checkmarkImageView.tintColor = .white
         checkmarkImageView.tag = 1001 // 체크마크를 식별할 수 있도록 tag 설정
         button.addSubview(checkmarkImageView)
         
         checkmarkImageView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalTo(11)
-            make.height.equalTo(8)
+            make.width.equalTo(16)
+            make.height.equalTo(15)
         }
     }
     // 체크 표시 제거 함수

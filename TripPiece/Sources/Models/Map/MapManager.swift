@@ -26,8 +26,8 @@ class MapManager {
     }
     
     
-    static func getCountryColors(userId: Int, completion: @escaping (Result<DefaultMultiResponse<ColorVisitRecord>, Error>) -> Void) {
-        APIManager.MapProvider.request(.getUserMap(userId: userId)) { result in
+    static func getCountryColors(completion: @escaping (Result<DefaultMultiResponse<ColorVisitRecord>, Error>) -> Void) {
+        APIManager.MapProvider.request(.getUserMap) { result in
             switch result {
             case .success(let response):
                 do {
@@ -46,8 +46,8 @@ class MapManager {
         }
     }
     
-    static func getCountryStats(userId: Int, completion: @escaping (Result<DefaultResponse<StatsVisitRecord>, Error>) -> Void) {
-        APIManager.MapProvider.request(.getUserMapStats(userId: userId)) { result in
+    static func getCountryStats(completion: @escaping (Result<DefaultResponse<StatsVisitRecord>, Error>) -> Void) {
+        APIManager.MapProvider.request(.getUserMapStats) { result in
             switch result {
             case .success(let response):
                 do {

@@ -251,7 +251,7 @@ class EmojiLogVC: UIViewController, UITextViewDelegate, UITextFieldDelegate {
         }
         
         titleImageView.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(40)
+            make.top.equalToSuperview().inset(40)
             make.width.height.equalTo(85)
             make.trailing.equalToSuperview().inset(21.18)
         }
