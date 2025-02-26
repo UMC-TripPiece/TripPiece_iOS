@@ -10,6 +10,8 @@ final class StartLogVC: UIViewController,
     // MARK: - UI (뷰 전담)
     public let rootView = StartLogView()
     
+    private var shouldHideDatePickerOnValueChanged: Bool = true
+    
     // MARK: - 데이터 모델
     public var travelRequest = CreateTravelRequest(cityName: "",
                                                     countryName: "",
@@ -20,6 +22,7 @@ final class StartLogVC: UIViewController,
     
     // 검색 결과
     private var searchResults: [[String: String]] = []
+    
     
     // MARK: - 라이프 사이클
     override func viewDidLoad() {
@@ -173,6 +176,11 @@ final class StartLogVC: UIViewController,
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
         }
+        if !rootView.startDatePicker.isHidden {
+            shouldHideDatePickerOnValueChanged = false
+            rootView.startDatePicker.sendActions(for: .valueChanged)
+            shouldHideDatePickerOnValueChanged = true
+        }
     }
     
     @objc private func showEndDatePicker() {
@@ -185,6 +193,11 @@ final class StartLogVC: UIViewController,
         }
         UIView.animate(withDuration: 0.3) {
             self.view.layoutIfNeeded()
+        }
+        if !rootView.endDatePicker.isHidden {
+            shouldHideDatePickerOnValueChanged = false
+            rootView.endDatePicker.sendActions(for: .valueChanged)
+            shouldHideDatePickerOnValueChanged = true
         }
     }
     
@@ -201,8 +214,10 @@ final class StartLogVC: UIViewController,
             travelRequest.endDate = selectedDate
             rootView.endDateButton.setTitle(selectedDate, for: .normal)
         }
-        rootView.startDatePicker.isHidden = true
-        rootView.endDatePicker.isHidden = true
+        if shouldHideDatePickerOnValueChanged {
+            rootView.startDatePicker.isHidden = true
+            rootView.endDatePicker.isHidden = true
+        }
 
         updateStartLogButtonState()
     }
@@ -484,7 +499,6 @@ extension StartLogVC {
             self.view.layoutIfNeeded()
         }, completion: { _ in
             self.rootView.addPhotoButton.isHidden = false
-            self.rootView.addCountryButton.isEnabled = false
             UIView.animate(withDuration: 0.3) {
                 self.rootView.addPhotoButton.alpha = 1.0
             }
