@@ -7,6 +7,10 @@ import SDWebImage
 class TravelLogCardCell: UIView {
     
     // MARK: - UI Components
+    let mainButton: UIButton = {
+        let button = UIButton()
+        return button
+    }()
     private let shadowView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
@@ -104,7 +108,9 @@ class TravelLogCardCell: UIView {
     // MARK: - UI Setup
     private func setupUI() {
         addSubview(shadowView)
+        
         shadowView.addSubview(cardView)
+        shadowView.addSubview(mainButton)
         
         [imageView, overlayView].forEach {
             cardView.addSubview($0)
@@ -117,6 +123,9 @@ class TravelLogCardCell: UIView {
     }
     
     private func setupConstraints() {
+        mainButton.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
         shadowView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
             make.width.equalTo(280)
@@ -173,7 +182,8 @@ class TravelLogCardCell: UIView {
     }
     
     // MARK: - Configuration
-    func configure(imageURL: String, title: String, date: String, subtitle: String, isONGOING: String) {
+    func configure(id: Int, imageURL: String, title: String, date: String, subtitle: String, isONGOING: String) {
+        mainButton.tag = id
         // 이미지 로드
         if let imageUrl = URL(string: imageURL) {
             imageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder"))

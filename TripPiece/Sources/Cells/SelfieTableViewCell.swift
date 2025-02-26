@@ -153,4 +153,11 @@ class SelfieTableViewCell: UITableViewCell {
         }
         descriptionLabel.text = travelsDetailInfo.description
     }
+    func initializeCell(tripPieceInfo: TripPieceInfo) {
+        guard let mediaUrl = tripPieceInfo.mediaUrl, let url = URL(string: mediaUrl) else { return }
+        selfieImageView.sd_setImage(with: url, placeholderImage: UIImage(named: "placeholder")) { [weak self] (image, error, cacheType, imageURL) in
+            self?.selfieImageView.image = image
+        }
+        descriptionLabel.text = tripPieceInfo.memo
+    }
 }

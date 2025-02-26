@@ -13,6 +13,7 @@ class FinishPuzzleVC: UIViewController {
     init(travelId: Int) {
         self.travelId = travelId
         super.init(nibName: nil, bundle: nil)
+        showLoadingIndicator()
     }
 
     required init?(coder: NSCoder) {
@@ -575,14 +576,17 @@ class FinishPuzzleVC: UIViewController {
     }
     
     private func fetchThumbnail(travelId: Int) {
-        PuzzleLogManager.fetchThumbnail(travelId: travelId) { result in
+        PuzzleLogManager.fetchThumbnail(travelId: travelId) { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case .success(let value):
                 print(value)
-                self.updateThumbnail(thumbnailInfos: value.result)
+                updateThumbnail(thumbnailInfos: value.result)
+                hideLoadingIndicator()
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
-                self.fetchThumbnailForInitial()
+                fetchThumbnailForInitial()
+                hideLoadingIndicator()
             }
         }
     }

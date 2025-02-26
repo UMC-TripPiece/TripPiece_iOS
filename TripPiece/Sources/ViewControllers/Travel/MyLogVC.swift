@@ -161,6 +161,7 @@ class MyLogVC: UIViewController {
     }()
     
     var fetchedTravelsInfo: [TravelsInfo] = []
+    var onGoingTravelsInfo: TravelsInfo?
     var allPiece: [TripPieceInfo] = []
     
     override func viewWillAppear(_ animated: Bool) {
@@ -318,6 +319,7 @@ class MyLogVC: UIViewController {
         // 선택된 탭의 네비게이션 컨트롤러 가져오기
         if let navigationController = tabBarController.selectedViewController as? UINavigationController {
             let viewController = OngoingLogVC()
+            viewController.travelsInfo = onGoingTravelsInfo
             navigationController.pushViewController(viewController, animated: true)
         }
 //        let viewController = OngoingLogVC()
@@ -341,10 +343,12 @@ class MyLogVC: UIViewController {
                 let title = "\(TravelsInfo.countryImage) \(TravelsInfo.title)"
                 let date = "\(TravelsInfo.startDate) ~ \(TravelsInfo.endDate)"
                 let location = "\(TravelsInfo.cityName), \(TravelsInfo.countryName)"
-                cell.configure(imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+                cell.configure(id: TravelsInfo.id, imageURL: TravelsInfo.thumbnail, title: title, date: date, subtitle: location, isONGOING: TravelsInfo.status)
+                cell.mainButton.addTarget(self, action: #selector(onClickCell(sender: )), for: .touchUpInside)
                 travelLogStackView.addArrangedSubview(cell)
                 
                 if TravelsInfo.status == "ONGOING" {
+                    self.onGoingTravelsInfo = TravelsInfo
                     progressTravelSectionTitle.isHidden = false
                     progressTravelCard.isHidden = false
                     let daysElapsed = calculateDaysElapsed(from: TravelsInfo.startDate)
@@ -358,6 +362,12 @@ class MyLogVC: UIViewController {
         updateLayoutForProgressTravelCardVisibility()
         travelLogScrollView.setNeedsLayout()
         travelLogScrollView.layoutIfNeeded()
+    }
+    
+    @objc private func onClickCell(sender: UIButton) {
+        let vc = UINavigationController(rootViewController: FinishPuzzleVC(travelId: sender.tag))
+        vc.modalPresentationStyle = .fullScreen
+        present(vc, animated: true)
     }
     
     private func updateGoogleMap() {
@@ -416,13 +426,19 @@ class MyLogVC: UIViewController {
             emptyPieceLabel.isHidden = true
             
             for item in items.reversed() {
-                let cell = PieceCell()
+                let cell = PieceCell(tripPieceInfo: item)
+                cell.onClickCell = pushPieceVC(tripPieceInfo:)
                 let formattedDate = formatDate(from: item.createdAt)!
                 let location = "\(item.cityName), \(item.countryName)"
                 cell.configure(type: item.category, mediaURL: item.mediaUrl ?? "", memo: item.memo ?? "", createdAt: formattedDate, location: location)
                 tripPieceStackView.addArrangedSubview(cell)
             }
         }
+    }
+    
+    private func pushPieceVC(tripPieceInfo: TripPieceInfo) {
+        let pieceVC = PieceVC(tripPieceInfo: tripPieceInfo)
+        navigationController?.pushViewController(pieceVC, animated: true)
     }
     
     //TODO: 최신순 sorting 추가

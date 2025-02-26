@@ -132,4 +132,12 @@ class WhereTableViewCell: UITableViewCell {
             self?.videoView.image = image
         }
     }
+    func initializeCell(tripPieceInfo: TripPieceInfo) {
+        descriptionLabel.text = tripPieceInfo.memo
+        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(tripPieceInfo.createdAt)Z")?.toStringYMDHM
+        guard let mediaUrl = tripPieceInfo.mediaUrl, let url = URL(string: mediaUrl) else { return }
+        videoView.sd_setImage(with: url, placeholderImage: UIImage(named: "placeholder")) { [weak self] (image, error, cacheType, imageURL) in
+            self?.videoView.image = image
+        }
+    }
 }

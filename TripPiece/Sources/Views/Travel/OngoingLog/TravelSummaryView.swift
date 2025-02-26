@@ -55,6 +55,19 @@ class TravelSummaryView: UIView {
         return label
     }()
     
+    let editButton: UIButton = {
+        let button = UIButton()
+        let title = "편집"
+        let attributedString = NSMutableAttributedString(string: title)
+        attributedString.addAttributes([
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .font: UIFont.systemFont(ofSize: 11),
+            .foregroundColor: UIColor.white
+        ], range: NSRange(location: 0, length: title.count))
+        button.setAttributedTitle(attributedString, for: .normal)
+        return button
+    }()
+    
     private let stackView = UIStackView()
     private let userStack = UIStackView()
     private let calendarStack = UIStackView()
@@ -74,6 +87,7 @@ class TravelSummaryView: UIView {
     private func setupUI() {
         stackView.axis = .vertical
         stackView.spacing = 5
+        stackView.alignment = .leading
         
         userStack.axis = .horizontal
         userStack.spacing = 8
@@ -92,6 +106,7 @@ class TravelSummaryView: UIView {
         }
         calendarStack.addArrangedSubview(calendarImageView)
         calendarStack.addArrangedSubview(calendarLabel)
+        calendarStack.addArrangedSubview(editButton)
         
         stackView.addArrangedSubview(userStack)
         stackView.addArrangedSubview(titleLabel)
