@@ -15,8 +15,44 @@ class LiveVideoLogVC: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(notification: )), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(notification: )), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        guard let userInfo = notification.userInfo, let keyboardFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else {
+            return
+        }
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom).inset(keyboardFrame.height)
+            make.bottom.equalToSuperview().inset(keyboardFrame.height)
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
+    @objc func keyboardWillHide(notification: NSNotification) {
+        baseView.snp.updateConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.bottom.equalToSuperview()
+        })
+        UIView.animate(withDuration: 0.2) { [weak self] in
+            self?.view.layoutIfNeeded()
+        }
+    }
 
     //MARK: - UI
+    private lazy var baseView: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
     private lazy var customNavBar: CustomNavigationLogoBar = {
         let nav = CustomNavigationLogoBar()
         nav.backgroundColor = .white
@@ -128,13 +164,14 @@ class LiveVideoLogVC: UIViewController {
 
     //MARK: - Setup UI
     private func setupUI() {
-        view.addSubview(titleLabel)
-        view.addSubview(subtitleLabel)
-        view.addSubview(titleImageView)
-        view.addSubview(buttonsStackView)
-        view.addSubview(addButton)
+        view.addSubview(baseView)
+        baseView.addSubview(titleLabel)
+        baseView.addSubview(subtitleLabel)
+        baseView.addSubview(titleImageView)
+        baseView.addSubview(buttonsStackView)
+        baseView.addSubview(addButton)
         
-        view.addSubview(grayBackgroundView)
+        baseView.addSubview(grayBackgroundView)
         grayBackgroundView.addSubview(contentStackView)
         contentStackView.addArrangedSubview(buttonsStackView)
         contentStackView.addArrangedSubview(createSpacer(height: 20))
@@ -161,17 +198,21 @@ class LiveVideoLogVC: UIViewController {
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top)
             make.height.equalTo(48)
         }
+        baseView.snp.makeConstraints({ make in
+            make.top.equalTo(customNavBar.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
+        })
         titleLabel.snp.makeConstraints{ make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(41)
+            make.top.equalToSuperview().inset(41)
             make.leading.equalToSuperview().offset(21)
         }
         subtitleLabel.snp.makeConstraints{ make in
-            make.top.equalTo(customNavBar.snp.bottom).offset(84)
+            make.top.equalToSuperview().inset(84)
             make.leading.equalToSuperview().offset(21)
             make.height.greaterThanOrEqualTo(42)
         }
         titleImageView.snp.makeConstraints{ make in
-            make.top.equalToSuperview().offset(129)
+            make.top.equalToSuperview().inset(40)
             make.trailing.equalToSuperview().inset(21.18)
         }
         grayBackgroundView.snp.makeConstraints { make in
@@ -217,9 +258,8 @@ class LiveVideoLogVC: UIViewController {
         // 두 변수의 상태를 프린트하여 확인
         print("Selected video URL: \(selectedVideoURL?.absoluteString ?? "nil")")
         
-        let isMemoValid = !memoTextView.text.isEmpty && memoTextView.text != "| 영상에 대해 설명해주세요 (100자 이내)"
-        addButton.isEnabled = selectedVideo != nil && isMemoValid
-        addButton.backgroundColor = (selectedVideo == nil || !isMemoValid) ? UIColor(named: "Cancel") : UIColor(named: "Main2")
+        addButton.isEnabled = selectedVideo != nil
+        addButton.backgroundColor = selectedVideo == nil ? UIColor(named: "Cancel") : UIColor(named: "Main2")
     }
 
     
@@ -230,14 +270,31 @@ class LiveVideoLogVC: UIViewController {
     
     ///비디오 추가 버튼 클릭
     @objc private func selectVideo() {
-        let alert = UIAlertController(title: "동영상 추가", message: " ", preferredStyle: .actionSheet)
-        
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let cameraAction = UIAlertAction(title: "카메라 열기", style: .default) { _ in
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                let imagePickerController = UIImagePickerController()
+                imagePickerController.delegate = self
+                imagePickerController.sourceType = .camera
+                imagePickerController.mediaTypes = ["public.movie"]
+                imagePickerController.cameraCaptureMode = .video
+                imagePickerController.allowsEditing = true
+                imagePickerController.cameraDevice = .rear
+                self.present(imagePickerController, animated: true, completion: nil)
+            } else {
+                // 카메라 사용 불가 처리
+                let alert = UIAlertController(title: "카메라 사용 불가", message: "카메라를 사용할 수 없습니다.", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "확인", style: .default, handler: nil)
+                    alert.addAction(okAction)
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
+        alert.addAction(cameraAction)
         alert.addAction(UIAlertAction(title: "라이브러리에서 동영상 선택", style: .default, handler: { _ in
             self.openPhotoLibrary()
         }))
-        
-        alert.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        
+        let cancelAction = UIAlertAction(title: "취소", style: .cancel, handler: nil)
+        alert.addAction(cancelAction)
         self.present(alert, animated: true, completion: nil)
     }
 
@@ -264,8 +321,14 @@ class LiveVideoLogVC: UIViewController {
             print("Failed to convert video to data")
             return
         }
+        let memoText: String = {
+            if memoTextView.text == "| 감정을 글로 표현해보세요 (100자 이내)" {
+                return ""
+            }
+            return memoTextView.text
+        }()
         print(videoURL.lastPathComponent)
-        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoTextView.text), video: videoData, videoName: videoURL.lastPathComponent)) { [weak self] result in
+        MissionLogManager.postLiveVideoPiece(createVideoPieceRequest: CreateVideoPieceRequest(travelId: travelId, memo: MemoObject(description: memoText), video: videoData, videoName: videoURL.lastPathComponent)) { [weak self] result in
             switch result {
             case .success(let value):
                 self?.navigateToVideoCompleteViewController()
@@ -367,9 +430,6 @@ extension LiveVideoLogVC: UITextViewDelegate {
         let currentText = textView.text ?? ""
         guard let stringRange = Range(range, in: currentText) else { return false }
         let updatedText = currentText.replacingCharacters(in: stringRange, with: text)
-        return updatedText.count <= 100 // 글자 수 제한 100자
-    }
-    func textViewDidChange(_ textView: UITextView) {
-        updateAddButtonState()
+        return updatedText.count <= 30 // 글자 수 제한 100자
     }
 }

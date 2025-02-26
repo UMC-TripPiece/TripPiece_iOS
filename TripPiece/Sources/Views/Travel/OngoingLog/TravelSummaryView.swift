@@ -55,25 +55,18 @@ class TravelSummaryView: UIView {
         return label
     }()
     
-//    private let editButton: UIButton = {
-//        let button = UIButton(type: .system)
-//        button.setTitle("편집", for: .normal)
-//        button.titleLabel?.font = UIFont.systemFont(ofSize: 11)
-//        button.titleLabel?.textColor = .white
-//        
-//        // 밑줄 스타일 추가
-//        let attributedString = NSAttributedString(
-//            string: "편집",
-//            attributes: [
-//                .underlineStyle: NSUnderlineStyle.single.rawValue,
-//                .foregroundColor: UIColor.white
-//            ]
-//        )
-//        button.setAttributedTitle(attributedString, for: .normal)
-//        button.addTarget(self, action: #selector(openEditView), for: .touchUpInside)
-//        
-//        return button
-//    }()
+    let editButton: UIButton = {
+        let button = UIButton()
+        let title = "편집"
+        let attributedString = NSMutableAttributedString(string: title)
+        attributedString.addAttributes([
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .font: UIFont.systemFont(ofSize: 11),
+            .foregroundColor: UIColor.white
+        ], range: NSRange(location: 0, length: title.count))
+        button.setAttributedTitle(attributedString, for: .normal)
+        return button
+    }()
     
     private let stackView = UIStackView()
     private let userStack = UIStackView()
@@ -94,6 +87,7 @@ class TravelSummaryView: UIView {
     private func setupUI() {
         stackView.axis = .vertical
         stackView.spacing = 5
+        stackView.alignment = .leading
         
         userStack.axis = .horizontal
         userStack.spacing = 8
@@ -112,6 +106,7 @@ class TravelSummaryView: UIView {
         }
         calendarStack.addArrangedSubview(calendarImageView)
         calendarStack.addArrangedSubview(calendarLabel)
+        calendarStack.addArrangedSubview(editButton)
         
         stackView.addArrangedSubview(userStack)
         stackView.addArrangedSubview(titleLabel)
@@ -144,10 +139,4 @@ class TravelSummaryView: UIView {
         calendarImageView.image = calendarImage
         calendarLabel.text = calendarText
     }
-//    @objc private func openEditView() {
-//        guard let parentViewController = self.parentViewController else { return }
-//        let editVC = StartLogVC() // EditViewVC를 호출
-//        editVC.modalPresentationStyle = .fullScreen
-//        parentViewController.present(editVC, animated: true, completion: nil)
-//    }
 }

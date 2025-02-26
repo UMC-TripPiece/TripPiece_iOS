@@ -23,4 +23,10 @@ extension Date {
         dateFormatter.dateFormat = "yy.MM.dd"
         return dateFormatter.string(from: self)
     }
+    
+    var toStringDetailYMD: String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy년 MM월 dd일"
+        return dateFormatter.string(from: self)
+    }
 }

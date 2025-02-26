@@ -2,13 +2,13 @@
 
 import UIKit
 
-protocol MapDelegate: AnyObject {
+/*protocol MapDelegate: AnyObject {
     func didSelectCountry(_ country: CountryEnum?)
-}
+}*/
 
 
 
-extension WorldVC: MapDelegate {
+/*extension WorldVC: MapDelegate {
     
     func didSelectCountry(_ country: CountryEnum?) {
         // 바다 클릭 시 처리
@@ -28,4 +28,4 @@ extension WorldVC: MapDelegate {
             return
         }
     }
-}
+}*/

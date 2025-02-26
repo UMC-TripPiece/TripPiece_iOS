@@ -18,6 +18,7 @@ class PuzzleLogVC: UIViewController {
         self.travelId = travelId
         self.thumbnails = thumbnails
         super.init(nibName: nil, bundle: nil)
+        showLoadingIndicator()
     }
 
     required init?(coder: NSCoder) {
@@ -276,6 +277,7 @@ class PuzzleLogVC: UIViewController {
                     initialCustomNavBar.isHidden = false
                 }
                 logTableView.reloadData()
+                hideLoadingIndicator()
             case .failure(let error):
                 print("Error occurred: \(error.localizedDescription)")
             }

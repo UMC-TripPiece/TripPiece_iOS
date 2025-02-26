@@ -23,6 +23,9 @@ enum TravelAPI {
     case postMemoPiece(param: CreateMemoPieceRequest)
     case postEmojiPiece(param: CreateEmojiPieceRequest)
     
+    //여행기 수정
+    case patchTravel(param: PatchTravelRequest)
+    
     //여행 완료
     case postTravelEnd(travelId: Int)
     
@@ -62,6 +65,9 @@ extension TravelAPI: TargetType {
         case .postEmojiPiece(let param):
             return "mytravels/emoji/\(param.travelId)"
             
+        case .patchTravel(let param):
+            return "mytravels/\(param.travelId)"
+            
         case .postTravelEnd(let travelId): return "mytravels/end/\(travelId)"
             
         case .postUpdateThumbnail(let param):
@@ -76,6 +82,8 @@ extension TravelAPI: TargetType {
         case .postCreateTravel, .postWherePiece, .postVideoPiece, .postSelfiePiece,
                 .postPicturePiece, .postMemoPiece, .postEmojiPiece, .postTravelEnd, .postUpdateThumbnail:
             return .post
+        case .patchTravel:
+            return .patch
         }
     }
     
@@ -205,6 +213,22 @@ extension TravelAPI: TargetType {
             return .requestJSONEncodable(param)
         case .postEmojiPiece(let param):
             return .requestJSONEncodable(param)
+            
+        case .patchTravel(let param):
+            var multipartFormDatas: [MultipartFormData] = []
+            if let thumbnail = param.thumbnail {
+                multipartFormDatas.append(MultipartFormData(provider: .data(thumbnail), name: "thumbnail", fileName: "\(UUID().uuidString).png", mimeType: "image/png"))
+            }
+            if let title = param.title.data(using: .utf8) {
+                multipartFormDatas.append(MultipartFormData(provider: .data(title), name: "title"))
+            }
+            if let startDate = param.startDate.data(using: .utf8) {
+                multipartFormDatas.append(MultipartFormData(provider: .data(startDate), name: "startDate"))
+            }
+            if let endDate = param.endDate.data(using: .utf8) {
+                multipartFormDatas.append(MultipartFormData(provider: .data(endDate), name: "endDate"))
+            }
+            return .uploadMultipart(multipartFormDatas)
             
         case .postTravelEnd:
             return .requestPlain

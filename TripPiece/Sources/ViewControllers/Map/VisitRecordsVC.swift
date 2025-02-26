@@ -55,6 +55,12 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     }
     
     
+    override func viewDidDisappear(_ animated: Bool) {
+        NotificationCenter.default.removeObserver(self, name: .updateCollectionView, object: nil)
+    }
+    
+    
+    
     // MARK: - UI Methods
     private func setupCustomNavigationBar() {
         // Custom Navigation Bar 설정
@@ -140,7 +146,7 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
     
     // 특정 countryCode에 대한 최신 색상 찾기
     func getLatestColor(for countryCode: String) -> String? {
-        for record in colorRecords.reversed() { // 최신 순으로 순회
+        for record in colorRecords { // 최신 순으로 순회
             if record.countryCode == countryCode {
                 return record.color
             }
@@ -251,12 +257,6 @@ class VisitRecordsVC: UIViewController, VisitRecordCellDelegate {
                 completion(nil)
             }
         }
-    }
-    
-    
-    
-    deinit {
-        NotificationCenter.default.removeObserver(self, name: .updateCollectionView, object: nil)
     }
 
     

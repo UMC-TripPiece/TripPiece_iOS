@@ -6,6 +6,9 @@ import SDWebImage
 
 class PieceCell: UIView {
     
+    var tripPieceInfo: TripPieceInfo
+    var onClickCell: ((TripPieceInfo) -> Void)?
+    
     // MARK: - UI Components
     private let moreButton: UIButton = {
         let button = UIButton(type: .system)
@@ -87,13 +90,18 @@ class PieceCell: UIView {
     
     // MARK: - Initializer
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(tripPieceInfo: TripPieceInfo) {
+        self.tripPieceInfo = tripPieceInfo
+        super.init(frame: .zero)
         setupUI()
         setupConstraints()
+        let tap = UITapGestureRecognizer(target: self, action: #selector(onClick))
+        tap.cancelsTouchesInView = false
+        self.addGestureRecognizer(tap)
     }
     
     required init?(coder: NSCoder) {
+        self.tripPieceInfo = TripPieceInfo(category: "", cityName: "", countryName: "", createdAt: "", mediaUrl: nil, memo: nil)
         super.init(coder: coder)
         setupUI()
         setupConstraints()
@@ -238,4 +246,7 @@ class PieceCell: UIView {
                 parentViewController.present(alertController, animated: true, completion: nil)
             }
         }
+    @objc private func onClick() {
+        onClickCell?(tripPieceInfo)
+    }
 }

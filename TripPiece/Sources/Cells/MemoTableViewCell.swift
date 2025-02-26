@@ -81,4 +81,8 @@ class MemoTableViewCell: UITableViewCell {
         memoLabel.text = travelsDetailInfo.description
         dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(travelsDetailInfo.createdAt)Z")?.toStringYMDHM
     }
+    func initializeCell(tripPieceInfo: TripPieceInfo) {
+        memoLabel.text = tripPieceInfo.memo
+        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(tripPieceInfo.createdAt)Z")?.toStringYMDHM
+    }
 }
