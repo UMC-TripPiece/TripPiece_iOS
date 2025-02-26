@@ -256,6 +256,12 @@ class OngoingLogVC: UIViewController {
             }
         }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchTravelSummary()
+        updatePuzzleCount()
+    }
 
     // MARK: - Update UI
     private func updateTravelSummary() {
