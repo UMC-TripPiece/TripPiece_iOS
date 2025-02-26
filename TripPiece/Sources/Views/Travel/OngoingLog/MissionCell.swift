@@ -54,12 +54,13 @@ class MissionCell: UIView {
 
         collectionView.snp.makeConstraints { make in
             make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(148)
+            make.height.equalTo(154)
         }
 
         pageControl.snp.makeConstraints { make in
             make.top.equalTo(collectionView.snp.bottom).offset(8)
             make.centerX.equalToSuperview()
+            make.bottom.equalToSuperview().inset(5)
         }
     }
 
