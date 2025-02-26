@@ -373,16 +373,17 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
 
     // 동영상 기록 완료 페이지로 이동
     private func navigateToVideoCompleteViewController() {
-        guard let thumbnail = videoImage, let text = memoTextView.text else {
-            let alert = UIAlertController(title: "경고", message: "썸네일 또는 텍스트가 없습니다.", preferredStyle: .alert)
+        guard let thumbnail = videoImage else {
+            let alert = UIAlertController(title: "경고", message: "썸네일이 없습니다.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             present(alert, animated: true)
             return
         }
         
         let recordCompleteVC = VideoCompleteViewController()
-        recordCompleteVC.setPreviewText(text)
-        recordCompleteVC.setVideoComplete(with: thumbnail, text: text)
+        let memoText = (memoTextView.text == "| 영상에 대해 설명해주세요 (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+        recordCompleteVC.setPreviewText(memoText ?? "")
+        recordCompleteVC.setVideoComplete(with: thumbnail, text: memoText ?? "")
         recordCompleteVC.modalPresentationStyle = .fullScreen
         present(recordCompleteVC, animated: true)
     }
