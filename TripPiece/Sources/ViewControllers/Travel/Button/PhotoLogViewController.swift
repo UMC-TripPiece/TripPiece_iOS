@@ -296,8 +296,8 @@ class PhotoLogViewController: UIViewController {
     //MARK: - Button & Functions
     private func updateAddButtonState() {
         let isMemoValid = !memoTextView.text.isEmpty && memoTextView.text != "| 사진에 대해 설명해주세요! (100자 이내)"
-        addButton.isEnabled = !selectedImages.isEmpty && isMemoValid
-        addButton.backgroundColor = (selectedImages.isEmpty || !isMemoValid)
+        addButton.isEnabled = !selectedImages.isEmpty //&& isMemoValid
+        addButton.backgroundColor = selectedImages.isEmpty //|| !isMemoValid)
             ? UIColor(named: "Cancel")
             : UIColor(named: "Main")
     }
@@ -340,7 +340,9 @@ class PhotoLogViewController: UIViewController {
 
     @objc private func addRecord() {
         let photoDataArray = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.5) }
-        logPicture(memoTextView.text, photos: photoDataArray) { result in
+        let memoText = (memoTextView.text == "| 사진에 대해 설명해주세요! (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+
+        logPicture(memoText ?? "", photos: photoDataArray) { result in
             switch result {
             case .success(let message):
                 print(message)
@@ -355,7 +357,7 @@ class PhotoLogViewController: UIViewController {
     }
 
     func logPicture(_ memo: String, photos: [Data], completion: @escaping (Result<Any, Error>) -> Void) {
-        guard !memo.isEmpty, !photos.isEmpty else {
+        guard !photos.isEmpty else {
             let error = NSError(
                 domain: "Upload Memo Error",
                 code: -1,
@@ -392,7 +394,8 @@ class PhotoLogViewController: UIViewController {
     private func navigateToPhotoCompleteViewController() {
         let recordCompleteVC = PhotoCompleteViewController()
         recordCompleteVC.images = selectedImages
-        recordCompleteVC.memoText = memoTextView.text
+        let memoText = (memoTextView.text == "| 사진에 대해 설명해주세요! (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+        recordCompleteVC.memoText = memoText ?? ""
         recordCompleteVC.modalPresentationStyle = .fullScreen
         present(recordCompleteVC, animated: true)
     }

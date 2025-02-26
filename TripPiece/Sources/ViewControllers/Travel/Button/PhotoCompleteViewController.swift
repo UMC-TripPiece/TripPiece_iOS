@@ -71,7 +71,7 @@ class PhotoCompleteViewController: UIViewController {
     
     private lazy var previewTextView: UITextView = {
         let textView = UITextView()
-        textView.text = memoText
+        textView.text = memoText.isEmpty ? "" : memoText
         textView.font = UIFont.systemFont(ofSize: 14)
         textView.textAlignment = .center
         textView.isEditable = false
