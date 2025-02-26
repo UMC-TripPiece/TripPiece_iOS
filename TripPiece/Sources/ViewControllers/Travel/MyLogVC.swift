@@ -426,13 +426,19 @@ class MyLogVC: UIViewController {
             emptyPieceLabel.isHidden = true
             
             for item in items.reversed() {
-                let cell = PieceCell()
+                let cell = PieceCell(tripPieceInfo: item)
+                cell.onClickCell = pushPieceVC(tripPieceInfo:)
                 let formattedDate = formatDate(from: item.createdAt)!
                 let location = "\(item.cityName), \(item.countryName)"
                 cell.configure(type: item.category, mediaURL: item.mediaUrl ?? "", memo: item.memo ?? "", createdAt: formattedDate, location: location)
                 tripPieceStackView.addArrangedSubview(cell)
             }
         }
+    }
+    
+    private func pushPieceVC(tripPieceInfo: TripPieceInfo) {
+        let pieceVC = PieceVC(tripPieceInfo: tripPieceInfo)
+        navigationController?.pushViewController(pieceVC, animated: true)
     }
     
     //TODO: 최신순 sorting 추가

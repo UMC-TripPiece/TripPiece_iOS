@@ -123,4 +123,9 @@ class EmojiTableViewCell: UITableViewCell {
         dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(travelsDetailInfo.createdAt)Z")?.toStringYMDHM
         middleEmojisLabel.text = travelsDetailInfo.mediaUrls?.joined(separator: "")
     }
+    func initializeCell(tripPieceInfo: TripPieceInfo) {
+        descriptionLabel.text = tripPieceInfo.memo
+        dateLabel.text = CalendarManager.shared.convertISO8601ToDate(iso8601Date: "\(tripPieceInfo.createdAt)Z")?.toStringYMDHM
+        middleEmojisLabel.text = tripPieceInfo.mediaUrl
+    }
 }
