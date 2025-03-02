@@ -61,7 +61,7 @@ class MemoLogViewController: UIViewController {
     ///회색 배경부분부터
     private lazy var grayBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "BgColor2")
+        view.backgroundColor = Constants.Colors.bg2 ?? .lightGray
         return view
     }()
     
@@ -91,7 +91,7 @@ class MemoLogViewController: UIViewController {
     private lazy var memoTextView: UITextView = {
         let textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 16)
-        textView.textColor = UIColor(named: "Black3")
+        textView.textColor = Constants.Colors.black3 ?? .black
         textView.text = "| 메모를 작성해주세요 (150자 이내)"
         textView.layer.borderColor = UIColor.lightGray.cgColor
         textView.layer.shadowColor = UIColor.black.cgColor
@@ -105,7 +105,7 @@ class MemoLogViewController: UIViewController {
     private lazy var addButton: UIButton = {
         let button = UIButton()
         button.setTitle("기록 추가", for: .normal)
-        button.backgroundColor = .lightGray
+        button.backgroundColor = Constants.Colors.bgGray ?? .gray
         button.layer.cornerRadius = 8
         button.isEnabled = false
         button.addTarget(self, action: #selector(addRecord), for: .touchUpInside)
@@ -201,7 +201,7 @@ class MemoLogViewController: UIViewController {
     
     private func updateAddButtonState() {
         addButton.isEnabled = memoTextView.text != "| 메모를 작성해주세요 (150자 이내)" && !memoTextView.text.isEmpty
-        addButton.backgroundColor = memoTextView.text != "| 메모를 작성해주세요 (150자 이내)" && !memoTextView.text.isEmpty ? UIColor(named: "Main3") : UIColor(named: "Cancel")
+        addButton.backgroundColor = memoTextView.text != "| 메모를 작성해주세요 (150자 이내)" && !memoTextView.text.isEmpty ? Constants.Colors.mainPink ?? .systemPink : Constants.Colors.bgGray ?? .gray
     }
     
     ///뒤로가기 버튼
@@ -294,7 +294,7 @@ extension MemoLogViewController: UITextViewDelegate, UINavigationControllerDeleg
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
             textView.text = "| 메모를 작성해주세요 (150자 이내)"
-            textView.textColor = UIColor(named: "Black3")
+            textView.textColor = Constants.Colors.black3 ?? .black
         }
         updateAddButtonState()
     }

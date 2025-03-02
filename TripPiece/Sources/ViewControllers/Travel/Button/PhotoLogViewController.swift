@@ -60,7 +60,7 @@ class PhotoLogViewController: UIViewController {
     // ✅ 회색 영역 전체(스크롤뷰를 담기 위한 컨테이너)
     private lazy var grayBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "BgColor2")
+        view.backgroundColor = Constants.Colors.bg2 ?? .lightGray
         return view
     }()
 
@@ -103,7 +103,7 @@ class PhotoLogViewController: UIViewController {
         label.text = "최대 4장 첨부 가능합니다"
         label.textAlignment = .left
         label.font = UIFont.systemFont(ofSize: 14, weight: .regular)
-        label.textColor = UIColor(named: "Black2")
+        label.textColor = Constants.Colors.black2 ?? .black
         return label
     }()
 
@@ -118,7 +118,7 @@ class PhotoLogViewController: UIViewController {
     private lazy var memoTextView: UITextView = {
         let textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 16)
-        textView.textColor = UIColor(named: "Black3")
+        textView.textColor = Constants.Colors.black3 ?? .black
         textView.text = "| 사진에 대해 설명해주세요! (100자 이내)"
         textView.layer.borderColor = UIColor.lightGray.cgColor
         textView.layer.shadowColor = UIColor.black.cgColor
@@ -132,7 +132,7 @@ class PhotoLogViewController: UIViewController {
     private lazy var addButton: UIButton = {
         let button = UIButton()
         button.setTitle("기록 추가", for: .normal)
-        button.backgroundColor = .lightGray
+        button.backgroundColor = Constants.Colors.bgGray ?? .gray
         button.layer.cornerRadius = 8
         button.isEnabled = false
         button.addTarget(self, action: #selector(addRecord), for: .touchUpInside)
@@ -296,10 +296,10 @@ class PhotoLogViewController: UIViewController {
     //MARK: - Button & Functions
     private func updateAddButtonState() {
         let isMemoValid = !memoTextView.text.isEmpty && memoTextView.text != "| 사진에 대해 설명해주세요! (100자 이내)"
-        addButton.isEnabled = !selectedImages.isEmpty && isMemoValid
-        addButton.backgroundColor = (selectedImages.isEmpty || !isMemoValid)
-            ? UIColor(named: "Cancel")
-            : UIColor(named: "Main")
+        addButton.isEnabled = !selectedImages.isEmpty //&& isMemoValid
+        addButton.backgroundColor = selectedImages.isEmpty //|| !isMemoValid)
+        ? Constants.Colors.bgGray ?? .gray
+        : Constants.Colors.mainPurple ?? .purple
     }
 
     @objc private func handleBackButtonTap() {
@@ -340,7 +340,9 @@ class PhotoLogViewController: UIViewController {
 
     @objc private func addRecord() {
         let photoDataArray = selectedImages.compactMap { $0.jpegData(compressionQuality: 0.5) }
-        logPicture(memoTextView.text, photos: photoDataArray) { result in
+        let memoText = (memoTextView.text == "| 사진에 대해 설명해주세요! (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+
+        logPicture(memoText ?? "", photos: photoDataArray) { result in
             switch result {
             case .success(let message):
                 print(message)
@@ -355,11 +357,11 @@ class PhotoLogViewController: UIViewController {
     }
 
     func logPicture(_ memo: String, photos: [Data], completion: @escaping (Result<Any, Error>) -> Void) {
-        guard !memo.isEmpty, !photos.isEmpty else {
+        guard !photos.isEmpty else {
             let error = NSError(
                 domain: "Upload Memo Error",
                 code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "Invalid inputs for memo or photos"]
+                userInfo: [NSLocalizedDescriptionKey: "Invalid inputs for photos"]
             )
             completion(.failure(error))
             return
@@ -392,7 +394,8 @@ class PhotoLogViewController: UIViewController {
     private func navigateToPhotoCompleteViewController() {
         let recordCompleteVC = PhotoCompleteViewController()
         recordCompleteVC.images = selectedImages
-        recordCompleteVC.memoText = memoTextView.text
+        let memoText = (memoTextView.text == "| 사진에 대해 설명해주세요! (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+        recordCompleteVC.memoText = memoText ?? ""
         recordCompleteVC.modalPresentationStyle = .fullScreen
         present(recordCompleteVC, animated: true)
     }
@@ -420,7 +423,7 @@ extension PhotoLogViewController: UITextViewDelegate, UIImagePickerControllerDel
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.isEmpty {
             textView.text = "| 사진에 대해 설명해주세요! (100자 이내)"
-            textView.textColor = UIColor(named: "Black3")
+            textView.textColor = Constants.Colors.black3 ?? .black
         }
     }
 

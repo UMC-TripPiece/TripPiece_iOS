@@ -256,6 +256,12 @@ class OngoingLogVC: UIViewController {
             }
         }
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchTravelSummary()
+        updatePuzzleCount()
+    }
 
     // MARK: - Update UI
     private func updateTravelSummary() {
@@ -323,6 +329,9 @@ class OngoingLogVC: UIViewController {
             viewController = VideoLogViewController(travelId: travelId)
         case 2:
             viewController = MemoLogViewController(travelId: travelId)
+        case 3:
+            let button4VC = EmojiLogVC(travelId: travelId)
+            navigationController?.pushViewController(button4VC, animated: true)
         default:
             return
         }

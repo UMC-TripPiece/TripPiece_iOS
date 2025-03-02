@@ -73,7 +73,7 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
     // 회색 영역(여기에 스크롤뷰를 넣어, SE3 기기에서도 내용 스크롤 가능)
     private lazy var grayBackgroundView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(named: "BgColor2")
+        view.backgroundColor = Constants.Colors.bg2 ?? .lightGray
         return view
     }()
 
@@ -120,7 +120,7 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
     private lazy var memoTextView: UITextView = {
         let textView = UITextView()
         textView.font = UIFont.systemFont(ofSize: 15)
-        textView.textColor = UIColor(named: "Black3")
+        textView.textColor = Constants.Colors.black3 ?? .black
         textView.text = "| 영상에 대해 설명해주세요 (100자 이내)"
         textView.layer.borderColor = UIColor.lightGray.cgColor
         textView.layer.shadowColor = UIColor.black.cgColor
@@ -134,7 +134,7 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
     private lazy var addButton: UIButton = {
         let button = UIButton()
         button.setTitle("기록 추가", for: .normal)
-        button.backgroundColor = .lightGray
+        button.backgroundColor = Constants.Colors.bgGray ?? .gray
         button.layer.cornerRadius = 8
         button.isEnabled = false
         button.addTarget(self, action: #selector(addRecord), for: .touchUpInside)
@@ -296,11 +296,11 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
     //MARK: - Button & Functions
     
     private func updateAddButtonState() {
-        let isMemoValid = !(memoTextView.text.isEmpty) && memoTextView.text != "| 영상에 대해 설명해주세요 (100자 이내)"
-        addButton.isEnabled = (selectedVideo != nil) && isMemoValid
-        addButton.backgroundColor = (selectedVideo == nil || !isMemoValid)
-            ? UIColor(named: "Cancel")
-            : UIColor(named: "Main2")
+        let isMemoValid = !memoTextView.text.isEmpty && memoTextView.text != "| 영상에 대해 설명해주세요 (100자 이내)"
+        addButton.isEnabled = (selectedVideo != nil) //&& isMemoValid
+        addButton.backgroundColor = selectedVideo == nil //|| !isMemoValid)
+        ? Constants.Colors.bgGray ?? .gray
+        : Constants.Colors.mainYellow ?? .yellow
     }
     @objc private func handleBackButtonTap() {
         self.dismiss(animated: true, completion: nil)
@@ -313,7 +313,8 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
         }
         do {
             let videoData = try Data(contentsOf: videoURL)
-            logVideo(memoTextView.text ?? "", video: videoData) { result in
+            let memoText = (memoTextView.text == "| 영상에 대해 설명해주세요 (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+            logVideo(memoText ?? "", video: videoData) { result in
                 switch result {
                 case .success(let message):
                     print(message)
@@ -335,11 +336,11 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
     }
     
     private func logVideo(_ description: String, video: Data, completion: @escaping (Result<Any, Error>) -> Void) {
-        guard !description.isEmpty, !video.isEmpty else {
+        guard !video.isEmpty else {
             let error = NSError(
                 domain: "Upload Memo Error",
                 code: -1,
-                userInfo: [NSLocalizedDescriptionKey: "Invalid inputs for memo or video"]
+                userInfo: [NSLocalizedDescriptionKey: "Invalid inputs for video"]
             )
             completion(.failure(error))
             return
@@ -372,16 +373,17 @@ class VideoLogViewController: UIViewController, UITextViewDelegate {
 
     // 동영상 기록 완료 페이지로 이동
     private func navigateToVideoCompleteViewController() {
-        guard let thumbnail = videoImage, let text = memoTextView.text else {
-            let alert = UIAlertController(title: "경고", message: "썸네일 또는 텍스트가 없습니다.", preferredStyle: .alert)
+        guard let thumbnail = videoImage else {
+            let alert = UIAlertController(title: "경고", message: "썸네일이 없습니다.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "확인", style: .default))
             present(alert, animated: true)
             return
         }
         
         let recordCompleteVC = VideoCompleteViewController()
-        recordCompleteVC.setPreviewText(text)
-        recordCompleteVC.setVideoComplete(with: thumbnail, text: text)
+        let memoText = (memoTextView.text == "| 영상에 대해 설명해주세요 (100자 이내)" || memoTextView.text.isEmpty) ? "" : memoTextView.text
+        recordCompleteVC.setPreviewText(memoText ?? "")
+        recordCompleteVC.setVideoComplete(with: thumbnail, text: memoText ?? "")
         recordCompleteVC.modalPresentationStyle = .fullScreen
         present(recordCompleteVC, animated: true)
     }
