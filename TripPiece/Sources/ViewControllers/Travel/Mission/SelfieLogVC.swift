@@ -183,7 +183,6 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         baseView.addSubview(titleLabel)
         baseView.addSubview(subtitleLabel)
         baseView.addSubview(titleImageView)
-        baseView.addSubview(addButton)
         
         baseView.addSubview(grayBackgroundView)
         
@@ -229,10 +228,10 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
         contentStackView.snp.makeConstraints { make in
             make.top.equalTo(grayBackgroundView.snp.top).offset(30)
             make.leading.trailing.equalToSuperview().inset(21)
+            make.bottom.equalToSuperview().inset(51)
         }
         // `photoContainerView` 제약 조건 설정
         photoContainerView.snp.makeConstraints { make in
-            make.height.equalTo(400)
             make.leading.trailing.equalToSuperview()
         }
         photoImageView.snp.makeConstraints { make in
@@ -272,7 +271,10 @@ class SelfieLogVC: UIViewController, UIImagePickerControllerDelegate, UINavigati
     }
     
     @objc private func selectPhoto() {
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        var alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        }
             
         let cameraAction = UIAlertAction(title: "카메라 열기", style: .default) { _ in
             if UIImagePickerController.isSourceTypeAvailable(.camera) {

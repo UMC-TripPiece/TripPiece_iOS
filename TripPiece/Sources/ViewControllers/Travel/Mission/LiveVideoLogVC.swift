@@ -270,7 +270,10 @@ class LiveVideoLogVC: UIViewController {
     
     ///비디오 추가 버튼 클릭
     @objc private func selectVideo() {
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        var alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+        }
         let cameraAction = UIAlertAction(title: "카메라 열기", style: .default) { _ in
             if UIImagePickerController.isSourceTypeAvailable(.camera) {
                 let imagePickerController = UIImagePickerController()
