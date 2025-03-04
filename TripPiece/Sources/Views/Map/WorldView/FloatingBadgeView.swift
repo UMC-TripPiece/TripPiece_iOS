@@ -89,7 +89,7 @@ class FloatingBadgeView: UIView {
         subtitleLabel.snp.makeConstraints { make in
             make.leading.equalTo(userProfileStackView.snp.leading)
             make.centerY.equalToSuperview().multipliedBy(1.3)
-            make.trailing.equalTo(globeImageView.snp.leading).offset(-15)
+            make.trailing.equalTo(globeImageView.snp.leading).offset(-8)
         }
         
         profileImageView.snp.makeConstraints { make in
