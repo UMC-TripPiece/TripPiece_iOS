@@ -9,6 +9,8 @@ import Moya
 class SignUpVC: UIViewController {
     // MARK: - UI Properties
     let navigationBarManager = NavigationBarManager()
+    let scrollView = UIScrollView()
+    let contentView = UIView()
     
     private lazy var usernameField = CustomLabelTextFieldView2(labelText: "이름", textFieldPlaceholder: "| 이름을 입력해 주세요", validationText: "이름을 입력해주세요")
     
@@ -86,6 +88,11 @@ class SignUpVC: UIViewController {
         setupActions()
         validateInputs()
         
+        setupKeyboardObservers()
+        setupDismissKeyboardGesture()
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
@@ -96,14 +103,25 @@ class SignUpVC: UIViewController {
     }
     
     private func setupView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
         [usernameField, emailField, confirmCodeField, confirmCodeButton, codeValidationLabel, passwordField, confirmPasswordField, signUpButton].forEach {
-            view.addSubview($0)
+            contentView.addSubview($0)
         }
         
         self.view.backgroundColor = Constants.Colors.bg4
     }
     
     private func setupConstraints() {
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+            make.height.greaterThanOrEqualToSuperview().priority(.low)
+        }
         usernameField.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
             make.leading.trailing.equalToSuperview().inset(20)
@@ -140,7 +158,68 @@ class SignUpVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(50)
+            make.bottom.equalToSuperview().offset(-20)
         }
+    }
+    
+    // MARK: - 키보드 설정
+    func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    @objc func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let activeField = getActiveTextField() else { return }
+
+        let keyboardHeight = keyboardFrame.height
+        let keyboardTopY = view.frame.height - keyboardHeight
+        let textFieldBottomY = scrollView.convert(activeField.frame, from: activeField.superview).maxY
+
+        if textFieldBottomY > keyboardTopY {
+            let offset = textFieldBottomY - keyboardTopY + 20
+            scrollView.setContentOffset(CGPoint(x: 0, y: offset), animated: true)
+        }
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = keyboardHeight + 20
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 20
+        }
+    }
+
+    @objc func keyboardWillHide(_ notification: Notification) {
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset = .zero
+            self.scrollView.scrollIndicatorInsets = .zero
+            self.scrollView.setContentOffset(.zero, animated: true)
+        }
+    }
+
+    /// 현재 활성화된 `UITextField` 찾기
+    func getActiveTextField() -> UITextField? {
+        return findActiveTextField(in: contentView)
+    }
+
+    /// 재귀적으로 서브뷰에서 현재 활성화된 `UITextField` 찾기
+    private func findActiveTextField(in view: UIView) -> UITextField? {
+        for subview in view.subviews {
+            if let textField = subview as? UITextField, textField.isFirstResponder {
+                return textField
+            } else if let found = findActiveTextField(in: subview) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    // MARK: - 키보드 해제 설정
+    func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     private func setupActions() {
@@ -152,10 +231,6 @@ class SignUpVC: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
         view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     // MARK: - Actions
@@ -289,5 +364,17 @@ class SignUpVC: UIViewController {
         signUpButton.isEnabled = isValid
         signUpButton.backgroundColor = isValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray
     }
-    
+}
+extension UIView {
+    func selectedTextField() -> UITextField? {
+        if let textField = self as? UITextField, textField.isFirstResponder {
+            return textField
+        }
+        for subview in subviews {
+            if let activeTextField = subview.selectedTextField() {
+                return activeTextField
+            }
+        }
+        return nil
+    }
 }
