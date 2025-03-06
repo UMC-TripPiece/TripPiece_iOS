@@ -118,9 +118,9 @@ class SignUpVC: UIViewController {
         }
 
         contentView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
-            make.height.greaterThanOrEqualToSuperview().priority(.low)
+            make.edges.equalTo(scrollView)
+            make.width.equalTo(scrollView)
+            make.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide).priority(.required)
         }
         usernameField.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
@@ -158,7 +158,7 @@ class SignUpVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(50)
-            make.bottom.equalToSuperview().offset(-20)
+            make.bottom.equalToSuperview().offset(-50)
         }
     }
     
@@ -167,29 +167,39 @@ class SignUpVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
+    private func scrollToActiveTextField() {
+        guard let activeField = getActiveTextField() else { return }
+        
+        let textFieldFrame = activeField.convert(activeField.bounds, to: scrollView)
+        let keyboardHeight = scrollView.contentInset.bottom
+        
+        let visibleHeight = scrollView.frame.height - keyboardHeight
+
+        if textFieldFrame.maxY > visibleHeight {
+            let offsetY = textFieldFrame.maxY - visibleHeight + 20 // 여유 공간 추가
+            scrollView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: true)
+        }
+    }
 
     @objc func keyboardWillShow(_ notification: Notification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-              let activeField = getActiveTextField() else { return }
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
 
         let keyboardHeight = keyboardFrame.height
-        let keyboardTopY = view.frame.height - keyboardHeight
-        let textFieldBottomY = scrollView.convert(activeField.frame, from: activeField.superview).maxY
 
-        if textFieldBottomY > keyboardTopY {
-            let offset = textFieldBottomY - keyboardTopY + 20
-            scrollView.setContentOffset(CGPoint(x: 0, y: offset), animated: true)
-        }
+        // ✅ 키보드의 높이에 맞게 `contentInset` 조정
         UIView.animate(withDuration: 0.3) {
-            self.scrollView.contentInset.bottom = keyboardHeight + 20
-            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 20
+            self.scrollView.contentInset.bottom = keyboardHeight + 30
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 30
         }
+
+        // 🔥 현재 입력 중인 필드로 스크롤 이동
+        scrollToActiveTextField()
     }
 
     @objc func keyboardWillHide(_ notification: Notification) {
         UIView.animate(withDuration: 0.3) {
             self.scrollView.contentInset = .zero
-            self.scrollView.scrollIndicatorInsets = .zero
+            self.scrollView.verticalScrollIndicatorInsets = .zero
             self.scrollView.setContentOffset(.zero, animated: true)
         }
     }
