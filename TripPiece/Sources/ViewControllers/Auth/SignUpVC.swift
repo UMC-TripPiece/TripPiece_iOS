@@ -113,54 +113,59 @@ class SignUpVC: UIViewController {
     }
     
     private func setupConstraints() {
+        // scrollView는 view 전체에 맞춤
         scrollView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
 
+        // contentView는 scrollView의 contentLayoutGuide와 frameLayoutGuide에 맞춤
         contentView.snp.makeConstraints { make in
-            make.edges.equalTo(scrollView)
-            make.width.equalTo(scrollView)
-            make.height.greaterThanOrEqualTo(scrollView).priority(.required)
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
+            // contentView의 높이는 내부 요소에 따라 확장되도록 함
         }
-        
+
+        // 모든 서브뷰는 contentView를 기준으로 배치합니다.
         usernameField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(contentView).offset(DynamicPadding.dynamicValue(20.0))
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         emailField.snp.makeConstraints { make in
             make.top.equalTo(usernameField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         confirmCodeField.snp.makeConstraints { make in
             make.top.equalTo(emailField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
-            make.leading.equalTo(usernameField)
-            make.width.equalTo(superViewWidth * 0.6)
+            make.leading.equalTo(contentView).inset(20)
+            make.width.equalTo(contentView).multipliedBy(0.6)
             make.height.equalTo(50)
         }
         confirmCodeButton.snp.makeConstraints { make in
             make.centerY.equalTo(confirmCodeField)
             make.leading.equalTo(confirmCodeField.snp.trailing).offset(10)
-            make.trailing.equalToSuperview().inset(20)
+            make.trailing.equalTo(contentView).inset(20)
             make.height.equalTo(50)
         }
         codeValidationLabel.snp.makeConstraints { make in
             make.top.equalTo(confirmCodeField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
-            make.leading.equalTo(usernameField)
+            make.leading.equalTo(contentView).inset(20)
         }
         passwordField.snp.makeConstraints { make in
             make.top.equalTo(codeValidationLabel.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         confirmPasswordField.snp.makeConstraints { make in
             make.top.equalTo(passwordField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         signUpButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(confirmPasswordField.snp.bottom).offset(40)
+            make.leading.trailing.equalTo(contentView).inset(20)
             make.height.equalTo(50)
+            make.bottom.equalTo(contentView).offset(-20) // contentView의 bottom까지 확장
         }
     }
+
     
     // MARK: - 키보드 설정
     func setupKeyboardObservers() {
@@ -196,12 +201,12 @@ class SignUpVC: UIViewController {
     }
 
     @objc func keyboardWillHide(_ notification: Notification) {
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: 0.3, animations: {
             self.scrollView.contentInset = .zero
             self.scrollView.verticalScrollIndicatorInsets = .zero
-            self.scrollView.setContentOffset(.zero, animated: true)
-        }
+        })
     }
+
 
     /// 현재 활성화된 `UITextField` 찾기
     func getActiveTextField() -> UITextField? {
