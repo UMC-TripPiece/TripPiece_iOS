@@ -120,8 +120,9 @@ class SignUpVC: UIViewController {
         contentView.snp.makeConstraints { make in
             make.edges.equalTo(scrollView)
             make.width.equalTo(scrollView)
-            make.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide).priority(.required)
+            make.height.greaterThanOrEqualTo(scrollView).priority(.required)
         }
+        
         usernameField.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
             make.leading.trailing.equalToSuperview().inset(20)
@@ -158,7 +159,6 @@ class SignUpVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
             make.leading.trailing.equalToSuperview().inset(20)
             make.height.equalTo(50)
-            make.bottom.equalToSuperview().offset(-50)
         }
     }
     
@@ -170,7 +170,7 @@ class SignUpVC: UIViewController {
     private func scrollToActiveTextField() {
         guard let activeField = getActiveTextField() else { return }
         
-        let textFieldFrame = activeField.convert(activeField.bounds, to: scrollView)
+        let textFieldFrame = activeField.convert(activeField.bounds, to: view)
         let keyboardHeight = scrollView.contentInset.bottom
         
         let visibleHeight = scrollView.frame.height - keyboardHeight
@@ -186,14 +186,13 @@ class SignUpVC: UIViewController {
 
         let keyboardHeight = keyboardFrame.height
 
-        // ✅ 키보드의 높이에 맞게 `contentInset` 조정
         UIView.animate(withDuration: 0.3) {
             self.scrollView.contentInset.bottom = keyboardHeight + 30
             self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 30
         }
-
-        // 🔥 현재 입력 중인 필드로 스크롤 이동
-        scrollToActiveTextField()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.scrollToActiveTextField()
+        }
     }
 
     @objc func keyboardWillHide(_ notification: Notification) {
