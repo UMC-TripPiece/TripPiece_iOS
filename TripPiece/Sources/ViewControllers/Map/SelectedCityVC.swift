@@ -217,24 +217,22 @@ class SelectedCityVC: UIViewController {
         dismiss(animated: true, completion: nil)
     }
     
-    // 여행 기록 시작
     @objc func logStartButtonTapped(_ sender: UIButton) {
-        let startLogVC = StartLogVC()
-        if let cityData = cityData {
-            startLogVC.rootView.titleLabel.text = "\(cityData.countryImage) \(cityData.cityName), \(cityData.countryName)"
-            startLogVC.travelRequest.cityName = cityData.cityName
-            startLogVC.travelRequest.countryName = cityData.countryName
-            startLogVC.updateStartLogButtonState()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                startLogVC.showAddphotoBtnController()
-            }
-        } else {
-            startLogVC.rootView.titleLabel.text = "도시 추가"
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first,
+              let tabBarController = window.rootViewController as? UITabBarController else {
+            return
         }
 
-        
-        startLogVC.modalPresentationStyle = .fullScreen
-        self.present(startLogVC, animated: true, completion: nil)
+        dismiss(animated: true) { [weak self] in
+            guard let self = self else { return }
+            tabBarController.selectedIndex = 1
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                print("notification 보냄")
+                NotificationCenter.default.post(name: NSNotification.Name("PresentStartLogVC"), object: self.cityData)
+            }
+        }
     }
     
     

@@ -195,6 +195,20 @@ class MyLogVC: UIViewController {
         setupGestures()
         updateSelectedFilterButton(selectedButton: allButton)
     }
+
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        print("notification 등록")
+        NotificationCenter.default.addObserver(self, selector: #selector(presentStartLogVC(_:)), name: NSNotification.Name("PresentStartLogVC"), object: nil)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    
     
     func setupView() {
         
@@ -306,6 +320,27 @@ class MyLogVC: UIViewController {
         let viewController = StartLogVC()
         viewController.modalPresentationStyle = .fullScreen
         self.present(viewController, animated: true, completion: nil)
+    }
+    
+    @objc func presentStartLogVC(_ notification: Notification) {
+        print("notification - present 함수까지 오셨다구")
+        let startLogVC = StartLogVC()
+        
+        if let cityData = notification.object as? SearchedCityResponse {
+            startLogVC.rootView.titleLabel.text = "\(cityData.countryImage) \(cityData.cityName), \(cityData.countryName)"
+            startLogVC.travelRequest.cityName = cityData.cityName
+            startLogVC.travelRequest.countryName = cityData.countryName
+            startLogVC.updateStartLogButtonState()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                startLogVC.showAddphotoBtnController()
+            }
+        } else {
+            startLogVC.rootView.titleLabel.text = "도시 추가"
+        }
+        
+        startLogVC.modalPresentationStyle = .fullScreen
+        self.present(startLogVC, animated: true, completion: nil)
     }
     
     
