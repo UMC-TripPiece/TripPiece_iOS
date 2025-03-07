@@ -319,15 +319,19 @@ class OngoingLogVC: UIViewController {
             return
         }
         print("Button with tag \(sender.tag) clicked")
-        
         var viewController: UIViewController?
-        
         switch sender.tag {
         case 0:
+//            let button1VC = PhotoLogViewController(travelId: travelId)
+//            navigationController?.pushViewController(button1VC, animated: true)
             viewController = PhotoLogViewController(travelId: travelId)
         case 1:
+//            let button2VC = VideoLogViewController(travelId: travelId)
+//            navigationController?.pushViewController(button2VC, animated: true)
             viewController = VideoLogViewController(travelId: travelId)
         case 2:
+//            let button3VC = MemoLogViewController(travelId: travelId)
+//            navigationController?.pushViewController(button3VC, animated: true)
             viewController = MemoLogViewController(travelId: travelId)
         case 3:
             let button4VC = EmojiLogVC(travelId: travelId)
@@ -335,7 +339,6 @@ class OngoingLogVC: UIViewController {
         default:
             return
         }
-        
         if let viewController = viewController {
             viewController.modalPresentationStyle = .fullScreen
             self.present(viewController, animated: true, completion: nil)

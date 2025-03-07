@@ -9,6 +9,8 @@ import Moya
 class SignUpVC: UIViewController {
     // MARK: - UI Properties
     let navigationBarManager = NavigationBarManager()
+    let scrollView = UIScrollView()
+    let contentView = UIView()
     
     private lazy var usernameField = CustomLabelTextFieldView2(labelText: "이름", textFieldPlaceholder: "| 이름을 입력해 주세요", validationText: "이름을 입력해주세요")
     
@@ -86,6 +88,11 @@ class SignUpVC: UIViewController {
         setupActions()
         validateInputs()
         
+        setupKeyboardObservers()
+        setupDismissKeyboardGesture()
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
@@ -96,51 +103,137 @@ class SignUpVC: UIViewController {
     }
     
     private func setupView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
         [usernameField, emailField, confirmCodeField, confirmCodeButton, codeValidationLabel, passwordField, confirmPasswordField, signUpButton].forEach {
-            view.addSubview($0)
+            contentView.addSubview($0)
         }
         
         self.view.backgroundColor = Constants.Colors.bg4
     }
     
     private func setupConstraints() {
+        // scrollView는 view 전체에 맞춤
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+
+        // contentView는 scrollView의 contentLayoutGuide와 frameLayoutGuide에 맞춤
+        contentView.snp.makeConstraints { make in
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
+            // contentView의 높이는 내부 요소에 따라 확장되도록 함
+        }
+
+        // 모든 서브뷰는 contentView를 기준으로 배치합니다.
         usernameField.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(contentView).offset(DynamicPadding.dynamicValue(20.0))
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         emailField.snp.makeConstraints { make in
             make.top.equalTo(usernameField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         confirmCodeField.snp.makeConstraints { make in
             make.top.equalTo(emailField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
-            make.leading.equalTo(usernameField)
-            make.width.equalTo(superViewWidth * 0.6)
+            make.leading.equalTo(contentView).inset(20)
+            make.width.equalTo(contentView).multipliedBy(0.6)
             make.height.equalTo(50)
         }
         confirmCodeButton.snp.makeConstraints { make in
             make.centerY.equalTo(confirmCodeField)
             make.leading.equalTo(confirmCodeField.snp.trailing).offset(10)
-            make.trailing.equalToSuperview().inset(20)
+            make.trailing.equalTo(contentView).inset(20)
             make.height.equalTo(50)
         }
         codeValidationLabel.snp.makeConstraints { make in
             make.top.equalTo(confirmCodeField.snp.bottom).offset(DynamicPadding.dynamicValue(10.0))
-            make.leading.equalTo(usernameField)
+            make.leading.equalTo(contentView).inset(20)
         }
         passwordField.snp.makeConstraints { make in
             make.top.equalTo(codeValidationLabel.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         confirmPasswordField.snp.makeConstraints { make in
             make.top.equalTo(passwordField.snp.bottom).offset(DynamicPadding.dynamicValue(20.0))
-            make.leading.trailing.equalTo(usernameField)
+            make.leading.trailing.equalTo(contentView).inset(20)
         }
         signUpButton.snp.makeConstraints { make in
-            make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
-            make.leading.trailing.equalToSuperview().inset(20)
+            make.top.equalTo(confirmPasswordField.snp.bottom).offset(40)
+            make.leading.trailing.equalTo(contentView).inset(20)
             make.height.equalTo(50)
+            make.bottom.equalTo(contentView).offset(-20) // contentView의 bottom까지 확장
         }
+    }
+
+    
+    // MARK: - 키보드 설정
+    func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    private func scrollToActiveTextField() {
+        guard let activeField = getActiveTextField() else { return }
+        
+        let textFieldFrame = activeField.convert(activeField.bounds, to: view)
+        let keyboardHeight = scrollView.contentInset.bottom
+        
+        let visibleHeight = scrollView.frame.height - keyboardHeight
+
+        if textFieldFrame.maxY > visibleHeight {
+            let offsetY = textFieldFrame.maxY - visibleHeight + 20 // 여유 공간 추가
+            scrollView.setContentOffset(CGPoint(x: 0, y: offsetY), animated: true)
+        }
+    }
+
+    @objc func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+
+        let keyboardHeight = keyboardFrame.height
+
+        UIView.animate(withDuration: 0.3) {
+            self.scrollView.contentInset.bottom = keyboardHeight + 30
+            self.scrollView.verticalScrollIndicatorInsets.bottom = keyboardHeight + 30
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.scrollToActiveTextField()
+        }
+    }
+
+    @objc func keyboardWillHide(_ notification: Notification) {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.scrollView.contentInset = .zero
+            self.scrollView.verticalScrollIndicatorInsets = .zero
+        })
+    }
+
+
+    /// 현재 활성화된 `UITextField` 찾기
+    func getActiveTextField() -> UITextField? {
+        return findActiveTextField(in: contentView)
+    }
+
+    /// 재귀적으로 서브뷰에서 현재 활성화된 `UITextField` 찾기
+    private func findActiveTextField(in view: UIView) -> UITextField? {
+        for subview in view.subviews {
+            if let textField = subview as? UITextField, textField.isFirstResponder {
+                return textField
+            } else if let found = findActiveTextField(in: subview) {
+                return found
+            }
+        }
+        return nil
+    }
+
+    // MARK: - 키보드 해제 설정
+    func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     private func setupActions() {
@@ -152,10 +245,6 @@ class SignUpVC: UIViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         
         view.addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     // MARK: - Actions
@@ -289,5 +378,17 @@ class SignUpVC: UIViewController {
         signUpButton.isEnabled = isValid
         signUpButton.backgroundColor = isValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray
     }
-    
+}
+extension UIView {
+    func selectedTextField() -> UITextField? {
+        if let textField = self as? UITextField, textField.isFirstResponder {
+            return textField
+        }
+        for subview in subviews {
+            if let activeTextField = subview.selectedTextField() {
+                return activeTextField
+            }
+        }
+        return nil
+    }
 }
