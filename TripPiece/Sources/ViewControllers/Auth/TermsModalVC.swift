@@ -8,6 +8,7 @@ import Then
 class TermsModalVC: UIViewController {
 
     // MARK: - Properties
+    var navigateToProfileVC: (() -> Void)?
     var agreements: [Bool] = [false, false, false, false]
     private var isAllAgreed: Bool = false
     
@@ -168,10 +169,7 @@ class TermsModalVC: UIViewController {
     }
     
     @objc private func startButtonTapped() {
-        let profileVC = ProfileVC()
-        
-        profileVC.isEmailLogin = true
-        profileVC.modalPresentationStyle = .fullScreen
-        present(profileVC, animated: true, completion: nil)
+        navigateToProfileVC?()
+        dismiss(animated: true)
     }
 }

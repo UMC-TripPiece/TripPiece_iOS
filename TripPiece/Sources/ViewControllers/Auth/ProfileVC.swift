@@ -42,8 +42,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     let genderSegmentedControl: UISegmentedControl = {
         let segmentedControl = UISegmentedControl(items: ["남성", "여성"])
-        segmentedControl.selectedSegmentIndex = 0
         segmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+        segmentedControl.selectedSegmentIndex = 0
+        SignUpManager.shared.gender = "MALE"
         return segmentedControl
     }()
     
@@ -107,6 +108,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = Constants.Colors.bg4
+        navigationController?.isNavigationBarHidden = true
         // 뷰 설정 및 초기화
         setupViews()
         setupConstraints()
@@ -256,7 +258,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         } else {
             print("⚠️ 이미지 선택 실패")
         }
-        
+        checkFormValidity()
         dismiss(animated: true, completion: nil)
     }
     
@@ -298,7 +300,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func checkFormValidity() {
         let isFormValid = !(nicknameTextField.text?.isEmpty ?? true) &&
         !(birthdateTextField.text?.isEmpty ?? true) &&
-        (genderSegmentedControl.selectedSegmentIndex != UISegmentedControl.noSegment)
+        (genderSegmentedControl.selectedSegmentIndex != UISegmentedControl.noSegment) &&
+        SignUpManager.shared.profileImg != nil
         
         startButton.isEnabled = isFormValid
         startButton.backgroundColor = isFormValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray
@@ -315,8 +318,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    func proceedIfSignupSuccessful() {
+    func   proceedIfSignupSuccessful() {
+        print("signup 성공 후 이동")
+        print(navigationController)
         let VC = SelectLoginTypeVC()
-        navigationController?.pushViewController(VC, animated: true)
+        navigationController?.replaceViewController(viewController: VC, animated: true)
     }
 }

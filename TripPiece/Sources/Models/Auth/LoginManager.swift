@@ -70,7 +70,7 @@ extension ProfileVC {
                 birth: signUpMng.birth,
                 country: signUpMng.country
             ),
-            profileImg: signUpMng.profileImg!
+            profileImg: signUpMng.profileImg
         )
         if let infoData = MultipartForm.createJSONMultipartData(data: emailSignUp.info, fieldName: "info") {
             multipartData.append(infoData)
@@ -87,6 +87,8 @@ extension ProfileVC {
                     //                    Toaster.shared.makeToast("회원가입이 성공적으로 완료되었습니다.")
                     completion(true)
                 } else {
+                    print(response.description)
+                    print(response.response)
                     //                    Toaster.shared.makeToast("데이터를 불러오는 데 실패했습니다.")
                     completion(false)
                 }
