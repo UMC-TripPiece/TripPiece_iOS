@@ -63,7 +63,6 @@ extension WorldVC: UITableViewDelegate, UITableViewDataSource {
     
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         view.endEditing(true)  // 스크롤을 시작할 때 키보드 내리기
-        searchTableView.isHidden = true
     }
     
 }

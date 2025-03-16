@@ -76,7 +76,6 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         //mapView.delegate = self
         
         configureTapGestureForDismissingKeyboard()
-        addObserver()
     }
 
     
@@ -91,7 +90,13 @@ class WorldVC: UIViewController, UITextFieldDelegate {
         scrollView.zoomScale = scrollView.minimumZoomScale
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        addObserver()
+    }
+    
     override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: .changeMapColor, object: nil)
         NotificationCenter.default.removeObserver(self, name: .deleteMapColor, object: nil)
         NotificationCenter.default.removeObserver(self, name: .updateFloatingView, object: nil)

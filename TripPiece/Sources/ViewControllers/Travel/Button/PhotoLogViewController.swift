@@ -148,6 +148,8 @@ class PhotoLogViewController: UIViewController {
     //MARK: - LifeCycle
     override func viewDidLoad() {
         super.viewDidLoad()
+//        tabBarController?.tabBar.isHidden = true
+//        navigationController?.navigationBar.isHidden = true
         NotificationCenter.default.addObserver(self, selector: #selector(handleBackButtonTap), name: .backButtonTapped, object: nil)
         navigationItem.hidesBackButton = true
         view.backgroundColor = .white

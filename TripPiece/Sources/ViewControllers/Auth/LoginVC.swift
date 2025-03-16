@@ -11,6 +11,8 @@ import SwiftyToaster
 class LoginVC: UIViewController {
     
     let navigationBarManager = NavigationBarManager()
+    let scrollView = UIScrollView() //키보드가 나타날 때 조절할 ScrollView
+    let contentView = UIView()
     
     let imageView: UIImageView = {
         let imageView = UIImageView()
@@ -67,12 +69,21 @@ class LoginVC: UIViewController {
         setupNavigationBar()
         setupActions()
         setupConstraints()
+        
+        // 키보드 관련 설정
+        setupKeyboardObservers()
+        setupDismissKeyboardGesture()
+    }
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup Methods
     func setupViews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
         [welcomeLabel, joinLabel, imageView, loginField, loginButton].forEach {
-            view.addSubview($0)
+            contentView.addSubview($0)
         }
     }
     
@@ -88,6 +99,13 @@ class LoginVC: UIViewController {
     }
     
     private func setupConstraints() {
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+        }
         welcomeLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(30)
             make.leading.equalToSuperview().offset(DynamicPadding.dynamicValue(20.0))
@@ -112,7 +130,40 @@ class LoginVC: UIViewController {
             make.top.equalTo(loginField.snp.bottom).offset(30)
             make.leading.trailing.equalTo(loginField)
             make.height.equalTo(50)
+            make.bottom.equalToSuperview().offset(-20)
         }
+    }
+    
+    // MARK: - 키보드 설정
+    func setupKeyboardObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+       
+    @objc func keyboardWillShow(_ notification: Notification) {
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
+        let keyboardHeight = keyboardFrame.height
+           
+        scrollView.snp.updateConstraints { make in
+            make.bottom.equalToSuperview().inset(keyboardHeight)
+        }
+    }
+       
+    @objc func keyboardWillHide(_ notification: Notification) {
+        scrollView.snp.updateConstraints { make in
+            make.bottom.equalToSuperview()
+        }
+    }
+       
+    // MARK: - 키보드 해제 설정
+    func setupDismissKeyboardGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+       
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     //MARK: Setup Actions
