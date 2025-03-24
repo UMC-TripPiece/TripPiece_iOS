@@ -302,6 +302,7 @@ class SignUpVC: UIViewController {
         let termsModalVC = TermsModalVC()
         termsModalVC.isModalInPresentation = true
         termsModalVC.loadViewIfNeeded()
+        termsModalVC.navigateToProfileVC = navigateToProfileVC
         let navigationController = UINavigationController(rootViewController: termsModalVC)
 
         navigationController.modalPresentationStyle = .pageSheet
@@ -311,11 +312,10 @@ class SignUpVC: UIViewController {
         present(navigationController, animated: true, completion: nil)
     }
     
-    func navigateToProfileVC() {
+    @objc func navigateToProfileVC() {
         let profileVC = ProfileVC()
         profileVC.isEmailLogin = true
-        profileVC.modalPresentationStyle = .fullScreen
-        present(profileVC, animated: true, completion: nil)
+        navigationController?.replaceViewController(viewController: profileVC, animated: true)
     }
     
     lazy var isUsernameValid = false
