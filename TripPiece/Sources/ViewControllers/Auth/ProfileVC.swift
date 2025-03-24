@@ -37,20 +37,22 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     let genderLabel: UILabel = {
         let label = UILabel()
         label.text = "성별"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
     let genderSegmentedControl: UISegmentedControl = {
         let segmentedControl = UISegmentedControl(items: ["남성", "여성"])
         segmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
-        segmentedControl.selectedSegmentIndex = 0
-        SignUpManager.shared.gender = "MALE"
+        segmentedControl.selectedSegmentIndex = -1
+        //SignUpManager.shared.gender = "MALE"
         return segmentedControl
     }()
     
     let birthdateLabel: UILabel = {
         let label = UILabel()
         label.text = "생년월일"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
@@ -76,12 +78,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     let countryLabel: UILabel = {
         let label = UILabel()
         label.text = "국적"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
     let countryTextField: PaddedTextField = {
         let textField = PaddedTextField(padding: UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10))
-        textField.setPlaceholder("🇰🇷 대한민국", color: .black)
+        textField.setPlaceholder("국적을 선택하세요.", color: .gray)
         textField.isUserInteractionEnabled = false
         return textField
     }()
@@ -298,10 +301,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     // 폼 유효성 검사
     func checkFormValidity() {
-        let isFormValid = !(nicknameTextField.text?.isEmpty ?? true) &&
-        !(birthdateTextField.text?.isEmpty ?? true) &&
-        (genderSegmentedControl.selectedSegmentIndex != UISegmentedControl.noSegment) &&
-        SignUpManager.shared.profileImg != nil
+        let isFormValid = !(nicknameTextField.text?.isEmpty ?? true) 
         
         startButton.isEnabled = isFormValid
         startButton.backgroundColor = isFormValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray

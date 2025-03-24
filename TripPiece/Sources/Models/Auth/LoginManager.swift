@@ -62,7 +62,6 @@ extension ProfileVC {
         let signUpMng = SignUpManager.shared
         let emailSignUp = SignUpRequest(
             info: Info(
-                name: signUpMng.name,
                 email: signUpMng.email,
                 password: signUpMng.password,
                 nickname: signUpMng.nickname,
@@ -74,14 +73,46 @@ extension ProfileVC {
         )
         if let infoData = MultipartForm.createJSONMultipartData(data: emailSignUp.info, fieldName: "info") {
             multipartData.append(infoData)
+            
+            switch infoData.provider {
+            case .data(let data):
+                if let jsonString = String(data: data, encoding: .utf8) {
+                    print("🧾 JSON multipart 내용: \(jsonString)")
+                }
+            default:
+                print("⚠️ provider가 .data가 아님")
+            }
+
         }
-        if let imageData = MultipartForm.createImageMultipartData(image: emailSignUp.profileImg!, fieldName: "profileImg") {
+        if let profileImg = emailSignUp.profileImg,
+           let imageData = MultipartForm.createImageMultipartData(image: profileImg, fieldName: "profileImg") {
             multipartData.append(imageData)
+            
+            switch imageData.provider {
+            case .data(let data):
+                print("🧾 IMAGE multipart 내용: \(data.count) bytes")
+            default:
+                print("⚠️ (image) provider가 .data가 아님")
+            }
         }
+
         
         APIManager.AuthProvider.request(.postSignUp(param: multipartData)) { result in
             switch result {
             case .success(let response):
+                print("📦 상태 코드: \(response.statusCode)")
+                
+                if let jsonString = String(data: response.data, encoding: .utf8) {
+                    print("🧾 서버 응답 Body: \(jsonString)")
+                }
+
+                if response.statusCode == 200 {
+                    completion(true)
+                } else {
+                    completion(false)
+                }
+
+            /*case .success(let response):
                 print(response)
                 if response.statusCode == 200 {
                     //                    Toaster.shared.makeToast("회원가입이 성공적으로 완료되었습니다.")
@@ -91,7 +122,7 @@ extension ProfileVC {
                     print(response.response)
                     //                    Toaster.shared.makeToast("데이터를 불러오는 데 실패했습니다.")
                     completion(false)
-                }
+                }*/
             case .failure(let error):
                 print("Error: \(error.localizedDescription)")
                 if let responseData = error.response?.data,

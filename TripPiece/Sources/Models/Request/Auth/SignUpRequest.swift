@@ -9,7 +9,6 @@ struct SignUpRequest<T: Codable> {
 }
 
 struct Info : Codable {
-    let name : String
     let email : String
     let password : String
     let nickname : String
@@ -37,7 +36,6 @@ struct UpdateInfo : Codable {
 class SignUpManager {
     static let shared = SignUpManager()
     
-    var name : String = ""
     var email : String = ""
     var password : String = ""
     var nickname : String = ""
@@ -48,8 +46,7 @@ class SignUpManager {
     
     private init() {}
     
-    func setName(username : String, emailString : String, pwString : String) {
-        name = username
+    func setName(emailString : String, pwString : String) {
         email = emailString
         password = pwString
     }
