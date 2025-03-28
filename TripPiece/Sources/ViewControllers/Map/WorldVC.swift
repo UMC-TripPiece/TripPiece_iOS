@@ -266,7 +266,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
                 self.getCountryStatsData { statsInfo in
                     if let data = statsInfo {
                         self.statsCountries = data
-                        self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg, visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
+                        self.setUpBadgeView(nickname: userInfo.nickname, profileImage: userInfo.profileImg ?? "", visitedCountryNum: data.countryCount, visitedCityNum: data.cityCount)
                     }
                 }
                 self.getCountryColorsData { colorInfo in
@@ -286,7 +286,7 @@ class WorldVC: UIViewController, UITextFieldDelegate {
     private func setUpBadgeView(nickname: String, profileImage: String, visitedCountryNum: Int, visitedCityNum: Int) {
         // 기존의 지도 및 UI 요소가 추가된 후 아래에 배지 뷰를 추가합니다.
         floatingBadgeView.updateProfile(with: nickname)
-        guard let urlImage = URL(string: profileImage) else { return }
+        let urlImage = URL(string: profileImage)
         floatingBadgeView.updateProfileImage(with: urlImage)
         floatingBadgeView.updateSubtitleLabel(countryNum: visitedCountryNum, cityNum: visitedCityNum)
         view.addSubview(floatingBadgeView)

@@ -12,7 +12,7 @@ struct Info : Codable {
     let email : String
     let password : String
     let nickname : String
-    let gender : String
+    let gender : String?
     let birth : String
     let country : String
 }
@@ -39,7 +39,7 @@ class SignUpManager {
     var email : String = ""
     var password : String = ""
     var nickname : String = ""
-    var gender : String = ""
+    var gender : String? = nil
     var birth : String = ""
     var country : String = ""
     var profileImg : UIImage? = nil
@@ -51,10 +51,15 @@ class SignUpManager {
         password = pwString
     }
     
-    func setProfile(nicknameString: String, birthString : String, countryString: String) {
+    /*func setProfile(nicknameString: String, birthString : String, countryString: String) {
         nickname = nicknameString
         birth = birthString
         country = countryString
+    }*/
+    func setProfile(nicknameString: String) {
+        nickname = nicknameString
+        birth = ""
+        country = ""
     }
 }
 

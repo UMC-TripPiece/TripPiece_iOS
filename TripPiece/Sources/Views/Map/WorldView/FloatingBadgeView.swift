@@ -111,7 +111,7 @@ class FloatingBadgeView: UIView {
     }
     
     // 프로필 이미지를 업데이트
-    func updateProfileImage(with urlString: URL) {
+    func updateProfileImage(with urlString: URL?) {
         profileImageView.sd_setImage(with: urlString, placeholderImage: UIImage(named: "profilePlaceholder"))
     }
     

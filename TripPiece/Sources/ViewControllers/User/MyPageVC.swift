@@ -140,7 +140,7 @@ class MyPageVC: UIViewController, UIImagePickerControllerDelegate, UINavigationC
         UserInfoManager.fetchMemberInfo { result in
             switch result {
             case .success(let memberInfo):
-                let profileImgURL = URL(string: memberInfo.result.profileImg)
+                let profileImgURL = URL(string: memberInfo.result.profileImg ?? "")
                 self.configureSwitch(isEnabled: memberInfo.result.isPublic)
                 self.nameLabel.text = "\(memberInfo.result.nickname)님"
                 self.travelLogsLabel.text = "\(memberInfo.result.travelNum)\n여행기"
