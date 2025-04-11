@@ -94,7 +94,7 @@ class TermsAgreeView: UIView {
     }
     
     @objc private func showDetailVC() {
-        print("showDetailVC Tapperd")
+        print("showDetailVC Tapped")
         guard let parentVC = parentViewController else {
                 print("부모 뷰 컨트롤러가 설정되지 않았습니다.")
                 return

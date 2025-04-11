@@ -3,6 +3,7 @@
 import UIKit
 import SnapKit
 import Moya
+import SwiftyToaster
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
@@ -34,23 +35,25 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         return textField
     }()
     
-    let genderLabel: UILabel = {
+    /*let genderLabel: UILabel = {
         let label = UILabel()
         label.text = "성별"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
     let genderSegmentedControl: UISegmentedControl = {
         let segmentedControl = UISegmentedControl(items: ["남성", "여성"])
         segmentedControl.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
-        segmentedControl.selectedSegmentIndex = 0
-        SignUpManager.shared.gender = "MALE"
+        segmentedControl.selectedSegmentIndex = -1
+        //SignUpManager.shared.gender = "MALE"
         return segmentedControl
     }()
     
     let birthdateLabel: UILabel = {
         let label = UILabel()
         label.text = "생년월일"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
@@ -76,12 +79,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     let countryLabel: UILabel = {
         let label = UILabel()
         label.text = "국적"
+        label.font = UIFont.systemFont(ofSize: 16, weight: .semibold)
         return label
     }()
     
     let countryTextField: PaddedTextField = {
         let textField = PaddedTextField(padding: UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10))
-        textField.setPlaceholder("🇰🇷 대한민국", color: .black)
+        textField.setPlaceholder("국적을 선택하세요.", color: .gray)
         textField.isUserInteractionEnabled = false
         return textField
     }()
@@ -91,7 +95,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let label = UILabel()
         label.text = "선택한 국가 외 지역으로 이동하면\n 여행 기록 기능이 자동으로 활성화됩니다."
         return label
-    }()
+    }()*/
     
     let startButton: UIButton = {
         let button = UIButton(type: .system)
@@ -118,7 +122,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func setupViews() {
-        [profileLabel, profileImageView, profileImageIconView, nicknameTextField, genderLabel, genderSegmentedControl, birthdateLabel, birthdateTextField, countryLabel, countryTextField, explainLabel, startButton].forEach {
+        [profileLabel, profileImageView, profileImageIconView, nicknameTextField, startButton].forEach {
             view.addSubview($0)
         }
     }
@@ -144,7 +148,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             make.leading.trailing.equalToSuperview().inset(DynamicPadding.dynamicValue(20.0))
         }
         
-        genderLabel.snp.makeConstraints { make in
+        /*genderLabel.snp.makeConstraints { make in
             make.top.equalTo(nicknameTextField.snp.bottom).offset(20)
             make.leading.equalTo(nicknameTextField)
         }
@@ -177,7 +181,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             make.top.equalTo(countryLabel.snp.bottom).offset(8)
             make.leading.trailing.equalTo(nicknameTextField)
             make.height.equalTo(50)
-        }
+        }*/
         
         startButton.snp.makeConstraints { make in
             make.bottom.equalTo(view.safeAreaLayoutGuide).offset(-DynamicPadding.dynamicValue(40.0))
@@ -200,17 +204,19 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         print("isEmailLogin : \(isEmailLogin)")
         print("isSocialLogin : \(isSocialLogin)")
         if isEmailLogin {
-            SignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!, birthString: birthdateTextField.text!, countryString: "South Korea")
+            SignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!)
             callSignUpAPI() { isSuccess in
                 if isSuccess {
                     self.proceedIfSignupSuccessful()
+                    Toaster.shared.makeToast("회원 가입 성공")
                     print("회원 가입 성공")
                 } else {
+                    Toaster.shared.makeToast("회원 가입 실패")
                     print("회원 가입 실패")
                 }
             }
         }
-        if isSocialLogin {
+        /*if isSocialLogin {
             SocialSignUpManager.shared.setProfile(nicknameString: nicknameTextField.text!, birthString: birthdateTextField.text!, countryString: "South Korea")
             callKakaoSignUpAPI() { isSuccess in
                 if isSuccess {
@@ -220,7 +226,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     print("회원 가입 실패")
                 }
             }
-        }
+        }*/
     }
     
     func configureTapGestureForProfileImage() {
@@ -289,19 +295,16 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     // 생년월일 변경 시 호출
-    @objc func dateChanged(_ sender: UIDatePicker) {
+    /*@objc func dateChanged(_ sender: UIDatePicker) {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy/MM/dd"
         birthdateTextField.text = dateFormatter.string(from: sender.date)
         checkFormValidity()
-    }
+    }*/
     
     // 폼 유효성 검사
     func checkFormValidity() {
-        let isFormValid = !(nicknameTextField.text?.isEmpty ?? true) &&
-        !(birthdateTextField.text?.isEmpty ?? true) &&
-        (genderSegmentedControl.selectedSegmentIndex != UISegmentedControl.noSegment) &&
-        SignUpManager.shared.profileImg != nil
+        let isFormValid = !(nicknameTextField.text?.isEmpty ?? true) 
         
         startButton.isEnabled = isFormValid
         startButton.backgroundColor = isFormValid ? Constants.Colors.mainPurple : Constants.Colors.bgGray

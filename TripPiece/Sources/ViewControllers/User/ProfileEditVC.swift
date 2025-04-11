@@ -90,7 +90,7 @@ class ProfileEditVC: UIViewController, UIImagePickerControllerDelegate, UINaviga
         UserInfoManager.fetchMemberInfo { result in
             switch result {
             case .success(let memberInfo):
-                let profileImgURL = URL(string: memberInfo.result.profileImg)
+                let profileImgURL = URL(string: memberInfo.result.profileImg ?? "")
                 self.profileImageView.sd_setImage(with: profileImgURL, placeholderImage: UIImage(named: "profileExample"))
                 self.nicknameTextField.text = "\(memberInfo.result.nickname)"
                 if memberInfo.result.gender == "MALE" {

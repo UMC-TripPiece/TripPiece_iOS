@@ -5,10 +5,10 @@ import Foundation
 struct MemberInfoResult: Codable {
     let userId: Int
     let nickname: String
-    let profileImg: String
+    let profileImg: String?
     let travelNum: Int
     let isPublic: Bool
-    let gender: String
+    let gender: String?
     let country: String
     let birth: String
 }

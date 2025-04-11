@@ -298,7 +298,7 @@ class SignUpVC: UIViewController {
     }
     
     @objc func showTermsModal() {
-        SignUpManager.shared.setName(username: usernameField.text!, emailString: emailField.text!, pwString: passwordField.text!)
+        SignUpManager.shared.setName(emailString: emailField.text!, pwString: passwordField.text!)
         let termsModalVC = TermsModalVC()
         termsModalVC.isModalInPresentation = true
         termsModalVC.loadViewIfNeeded()
